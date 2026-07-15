@@ -1,3 +1,4 @@
+const PRODUCTION_BASE_URL = '';
 const DEFAULT_PROTOCOL = 'http';
 const DEFAULT_HOST = '192.168.43.9';
 const DEFAULT_PORT = 8000;
@@ -14,7 +15,7 @@ const buildBaseUrl = (host, port, protocol = DEFAULT_PROTOCOL) => {
   return `${protocol}://${host}:${port}`;
 };
 
-const DEFAULT_BASE_URL = buildBaseUrl(DEFAULT_HOST, DEFAULT_PORT);
+const DEFAULT_BASE_URL = normalizeBaseUrl(PRODUCTION_BASE_URL) || buildBaseUrl(DEFAULT_HOST, DEFAULT_PORT);
 
 const isLegacyLocalBaseUrl = (url) => {
   return url.includes('127.0.0.1') || url.includes('localhost');
