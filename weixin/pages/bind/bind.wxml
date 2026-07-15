@@ -1,0 +1,122 @@
+<view class="bind-page">
+  <view class="mode-switch">
+    <view class="mode-item {{transportMode === 'ble' ? 'active' : ''}}" bindtap="switchTransport" data-mode="ble">
+      <text class="mode-title">BLE</text>
+      <text class="mode-desc">近距离直连</text>
+    </view>
+    <view class="mode-item {{transportMode === 'wifi' ? 'active' : ''}}" bindtap="switchTransport" data-mode="wifi">
+      <text class="mode-title">后端 Wi-Fi</text>
+      <text class="mode-desc">ESP32 走后端</text>
+    </view>
+    <view class="mode-item {{transportMode === 'esp32_direct' ? 'active' : ''}}" bindtap="switchTransport" data-mode="esp32_direct">
+      <text class="mode-title">ESP32 直连</text>
+      <text class="mode-desc">HTTP + WebSocket</text>
+    </view>
+  </view>
+
+  <view class="scan-section" wx:if="{{step === 'scan' && transportMode === 'ble'}}">
+    <view class="scan-frame">
+      <text class="scan-emoji">QR</text>
+    </view>
+    <text class="scan-hint">扫描设备二维码，或手动输入 BLE 广播名 / MAC 地址</text>
+    <button class="btn-primary" bindtap="startScan">开始扫码</button>
+    <button class="btn-secondary" bindtap="manualInput">手动输入</button>
+  </view>
+
+  <view class="wifi-section" wx:if="{{step === 'scan' && transportMode === 'wifi'}}">
+    <view class="form-card">
+      <view class="form-header">
+        <text class="form-title">绑定设备到后端</text>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">设备编号</text>
+        <input class="form-input" placeholder="例如 ESP32-HAND-001" data-field="hardwareId" value="{{wifiForm.hardwareId}}" bindinput="onWifiInput" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">板端密钥</text>
+        <input class="form-input" placeholder="请输入设备固件中的 board_token" data-field="boardToken" value="{{wifiForm.boardToken}}" bindinput="onWifiInput" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">显示名称</text>
+        <input class="form-input" placeholder="例如 ESP32 假手" data-field="deviceName" value="{{wifiForm.deviceName}}" bindinput="onWifiInput" />
+      </view>
+
+      <button class="btn-primary" bindtap="bindWifiDevice">绑定到后端</button>
+      <button class="btn-secondary" bindtap="scanWifiQrCode">扫描二维码填写</button>
+    </view>
+  </view>
+
+  <view class="wifi-section" wx:if="{{step === 'scan' && transportMode === 'esp32_direct'}}">
+    <view class="form-card">
+      <view class="form-header">
+        <text class="form-title">小程序直连 ESP32</text>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">ESP32 IP</text>
+        <input class="form-input" placeholder="例如 192.168.31.88" data-field="ip" value="{{esp32Form.ip}}" bindinput="onEsp32Input" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">deviceId</text>
+        <input class="form-input" placeholder="例如 esp32s3_001" data-field="deviceId" value="{{esp32Form.deviceId}}" bindinput="onEsp32Input" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">token</text>
+        <input class="form-input" placeholder="可选，和设备侧约定后填写" data-field="token" value="{{esp32Form.token}}" bindinput="onEsp32Input" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">vendor</text>
+        <input class="form-input" placeholder="可选，例如 your_brand" data-field="vendor" value="{{esp32Form.vendor}}" bindinput="onEsp32Input" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">显示名称</text>
+        <input class="form-input" placeholder="例如 客厅假手节点" data-field="name" value="{{esp32Form.name}}" bindinput="onEsp32Input" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">HTTP 端口</text>
+        <input class="form-input" placeholder="80" data-field="httpPort" value="{{esp32Form.httpPort}}" bindinput="onEsp32Input" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">WebSocket 端口</text>
+        <input class="form-input" placeholder="81" data-field="wsPort" value="{{esp32Form.wsPort}}" bindinput="onEsp32Input" />
+      </view>
+
+      <button class="btn-primary" bindtap="bindEsp32Direct">校验并绑定直连</button>
+      <button class="btn-secondary" bindtap="scanEsp32QrCode">扫描 ESP32 二维码</button>
+    </view>
+  </view>
+
+  <view class="search-section" wx:if="{{step === 'searching'}}">
+    <view class="loading-ring"></view>
+    <text class="search-text">正在绑定 {{targetDevice}}...</text>
+    <text class="search-sub">
+      {{transportMode === 'esp32_direct' ? '正在请求 /esp32/info 做身份校验' : (transportMode === 'wifi' ? '等待后端保存 ESP32 设备信息' : '请确认设备已开机并在蓝牙范围内')}}
+    </text>
+  </view>
+
+  <view class="success-section" wx:if="{{step === 'success'}}">
+    <view class="result-icon success">OK</view>
+    <text class="result-title">绑定成功</text>
+    <text class="result-device">{{targetDevice}}</text>
+    <text class="result-hint">
+      {{transportMode === 'esp32_direct' ? '后续控制页会直接连 ESP32 的 WebSocket 通道' : (transportMode === 'wifi' ? 'ESP32 后续会通过 Wi-Fi 向后端发送心跳、状态与 EMG 数据' : '设备已完成蓝牙绑定')}}
+    </text>
+    <button class="btn-primary" bindtap="goHome">进入首页</button>
+  </view>
+
+  <view class="fail-section" wx:if="{{step === 'fail'}}">
+    <view class="result-icon fail">X</view>
+    <text class="result-title">绑定失败</text>
+    <text class="result-hint">{{failMsg}}</text>
+    <button class="btn-primary" bindtap="retry">重新操作</button>
+  </view>
+</view>

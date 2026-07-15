@@ -1,0 +1,284 @@
+<view class="control-page">
+  <view class="alert-banner" wx:if="{{healthAlert}}" bindtap="dismissAlert">
+    <text class="alert-icon">!</text>
+    <view class="alert-content">
+      <text class="alert-text">{{healthAlert}}</text>
+      <text class="alert-disclaimer">仅供参考，如有不适请咨询专业医生。</text>
+    </view>
+    <text class="alert-close">x</text>
+  </view>
+
+  <view class="device-card">
+    <view class="device-card-top">
+      <view>
+        <text class="device-title">{{deviceName}}</text>
+        <text class="device-subtitle">
+          {{deviceTransport === 'wifi' ? 'ESP32 通过后端 Wi-Fi 上报状态与肌电数据' : (deviceTransport === 'esp32_direct' ? '小程序直连 ESP32：HTTP + WebSocket' : 'BLE 本地直连')}}
+        </text>
+      </view>
+      <view class="status-pill {{deviceStatus === 'online' ? 'online' : 'offline'}}">
+        {{deviceStatusLabel}}
+      </view>
+    </view>
+
+    <view class="connection-strip {{deviceStatus === 'online' ? 'online' : 'offline'}}">
+      <view class="connection-dot"></view>
+      <view class="connection-copy">
+        <text class="connection-title">{{deviceStatusLabel}}</text>
+        <text class="connection-desc">{{deviceStatusHint}}</text>
+      </view>
+    </view>
+
+    <view class="device-meta" wx:if="{{deviceTransport === 'wifi' || deviceTransport === 'esp32_direct'}}">
+      <text class="device-meta-item">IP: {{deviceIp || '--'}}</text>
+      <text class="device-meta-item">固件: {{firmwareVersion || '--'}}</text>
+    </view>
+
+    <button class="btn-refresh" bindtap="refreshDeviceStatus">刷新设备状态</button>
+  </view>
+
+  <view class="armband-card" wx:if="{{deviceTransport === 'ble'}}">
+    <view class="armband-card-head">
+      <text class="armband-title">臂环状态</text>
+      <view class="armband-pill {{armbandStatusLabel === '在线' ? 'online' : 'offline'}}">{{armbandStatusLabel}}</view>
+    </view>
+    <text class="armband-desc">{{armbandStatusHint}}</text>
+    <text class="armband-sub">蓝牙模块：{{bluetoothStatus || '--'}}</text>
+  </view>
+
+  <view class="command-banner" wx:if="{{lastCommandMessage}}">
+    <text class="command-text">{{lastCommandMessage}}</text>
+  </view>
+
+  <view class="mode-switch">
+    <view class="mode-item {{mode === 'public' ? 'active' : ''}}" bindtap="switchMode" data-mode="public">
+      <text class="mode-icon">A</text>
+      <text class="mode-label">公共模式</text>
+    </view>
+    <view class="mode-item {{mode === 'personal' ? 'active' : ''}}" bindtap="switchMode" data-mode="personal">
+      <text class="mode-icon">P</text>
+      <text class="mode-label">动作录入</text>
+    </view>
+  </view>
+
+  <view class="dashboard">
+    <view class="dash-row">
+      <view class="dash-card">
+        <canvas canvas-id="batteryCanvas" class="ring-canvas"></canvas>
+        <text class="dash-label">设备电量</text>
+        <text class="dash-value">{{battery}}%</text>
+      </view>
+      <view class="dash-card">
+        <canvas canvas-id="strengthCanvas" class="ring-canvas"></canvas>
+        <text class="dash-label">动作强度</text>
+        <text class="dash-value">{{strength}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="esp32-section" wx:if="{{deviceTransport === 'wifi' || deviceTransport === 'esp32_direct'}}">
+    <view class="section-header">
+      <text class="section-title">ESP32 模块状态</text>
+    </view>
+
+    <view class="module-grid">
+      <view class="module-card">
+        <text class="module-name">存储器</text>
+        <text class="module-status">{{storageStatus}}</text>
+      </view>
+      <view class="module-card">
+        <text class="module-name">模型</text>
+        <text class="module-status">{{modelStatus}}</text>
+      </view>
+      <view class="module-card">
+        <text class="module-name">蓝牙模块</text>
+        <text class="module-status">{{bluetoothStatus}}</text>
+      </view>
+      <view class="module-card">
+        <text class="module-name">CPU 运行</text>
+        <text class="module-status">{{cpuStatus}}</text>
+      </view>
+    </view>
+
+    <view class="prediction-card">
+      <text class="prediction-label">模式识别结果</text>
+      <text class="prediction-value">{{predictionResult || '--'}}</text>
+      <text class="prediction-sub" wx:if="{{predictionConfidence}}">置信度：{{predictionConfidence}}</text>
+    </view>
+
+    <view class="record-card">
+      <text class="record-title">动作录入上传</text>
+      <text class="record-item">会话：{{recordingSessionId || '--'}}</text>
+      <text class="record-item">样本数：{{recordingSamples}}</text>
+      <text class="record-item">批次数：{{recordingBatches}}</text>
+      <text class="record-item">最近批次 RMS：{{recordingRms || '--'}}</text>
+      <text class="record-item">状态：{{recordingActive ? '录入中' : '空闲/已完成'}}</text>
+    </view>
+
+    <view class="wave-card">
+      <view class="wave-head">
+        <text class="wave-title">实时肌电波形</text>
+        <view class="wave-badge {{deviceStatus === 'online' ? 'online' : 'offline'}}">
+          <text class="wave-badge-dot"></text>
+          <text class="wave-badge-text">{{deviceStatusLabel}}</text>
+        </view>
+      </view>
+      <view class="wave-stats">
+        <text class="wave-stat">采样 {{emgLiveSamples}}</text>
+        <text class="wave-stat">RMS {{emgLiveRms}}</text>
+        <text class="wave-stat">峰值 {{emgLivePeak}}</text>
+        <text class="wave-stat">MIN {{emgLiveMin}}</text>
+        <text class="wave-stat">MAX {{emgLiveMax}}</text>
+        <text class="wave-time">{{emgPreviewUpdatedAt || '等待数据'}}</text>
+      </view>
+      <canvas canvas-id="emgCanvas" class="emg-canvas"></canvas>
+      <text class="wave-tip">显示最近一段原始肌电数据，页面会同步缓存到本地。</text>
+    </view>
+  </view>
+
+  <view class="gesture-input-section" wx:if="{{mode === 'personal'}}">
+    <view class="section-header">
+      <text class="section-title">个性动作录入</text>
+      <text class="section-action" bindtap="addGesture">+ 新增</text>
+    </view>
+    <text class="section-subtitle">新增自定义动作后，采集会按当前选中的动作模板执行。</text>
+
+    <view class="gesture-list" wx:if="{{customGestures.length > 0}}">
+      <view
+        class="gesture-tag {{selectedGestureIndex === index ? 'gesture-tag-active' : ''}}"
+        wx:for="{{customGestures}}"
+        wx:key="index"
+        bindtap="selectGesture"
+        data-index="{{index}}"
+      >
+        <text class="gesture-tag-emoji">{{item.emoji}}</text>
+        <text class="gesture-tag-name">{{item.name}}</text>
+        <text class="gesture-tag-del" bindtap="deleteGesture" catchtap data-index="{{index}}">x</text>
+      </view>
+    </view>
+
+    <view class="gesture-empty" wx:else>
+      <text class="gesture-empty-text">还没有录入动作，先新增一个训练动作。</text>
+    </view>
+
+    <view class="selected-hint" wx:if="{{selectedGestureIndex >= 0}}">
+      <text class="selected-hint-text">当前训练动作：{{customGestures[selectedGestureIndex].name}}</text>
+    </view>
+  </view>
+
+  <view class="history-section">
+    <view class="section-header">
+      <text class="section-title">存储数据查看</text>
+      <text class="section-action" bindtap="loadStoredSessions">刷新</text>
+    </view>
+    <text class="section-subtitle">这里显示最近保存到数据库的 EMG 采集记录，点击可以查看预览。</text>
+
+    <view class="gesture-empty" wx:if="{{storedSessionsLoading}}">
+      <text class="gesture-empty-text">正在读取采集记录...</text>
+    </view>
+
+    <view class="gesture-empty" wx:elif="{{storedSessions.length === 0}}">
+      <text class="gesture-empty-text">暂无存储数据，先完成一次采集。</text>
+    </view>
+
+    <view class="history-list" wx:else>
+      <view
+        class="history-item {{selectedStoredSessionId === item.session_id ? 'history-item-active' : ''}}"
+        wx:for="{{storedSessions}}"
+        wx:key="session_id"
+        bindtap="selectStoredSession"
+        data-index="{{index}}"
+      >
+        <view class="history-item-top">
+          <text class="history-item-title">{{item.gesture_name || '未命名动作'}}</text>
+          <view class="history-item-actions">
+            <text class="history-item-badge">{{item.transport === 'wifi' ? 'Wi-Fi' : 'BLE'}}</text>
+            <text class="history-item-delete" bindtap="deleteStoredSession" catchtap data-id="{{item.session_id}}">删除</text>
+          </view>
+        </view>
+        <text class="history-item-sub">会话 {{item.session_id}}</text>
+        <text class="history-item-sub">样本 {{item.total_samples}} · 批次 {{item.batch_count}} · RMS {{item.rms_value}}</text>
+        <text class="history-item-sub">{{item.created_at || item.updated_at}}</text>
+      </view>
+    </view>
+
+    <view class="history-detail" wx:if="{{selectedStoredSession}}">
+      <view class="history-detail-top">
+        <text class="history-detail-title">记录详情</text>
+        <text class="history-detail-id">{{selectedStoredSession.session_id}}</text>
+      </view>
+      <text class="history-detail-line">动作：{{selectedStoredSession.gesture_name || '--'}}</text>
+      <text class="history-detail-line">总样本：{{selectedStoredSession.total_samples}}</text>
+      <text class="history-detail-line">批次数：{{selectedStoredSession.batch_count}}</text>
+      <text class="history-detail-line">RMS：{{selectedStoredSession.rms_value}}</text>
+      <text class="history-detail-line">来源：{{selectedStoredSession.transport}} / {{selectedStoredSession.source}}</text>
+      <canvas canvas-id="historyCanvas" class="history-canvas"></canvas>
+    </view>
+
+    <view class="gesture-empty" wx:if="{{storedSessionsError}}">
+      <text class="gesture-empty-text">{{storedSessionsError}}</text>
+    </view>
+  </view>
+
+  <view class="collect-section">
+    <view class="section-header">
+      <text class="section-title">{{mode === 'personal' ? '个性化数据采集' : '设备控制'}}</text>
+    </view>
+
+    <view class="animation-area">
+      <view class="gesture-display">
+        <text class="gesture-emoji">{{gestureEmoji}}</text>
+        <text class="gesture-name">{{gestureName}}</text>
+      </view>
+      <view class="countdown" wx:if="{{isCollecting}}">
+        <text class="countdown-num">{{countdown}}</text>
+      </view>
+    </view>
+
+    <view class="collect-actions">
+      <button class="btn-collect {{isCollecting ? 'collecting' : ''}}" bindtap="toggleCollect" disabled="{{isUploading}}">
+        {{isCollecting ? '停止采集' : '开始采集'}}
+      </button>
+    </view>
+
+    <view class="wifi-tip" wx:if="{{deviceTransport === 'wifi'}}">
+      <text class="wifi-tip-text">Wi-Fi 模式下，ESP32 会通过后端上报状态和肌电数据，小程序通过后端查看并下发命令。</text>
+    </view>
+
+    <view class="wifi-tip" wx:if="{{deviceTransport === 'esp32_direct'}}">
+      <text class="wifi-tip-text">直连模式下，小程序先请求 `/esp32/info`，再连接 WebSocket，控制和状态都直接走 ESP32。</text>
+    </view>
+
+    <view class="upload-section" wx:if="{{isUploading || uploadProgress > 0}}">
+      <view class="progress-bar-bg">
+        <view class="progress-bar-fill" style="width: {{uploadProgress}}%;"></view>
+      </view>
+      <text class="progress-text">上传进度：{{uploadProgress}}% ({{uploadedChunks}}/{{totalChunks}})</text>
+    </view>
+
+    <button class="btn-upload" wx:if="{{canUpload && hasCollectedData && !isCollecting && !isUploading}}" bindtap="startUpload">
+      上传训练数据
+    </button>
+  </view>
+
+  <view class="health-section">
+    <view class="section-header">
+      <text class="section-title">健康状态</text>
+      <text class="section-action" bindtap="generateReport">生成报告</text>
+    </view>
+    <view class="health-grid">
+      <view class="health-item">
+        <text class="health-label">肌电 RMS</text>
+        <text class="health-val">{{rmsValue || '--'}}</text>
+      </view>
+      <view class="health-item">
+        <text class="health-label">侧压力</text>
+        <text class="health-val">{{sidePresure || '--'}}</text>
+      </view>
+      <view class="health-item">
+        <text class="health-label">肌肉状态</text>
+        <text class="health-val {{muscleStatus === '钙缩风险' ? 'text-danger' : ''}}">{{muscleStatus || '正常'}}</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,53 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/index/index",
+    "pages/bind/bind",
+    "pages/control/control",
+    "pages/ai/ai",
+    "pages/forum/forum",
+    "pages/profile/profile",
+    "pages/devguide/devguide",
+    "pages/slides/slides"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "navigationBarTitleText": "肌电假手管理系统",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#007AFF",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "assets/icons/home.png",
+        "selectedIconPath": "assets/icons/home_active.png"
+      },
+      {
+        "pagePath": "pages/ai/ai",
+        "text": "AI助手",
+        "iconPath": "assets/icons/ai.png",
+        "selectedIconPath": "assets/icons/ai_active.png"
+      },
+      {
+        "pagePath": "pages/forum/forum",
+        "text": "论坛",
+        "iconPath": "assets/icons/forum.png",
+        "selectedIconPath": "assets/icons/forum_active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "assets/icons/profile.png",
+        "selectedIconPath": "assets/icons/profile_active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

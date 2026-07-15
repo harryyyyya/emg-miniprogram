@@ -1,0 +1,233 @@
+<page-meta page-style="{{showComment || showPublish ? 'overflow:hidden;height:100vh;' : ''}}" />
+
+<view class="forum-page">
+  <view class="post-entry card" bindtap="showPublish">
+    <image class="post-entry__avatar" src="{{userAvatar || '/assets/icons/default_avatar.png'}}" mode="aspectFill" />
+    <view class="post-entry__input">分享你的康复故事、训练心得或使用体验</view>
+    <text class="post-entry__btn">发布</text>
+  </view>
+
+  <view class="post-list">
+    <view class="post-card card" wx:for="{{posts}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+      <view class="post-header">
+        <image class="post-avatar" src="{{item.author_avatar || '/assets/icons/default_avatar.png'}}" mode="aspectFill" />
+        <view class="post-meta">
+          <text class="post-author">{{item.author_name}}</text>
+          <text class="post-time">{{item.created_at}}</text>
+        </view>
+        <text
+          wx:if="{{item.can_delete}}"
+          class="post-delete-btn"
+          bindtap="deletePost"
+          data-id="{{item.id}}"
+          catchtap
+        >
+          删除帖子
+        </text>
+      </view>
+
+      <text class="post-content">{{item.content}}</text>
+
+      <view class="post-images" wx:if="{{item.image_urls && item.image_urls.length > 0}}">
+        <image
+          wx:for="{{item.image_urls}}"
+          wx:key="index"
+          wx:for-item="img"
+          class="post-img post-img--{{item.image_urls.length}}"
+          src="{{img}}"
+          mode="aspectFill"
+          bindtap="previewImage"
+          data-src="{{img}}"
+          data-urls="{{item.image_urls}}"
+          catchtap
+        />
+      </view>
+
+      <view class="post-footer">
+        <view class="post-action">
+          <image
+            class="like-icon"
+            src="{{item.liked ? '../../assets/icons/like_yes.png' : '../../assets/icons/like.png'}}"
+            mode="aspectFit"
+            bindtap="likePost"
+            data-id="{{item.id}}"
+            catchtap
+          />
+          <text class="action-count">{{item.like_count || 0}}</text>
+        </view>
+
+        <view class="post-action" bindtap="openComment" data-id="{{item.id}}" catchtap>
+          <image class="action-icon-img" src="/assets/icons/reply.png" mode="aspectFit" />
+          <text class="action-count">{{item.comment_count || 0}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="load-more" wx:if="{{loading}}">
+      <text class="load-more-text">加载中...</text>
+    </view>
+    <view class="load-more" wx:elif="{{noMore}}">
+      <text class="load-more-text">已经到底了</text>
+    </view>
+  </view>
+
+  <view class="publish-mask" wx:if="{{showPublish}}" bindtap="hidePublish" catchtouchmove="stopTouchMove">
+    <view class="publish-panel" catchtap catchtouchmove="stopTouchMove">
+      <view class="publish-header">
+        <text class="publish-title">发布帖子</text>
+        <text class="publish-close" bindtap="hidePublish">×</text>
+      </view>
+
+      <textarea
+        class="publish-textarea"
+        placeholder="分享你的康复故事、训练心得或任何想说的话..."
+        value="{{postContent}}"
+        bindinput="onContentInput"
+        maxlength="500"
+        auto-height
+      />
+
+      <view class="image-picker">
+        <view class="img-thumb-wrap" wx:for="{{selectedImages}}" wx:key="index">
+          <image class="img-thumb" src="{{item}}" mode="aspectFill" />
+          <text class="img-remove" bindtap="removeImage" data-idx="{{index}}" catchtap>×</text>
+        </view>
+        <view class="img-add-btn" wx:if="{{selectedImages.length < 9}}" bindtap="pickImages" catchtap>
+          <text class="img-add-icon">+</text>
+          <text class="img-add-label">{{selectedImages.length}}/9</text>
+        </view>
+      </view>
+
+      <button
+        class="btn-primary publish-btn"
+        bindtap="submitPost"
+        loading="{{publishing}}"
+        disabled="{{publishing || !postContent}}"
+      >
+        发布
+      </button>
+    </view>
+  </view>
+
+  <view class="comment-mask" wx:if="{{showComment}}" bindtap="closeComment" catchtouchmove="stopTouchMove">
+    <view class="comment-panel" catchtap catchtouchmove="stopTouchMove">
+      <view class="comment-header">
+        <text class="comment-title">评论 {{commentTotal}}</text>
+        <text class="comment-close" bindtap="closeComment">×</text>
+      </view>
+
+      <scroll-view
+        class="comment-list"
+        scroll-y
+        enhanced
+        show-scrollbar="false"
+        bindscrolltolower="onCommentScrollToLower"
+      >
+        <view wx:if="{{commentLoading && comments.length === 0}}" class="comment-loading">
+          <text class="comment-loading-text">加载中...</text>
+        </view>
+        <view wx:elif="{{comments.length === 0}}" class="comment-empty">
+          <text class="comment-empty-text">还没有评论，来留下第一句话吧</text>
+        </view>
+        <view wx:else>
+          <view class="comment-item" wx:for="{{comments}}" wx:key="id">
+            <image class="comment-avatar" src="{{item.author_avatar || '/assets/icons/default_avatar.png'}}" mode="aspectFill" />
+            <view class="comment-body">
+              <view class="comment-top">
+                <view class="comment-top-meta">
+                  <text class="comment-author">{{item.author_name}}</text>
+                  <text class="comment-time">{{item.created_at}}</text>
+                </view>
+              </view>
+
+              <text class="comment-content">{{item.content}}</text>
+
+              <view class="comment-actions">
+                <view
+                  class="comment-action-btn"
+                  bindtap="replyComment"
+                  data-id="{{item.id}}"
+                  data-author="{{item.author_name}}"
+                  catchtap
+                >
+                  回复
+                </view>
+                <view
+                  wx:if="{{item.can_delete}}"
+                  class="comment-action-btn comment-action-btn--danger"
+                  bindtap="deleteComment"
+                  data-id="{{item.id}}"
+                  catchtap
+                >
+                  删除
+                </view>
+                <text class="comment-reply-count" wx:if="{{item.reply_count}}">{{item.reply_count}}条回复</text>
+              </view>
+
+              <view class="reply-list" wx:if="{{item.replies && item.replies.length}}">
+                <view class="reply-item" wx:for="{{item.replies}}" wx:key="id" wx:for-item="reply">
+                  <view class="reply-row">
+                    <image class="reply-avatar" src="{{reply.author_avatar || '/assets/icons/default_avatar.png'}}" mode="aspectFill" />
+                    <view class="reply-main">
+                      <view class="reply-top">
+                        <text class="reply-author">{{reply.author_name}}</text>
+                        <text class="reply-time">{{reply.created_at}}</text>
+                      </view>
+                      <text class="reply-prefix" wx:if="{{reply.reply_to_user_name}}">回复 {{reply.reply_to_user_name}}</text>
+                      <text class="reply-content">{{reply.content}}</text>
+                    </view>
+                  </view>
+                  <view class="reply-actions">
+                    <view
+                      wx:if="{{reply.can_delete}}"
+                      class="comment-action-btn comment-action-btn--danger comment-action-btn--reply"
+                      bindtap="deleteComment"
+                      data-id="{{reply.id}}"
+                      catchtap
+                    >
+                      删除
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </view>
+
+          <view class="comment-loading-more" wx:if="{{commentLoading && comments.length > 0}}">
+            <text class="comment-load-more-text">正在加载更多评论...</text>
+          </view>
+          <view class="comment-load-more" wx:elif="{{!commentNoMore}}" bindtap="loadMoreComments" catchtap>
+            <text class="comment-load-more-text">查看更多评论</text>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="reply-tip" wx:if="{{replyParentId}}">
+        <text class="reply-tip-text">正在回复 {{replyTargetName}}</text>
+        <text class="reply-tip-cancel" bindtap="cancelReply" catchtap>取消</text>
+      </view>
+
+      <view class="comment-input-bar safe-bottom">
+        <image class="comment-input-avatar" src="{{userAvatar || '/assets/icons/default_avatar.png'}}" mode="aspectFill" />
+        <input
+          class="comment-input"
+          placeholder="{{commentPlaceholder}}"
+          value="{{commentText}}"
+          bindinput="onCommentInput"
+          confirm-type="send"
+          bindconfirm="submitComment"
+          cursor-spacing="20"
+          adjust-position
+          focus="{{commentInputFocus}}"
+        />
+        <button
+          class="comment-send-btn {{commentText ? 'comment-send-btn--active' : ''}}"
+          bindtap="submitComment"
+          disabled="{{commentSubmitting || !commentText}}"
+        >
+          发送
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

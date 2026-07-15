@@ -1,0 +1,117 @@
+<view class="guide-page">
+
+  <!-- 顶部 Banner -->
+  <view class="guide-banner">
+    <text class="banner-icon">📱</text>
+    <text class="banner-title">开发与调试指南</text>
+    <text class="banner-sub">了解真机调试与硬件能力</text>
+  </view>
+
+  <!-- 提示说明卡片 -->
+  <view class="info-card">
+    <view class="info-card-header">
+      <text class="info-card-icon">💡</text>
+      <text class="info-card-title">重要说明</text>
+    </view>
+    <text class="info-card-text">本小程序支持在手机上运行并调用蓝牙与 Wi-Fi 模块。蓝牙功能需在真机上调试，微信开发者工具本身不支持蓝牙调试。</text>
+  </view>
+
+  <!-- 第一节：开发与调试路径 -->
+  <view class="section-card">
+    <view class="section-title-row">
+      <text class="section-icon">🛠️</text>
+      <text class="section-title">开发与调试路径</text>
+    </view>
+
+    <view class="step-item">
+      <view class="step-badge">1</view>
+      <view class="step-content">
+        <text class="step-name">真机调试</text>
+        <text class="step-desc">编写完代码后，点击开发者工具中的「真机调试」，工具会生成一个调试专属二维码。用手机微信扫码后，小程序就会在手机上启动，并接入到调试环境里。这样你就能在手机上实时测试蓝牙、Wi-Fi 等硬件功能了。</text>
+      </view>
+    </view>
+
+    <view class="step-divider"></view>
+
+    <view class="step-item">
+      <view class="step-badge">2</view>
+      <view class="step-content">
+        <text class="step-name">最终体验</text>
+        <text class="step-desc">完成开发后，你可以「上传」代码到微信后台，生成「体验版」，并通过「成员管理」邀请其他人一起试用。</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 第二节：Wi-Fi 模块 -->
+  <view class="section-card">
+    <view class="section-title-row">
+      <text class="section-icon">📶</text>
+      <text class="section-title">Wi-Fi 模块</text>
+    </view>
+    <text class="section-desc">微信小程序提供了一整套 Wi-Fi 接口，可以搜索、连接附近的 Wi-Fi，或获取当前已连接 Wi-Fi 的信息，以及用于局域网设备发现与通信的 mDNS 服务。</text>
+
+    <view class="tag-group">
+      <view class="tag tag-blue">基础库 ≥ 1.6.0</view>
+      <view class="tag tag-green">mDNS 支持</view>
+    </view>
+
+    <view class="platform-row">
+      <view class="platform-item">
+        <view class="platform-header platform-android">
+          <text class="platform-label">🤖 Android</text>
+        </view>
+        <text class="platform-desc">支持完整的搜索和连接功能。调用前需获得定位权限（scope.userLocation）才能搜索到 Wi-Fi 列表。</text>
+      </view>
+      <view class="platform-item">
+        <view class="platform-header platform-ios">
+          <text class="platform-label">🍎 iOS</text>
+        </view>
+        <text class="platform-desc">支持搜索，但部分功能需要用户手动跳转到系统设置中操作。</text>
+      </view>
+    </view>
+
+    <view class="notice-bar">
+      <text class="notice-icon">⚠️</text>
+      <text class="notice-text">Android 端调用 Wi-Fi 搜索前，需先申请定位权限（scope.userLocation）</text>
+    </view>
+  </view>
+
+  <!-- 第三节：蓝牙模块 -->
+  <view class="section-card">
+    <view class="section-title-row">
+      <text class="section-icon">🔵</text>
+      <text class="section-title">蓝牙模块</text>
+    </view>
+    <text class="section-desc">本程序通过 BLE（低功耗蓝牙）与假手设备进行数据通信，包括采集肌电数据、发送控制指令等。蓝牙功能必须在真机上测试，无法在模拟器中使用。</text>
+
+    <view class="tag-group">
+      <view class="tag tag-blue">BLE 低功耗蓝牙</view>
+      <view class="tag tag-orange">需真机调试</view>
+    </view>
+
+    <view class="capability-list">
+      <view class="capability-item">
+        <text class="cap-dot">•</text>
+        <text class="cap-text">扫描并连接蓝牙设备</text>
+      </view>
+      <view class="capability-item">
+        <text class="cap-dot">•</text>
+        <text class="cap-text">实时接收肌电 EMG 信号数据</text>
+      </view>
+      <view class="capability-item">
+        <text class="cap-dot">•</text>
+        <text class="cap-text">发送控制指令（0x0A 开始 / 0x0B 停止）</text>
+      </view>
+      <view class="capability-item">
+        <text class="cap-dot">•</text>
+        <text class="cap-text">读取设备电量信息</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部版本 -->
+  <view class="footer-tip">
+    <text>如遇问题，请通过「我的 - 帮助与反馈」联系我们</text>
+  </view>
+
+</view>

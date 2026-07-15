@@ -1,0 +1,56 @@
+# Secrets and local environment
+.env
+*.env
+backend/.env
+服务器密钥/
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+
+# Python virtual environments and caches
+.venv/
+venv/
+env/
+backend/.venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Test and tool caches
+.pytest_cache/
+**/.pytest_cache/
+pytest-cache-files-*/
+backend/pytest-cache-files-*/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+backend/emg_hand.db
+emg_hand.db
+
+# Runtime uploads and generated user files
+uploads/
+backend/uploads/
+
+# Build archives and backups
+*.zip
+large-assets-backup/
+
+# Large local documents/media not needed for deployment
+*.mp4
+*.pptx
+*.docx
+*.pdf
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.claude/
+**/.claude/
+project.private.config.json
+**/project.private.config.json

@@ -1,0 +1,257 @@
+.guide-page {
+  padding: 0 0 120rpx;
+  background: #F5F7FA;
+  min-height: 100vh;
+}
+
+/* Banner */
+.guide-banner {
+  background: linear-gradient(135deg, #007AFF, #40A0FF);
+  padding: 60rpx 40rpx 50rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.banner-icon {
+  font-size: 80rpx;
+  margin-bottom: 16rpx;
+}
+
+.banner-title {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #FFF;
+  margin-bottom: 10rpx;
+}
+
+.banner-sub {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* 重要说明卡片 */
+.info-card {
+  background: #FFF8E6;
+  border: 2rpx solid #FFD84D;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  margin: 30rpx 30rpx 0;
+}
+
+.info-card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14rpx;
+}
+
+.info-card-icon {
+  font-size: 32rpx;
+  margin-right: 12rpx;
+}
+
+.info-card-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #B07A00;
+}
+
+.info-card-text {
+  font-size: 26rpx;
+  color: #7A6000;
+  line-height: 1.7;
+  display: block;
+}
+
+/* 通用内容卡片 */
+.section-card {
+  background: #FFF;
+  border-radius: 16rpx;
+  padding: 32rpx 30rpx;
+  margin: 24rpx 30rpx 0;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.section-title-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.section-icon {
+  font-size: 36rpx;
+  margin-right: 14rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #222;
+}
+
+.section-desc {
+  font-size: 26rpx;
+  color: #555;
+  line-height: 1.75;
+  display: block;
+  margin-bottom: 24rpx;
+}
+
+/* 步骤 */
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 16rpx 0;
+}
+
+.step-badge {
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #007AFF, #40A0FF);
+  color: #FFF;
+  font-size: 28rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 20rpx;
+  margin-top: 4rpx;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.step-desc {
+  font-size: 25rpx;
+  color: #666;
+  line-height: 1.75;
+  display: block;
+}
+
+.step-divider {
+  height: 1rpx;
+  background: #F0F0F0;
+  margin: 16rpx 0;
+}
+
+/* 标签组 */
+.tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-bottom: 28rpx;
+}
+
+.tag {
+  font-size: 22rpx;
+  font-weight: 600;
+  padding: 8rpx 20rpx;
+  border-radius: 30rpx;
+}
+
+.tag-blue   { background: #E8F0FF; color: #007AFF; }
+.tag-green  { background: #E8F8EE; color: #34C759; }
+.tag-orange { background: #FFF1E6; color: #FF8C00; }
+
+/* 平台对比 */
+.platform-row {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 24rpx;
+}
+
+.platform-item {
+  flex: 1;
+  background: #F8F9FC;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+.platform-header {
+  padding: 14rpx 20rpx;
+}
+
+.platform-android { background: #E8F5E9; }
+.platform-ios     { background: #EAF2FF; }
+
+.platform-label {
+  font-size: 25rpx;
+  font-weight: 700;
+  color: #333;
+}
+
+.platform-desc {
+  font-size: 23rpx;
+  color: #666;
+  line-height: 1.7;
+  display: block;
+  padding: 16rpx 20rpx;
+}
+
+/* 提示条 */
+.notice-bar {
+  display: flex;
+  align-items: flex-start;
+  background: #FFF5F5;
+  border-left: 6rpx solid #FF3B30;
+  border-radius: 0 10rpx 10rpx 0;
+  padding: 18rpx 20rpx;
+}
+
+.notice-icon {
+  font-size: 28rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.notice-text {
+  font-size: 24rpx;
+  color: #CC2200;
+  line-height: 1.65;
+  flex: 1;
+}
+
+/* 能力清单 */
+.capability-list {
+  background: #F8F9FC;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+}
+
+.capability-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 10rpx 0;
+}
+
+.cap-dot {
+  font-size: 28rpx;
+  color: #007AFF;
+  margin-right: 14rpx;
+  flex-shrink: 0;
+}
+
+.cap-text {
+  font-size: 26rpx;
+  color: #444;
+  line-height: 1.65;
+}
+
+/* 底部提示 */
+.footer-tip {
+  text-align: center;
+  font-size: 22rpx;
+  color: #BBB;
+  padding: 40rpx 30rpx 20rpx;
+}

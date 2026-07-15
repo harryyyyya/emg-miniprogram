@@ -1,0 +1,143 @@
+<view class="slides-page">
+
+  <!-- 进度点 -->
+  <view class="dots">
+    <view wx:for="{{slides}}" wx:key="index"
+      class="dot {{index === current ? 'dot--active' : ''}}"
+      bindtap="goTo" data-index="{{index}}"></view>
+  </view>
+
+  <!-- 幻灯片主体 -->
+  <swiper class="swiper" current="{{current}}" bindchange="onSwiperChange"
+    duration="300" easing-function="easeInOutCubic">
+
+    <swiper-item wx:for="{{slides}}" wx:key="index" wx:for-item="slide">
+
+      <!-- 封面 -->
+      <view wx:if="{{slide.type === 'cover'}}" class="slide slide--cover">
+        <view class="cover-badge">DEMO</view>
+        <view class="cover-icon">🦾</view>
+        <view class="cover-title">{{slide.title}}</view>
+        <view class="cover-sub">{{slide.subtitle}}</view>
+        <view class="cover-tags">
+          <view wx:for="{{slide.tags}}" wx:key="index" wx:for-item="tag" class="tag">{{tag}}</view>
+        </view>
+        <view class="slide-num">1 / {{slides.length}}</view>
+      </view>
+
+      <!-- 概述 -->
+      <view wx:elif="{{slide.type === 'overview'}}" class="slide slide--feature">
+        <view class="slide-icon">{{slide.icon}}</view>
+        <view class="slide-title">{{slide.title}}</view>
+        <view class="slide-desc">{{slide.desc}}</view>
+        <view class="item-list">
+          <view wx:for="{{slide.items}}" wx:key="index" wx:for-item="item" class="item">
+            <view class="item-dot"></view>
+            <text class="item-text">{{item}}</text>
+          </view>
+        </view>
+        <view class="slide-num">{{index + 1}} / {{slides.length}}</view>
+      </view>
+
+      <!-- 架构 -->
+      <view wx:elif="{{slide.type === 'arch'}}" class="slide slide--arch">
+        <view class="slide-icon">{{slide.icon}}</view>
+        <view class="slide-title">{{slide.title}}</view>
+        <view class="arch-label">Pages</view>
+        <view class="arch-grid">
+          <view wx:for="{{slide.pages}}" wx:key="index" wx:for-item="p" class="arch-card">
+            <view class="arch-card-name">{{p.label}}</view>
+            <view class="arch-card-desc">{{p.desc}}</view>
+          </view>
+        </view>
+        <view class="arch-label">Utils</view>
+        <view class="util-list">
+          <view wx:for="{{slide.utils}}" wx:key="index" wx:for-item="u" class="util-item">
+            <text class="util-icon">⚙️</text>
+            <text class="util-text">{{u}}</text>
+          </view>
+        </view>
+        <view class="slide-num">{{index + 1}} / {{slides.length}}</view>
+      </view>
+
+      <!-- 功能页 -->
+      <view wx:elif="{{slide.type === 'feature'}}" class="slide slide--feature">
+        <view class="slide-icon">{{slide.icon}}</view>
+        <view class="slide-title">{{slide.title}}</view>
+        <view class="item-list">
+          <view wx:for="{{slide.items}}" wx:key="index" wx:for-item="item" class="item">
+            <view class="item-dot"></view>
+            <text class="item-text">{{item}}</text>
+          </view>
+        </view>
+        <view class="slide-num">{{index + 1}} / {{slides.length}}</view>
+      </view>
+
+      <!-- Mock策略表格 -->
+      <view wx:elif="{{slide.type === 'mock'}}" class="slide slide--table">
+        <view class="slide-icon">{{slide.icon}}</view>
+        <view class="slide-title">{{slide.title}}</view>
+        <view class="table">
+          <view class="table-head">
+            <text class="th th--scene">场景</text>
+            <text class="th th--strategy">策略</text>
+          </view>
+          <view wx:for="{{slide.rows}}" wx:key="index" wx:for-item="row" class="table-row {{index % 2 === 0 ? 'row--even' : ''}}">
+            <text class="td td--scene">{{row.scene}}</text>
+            <text class="td td--strategy">{{row.strategy}}</text>
+          </view>
+        </view>
+        <view class="slide-num">{{index + 1}} / {{slides.length}}</view>
+      </view>
+
+      <!-- 存储Key表格 -->
+      <view wx:elif="{{slide.type === 'storage'}}" class="slide slide--table">
+        <view class="slide-icon">{{slide.icon}}</view>
+        <view class="slide-title">{{slide.title}}</view>
+        <view class="table">
+          <view class="table-head">
+            <text class="th th--key">Key</text>
+            <text class="th th--type">类型</text>
+            <text class="th th--desc">说明</text>
+          </view>
+          <view wx:for="{{slide.rows}}" wx:key="index" wx:for-item="row" class="table-row {{index % 2 === 0 ? 'row--even' : ''}}">
+            <text class="td td--key">{{row.key}}</text>
+            <text class="td td--type">{{row.type}}</text>
+            <text class="td td--desc">{{row.desc}}</text>
+          </view>
+        </view>
+        <view class="slide-num">{{index + 1}} / {{slides.length}}</view>
+      </view>
+
+      <!-- 结尾 -->
+      <view wx:elif="{{slide.type === 'end'}}" class="slide slide--end">
+        <view class="end-icon">🎉</view>
+        <view class="end-title">{{slide.title}}</view>
+        <view class="end-sub">{{slide.subtitle}}</view>
+        <view class="end-tags">
+          <view wx:for="{{slide.items}}" wx:key="index" wx:for-item="item" class="end-tag">{{item}}</view>
+        </view>
+        <view class="slide-num">{{index + 1}} / {{slides.length}}</view>
+      </view>
+
+    </swiper-item>
+  </swiper>
+
+  <!-- 底部导航按钮 -->
+  <view class="nav-bar">
+    <view class="nav-btn {{current === 0 ? 'nav-btn--disabled' : ''}}" bindtap="prev">
+      <text class="nav-arrow">‹</text>
+      <text class="nav-label">上一页</text>
+    </view>
+    <view class="nav-progress">
+      <text class="nav-cur">{{current + 1}}</text>
+      <text class="nav-sep">/</text>
+      <text class="nav-total">{{slides.length}}</text>
+    </view>
+    <view class="nav-btn {{current === slides.length - 1 ? 'nav-btn--disabled' : ''}}" bindtap="next">
+      <text class="nav-label">下一页</text>
+      <text class="nav-arrow">›</text>
+    </view>
+  </view>
+
+</view>

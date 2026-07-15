@@ -1,0 +1,30 @@
+/** 全局医疗科技风样式表 */
+page {
+  background-color: #F4F7FB; /* 科技感的浅蓝灰背景 */
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei',
+    sans-serif;
+  color: #333333;
+}
+
+/* 通用工具类 */
+.container {
+  padding: 30rpx;
+  box-sizing: border-box;
+}
+
+.text-primary {
+  color: #007AFF; /* 医疗科技蓝主色调 */
+}
+
+.bg-white {
+  background-color: #FFFFFF;
+}
+
+.card {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.05);
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+}

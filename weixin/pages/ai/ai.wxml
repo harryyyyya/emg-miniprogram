@@ -1,0 +1,52 @@
+<view class="ai-page">
+  <view class="device-bar" wx:if="{{boundDevice}}">
+    <view class="device-dot online"></view>
+    <text class="device-bar-text">已绑定 {{boundDevice.name || boundDevice.device_name || boundDevice.hardware_id}}</text>
+  </view>
+
+  <scroll-view class="chat-list" scroll-y scroll-into-view="{{scrollToId}}" enhanced show-scrollbar="{{false}}">
+    <view class="chat-welcome" wx:if="{{messages.length === 0}}">
+      <text class="welcome-emoji">AI</text>
+      <text class="welcome-title">你的智能体助手</text>
+      <text class="welcome-sub">你可以直接询问设备状态、肌电数据、训练建议等问题</text>
+      <view class="quick-questions">
+        <view class="quick-item" wx:for="{{quickQuestions}}" wx:key="*this" bindtap="quickAsk" data-q="{{item}}">
+          {{item}}
+        </view>
+      </view>
+    </view>
+
+    <view wx:for="{{messages}}" wx:key="id" id="msg-{{item.id}}" class="msg-row {{item.role === 'user' ? 'msg-right' : 'msg-left'}}">
+      <view class="msg-avatar">
+        <text>{{item.role === 'user' ? '我' : 'AI'}}</text>
+      </view>
+      <view class="msg-bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}}">
+        <text class="msg-text">{{item.content}}</text>
+        <text class="msg-meta" wx:if="{{item.role === 'ai' && item.meta}}">{{item.meta}}</text>
+      </view>
+    </view>
+
+    <view class="typing-indicator" wx:if="{{isTyping}}">
+      <view class="msg-avatar"><text>AI</text></view>
+      <view class="msg-bubble bubble-ai">
+        <view class="dot-typing">
+          <view class="dot"></view>
+          <view class="dot"></view>
+          <view class="dot"></view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="input-bar">
+    <input
+      class="chat-input"
+      placeholder="输入你的问题..."
+      value="{{inputValue}}"
+      bindinput="onInput"
+      bindconfirm="sendMessage"
+      confirm-type="send"
+    />
+    <button class="btn-send" bindtap="sendMessage" disabled="{{!inputValue || isTyping}}">发送</button>
+  </view>
+</view>
