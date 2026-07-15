@@ -1,4 +1,4 @@
-const PRODUCTION_BASE_URL = '';
+const PRODUCTION_BASE_URL = 'http://47.239.150.223';
 const DEFAULT_PROTOCOL = 'http';
 const DEFAULT_HOST = '192.168.43.9';
 const DEFAULT_PORT = 8000;
