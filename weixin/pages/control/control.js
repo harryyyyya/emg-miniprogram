@@ -10,7 +10,7 @@ const DEFAULT_GESTURES = [
 ];
 
 const EMG_STORAGE_PREFIX = 'realtime_emg_';
-const EMG_CACHE_LIMIT = 120;
+const EMG_CACHE_LIMIT = 240;
 const fs = wx.getFileSystemManager();
 const TEMP_DIR = `${wx.env.USER_DATA_PATH}/emg_collect`;
 
@@ -300,7 +300,7 @@ Page({
   drawStoredSessionPreview() {
     const session = this.data.selectedStoredSession;
     const preview = session && Array.isArray(session.preview) ? session.preview : [];
-    this.drawEmgChart(preview, 'historyCanvas', '鍘嗗彶娉㈠舰');
+    this.drawEmgChart(preview, 'historyCanvas');
   },
 
   initBleMode() {
@@ -685,14 +685,15 @@ Page({
     });
   },
 
-  drawEmgChart(samples, canvasId = 'emgCanvas', title = 'CH1 原始信号') {
+  drawEmgChart(samples, canvasId = 'emgCanvas') {
     const ctx = wx.createCanvasContext(canvasId, this);
-    const width = 680;
-    const height = 320;
-    const paddingLeft = 62;
-    const paddingRight = 54;
-    const paddingTop = 28;
-    const paddingBottom = 28;
+    const isHistory = canvasId === 'historyCanvas';
+    const width = isHistory ? 320 : 330;
+    const height = isHistory ? 130 : 180;
+    const paddingLeft = 18;
+    const paddingRight = 12;
+    const paddingTop = 14;
+    const paddingBottom = 20;
     const visible = (samples || []).slice(-EMG_CACHE_LIMIT);
     const plotWidth = width - paddingLeft - paddingRight;
     const plotHeight = height - paddingTop - paddingBottom;
@@ -721,25 +722,26 @@ Page({
 
     if (!series.length) {
       ctx.setFillStyle('rgba(255,255,255,0.58)');
-      ctx.setFontSize(22);
-      ctx.fillText('等待原始肌电数据...', 238, 164);
+      ctx.setFontSize(13);
+      ctx.fillText('Waiting for EMG data...', paddingLeft + 70, height / 2 + 4);
       ctx.draw();
       return;
     }
 
     const min = Math.min(...series);
     const max = Math.max(...series);
-    const range = Math.max(20, max - min);
-    const topValue = max + range * 0.12;
-    const bottomValue = min - range * 0.12;
+    const mean = series.reduce((sum, value) => sum + value, 0) / series.length;
+    const maxDeviation = Math.max(...series.map((value) => Math.abs(value - mean)));
+    const halfRange = Math.max(12, maxDeviation * 1.25, (max - min) * 0.62);
+    const topValue = mean + halfRange;
+    const bottomValue = mean - halfRange;
     const valueRange = Math.max(1, topValue - bottomValue);
-    const zeroValue = bottomValue <= 0 && topValue >= 0 ? 0 : min;
-    const zeroY = paddingTop + ((topValue - zeroValue) / valueRange) * plotHeight;
+    const centerY = paddingTop + ((topValue - mean) / valueRange) * plotHeight;
 
-    ctx.setStrokeStyle('rgba(255,255,255,0.18)');
+    ctx.setStrokeStyle('rgba(255,255,255,0.2)');
     ctx.beginPath();
-    ctx.moveTo(paddingLeft, zeroY);
-    ctx.lineTo(width - paddingRight, zeroY);
+    ctx.moveTo(paddingLeft, centerY);
+    ctx.lineTo(width - paddingRight, centerY);
     ctx.stroke();
 
     const strokeColor = this.data.deviceStatus === 'online' ? '#24F2A6' : '#FF6B6B';
@@ -755,7 +757,7 @@ Page({
       else ctx.lineTo(x, y);
     });
     ctx.setStrokeStyle(glowColor);
-    ctx.setLineWidth(10);
+    ctx.setLineWidth(isHistory ? 5 : 7);
     ctx.setLineJoin('round');
     ctx.setLineCap('round');
     ctx.stroke();
@@ -768,20 +770,15 @@ Page({
       else ctx.lineTo(x, y);
     });
     ctx.setStrokeStyle(strokeColor);
-    ctx.setLineWidth(3);
+    ctx.setLineWidth(isHistory ? 2 : 2.5);
     ctx.setLineJoin('round');
     ctx.setLineCap('round');
     ctx.stroke();
 
-    ctx.setFillStyle('rgba(255,255,255,0.76)');
-    ctx.setFontSize(18);
-    ctx.fillText(title, paddingLeft, paddingTop + 8);
-    ctx.fillText(`MAX ${Math.round(topValue)}`, 8, paddingTop + 8);
-    ctx.fillText(`MIN ${Math.round(bottomValue)}`, 8, height - 12);
-
-    ctx.setFillStyle(strokeColor);
-    ctx.setFontSize(18);
-    ctx.fillText(this.data.deviceStatus === 'online' ? 'LIVE RAW' : 'OFFLINE', width - 120, 26);
+    ctx.setFillStyle('rgba(255,255,255,0.55)');
+    ctx.setFontSize(10);
+    ctx.fillText(`max ${Math.round(max)}`, paddingLeft, paddingTop + 9);
+    ctx.fillText(`min ${Math.round(min)}`, paddingLeft, height - 8);
 
     ctx.draw();
   },
