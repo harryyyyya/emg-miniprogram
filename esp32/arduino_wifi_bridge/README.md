@@ -30,15 +30,15 @@ Open `arduino_wifi_bridge.ino` and change these values:
 ```cpp
 static const char* WIFI_SSID = "YOUR_WIFI_NAME";
 static const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
-static const char* BACKEND_HOST = "192.168.43.9";
-static const uint16_t BACKEND_PORT = 8000;
+static const char* BACKEND_HOST = "47.239.150.223";
+static const uint16_t BACKEND_PORT = 80;
 static const char* HARDWARE_ID = "ESP32-HAND-001";
 static const char* BOARD_TOKEN = "esp32-secret";
 ```
 
 Notes:
 
-- `BACKEND_HOST` must be your computer's LAN IP, not `127.0.0.1`
+- `BACKEND_HOST` must be your backend host. For current cloud testing, use `47.239.150.223`.
 - `HARDWARE_ID` and `BOARD_TOKEN` must match what you bind in the mini-program
 
 ## Arduino IDE setup
@@ -195,7 +195,7 @@ Check:
 
 - computer firewall
 - backend started with `--host 0.0.0.0`
-- `BACKEND_HOST` is your computer LAN IP
+- `BACKEND_HOST` is your cloud backend host or local test backend host
 - ESP32 and computer are on the same Wi-Fi
 
 ### 2. Backend says `device not bound`

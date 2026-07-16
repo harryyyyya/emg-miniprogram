@@ -25,14 +25,14 @@ Edit these values at the top of `esp32_jingjian.ino`:
 ```cpp
 static const char* WIFI_SSID = "weixin";
 static const char* WIFI_PASSWORD = "88888888a";
-static const char* BACKEND_HOST = "192.168.43.9";
-static const uint16_t BACKEND_PORT = 8000;
+static const char* BACKEND_HOST = "47.239.150.223";
+static const uint16_t BACKEND_PORT = 80;
 
 static const char* HARDWARE_ID = "ESP32-HAND-001";
 static const char* BOARD_TOKEN = "esp32-secret";
 ```
 
-`BACKEND_HOST` must be your computer LAN IP. It must be the same IP that the mini-program uses to access the backend.
+`BACKEND_HOST` must be your cloud backend host. During current testing it should be `47.239.150.223`, the same backend address used by the mini-program.
 
 ## Mini-program binding values
 
