@@ -13,40 +13,42 @@
       <view class="device-dot {{deviceOnline ? 'online' : 'offline'}}"></view>
       <view class="device-info">
         <text class="device-name">{{deviceName || '未绑定设备'}}</text>
+        <text class="device-status">{{deviceStatusText}}</text>
       </view>
     </view>
-    <text class="device-arrow">→</text>
+    <text class="device-arrow">›</text>
   </view>
 
   <view class="feature-grid">
     <view class="feature-item" bindtap="goTo" data-url="/pages/control/control">
-      <view class="feature-icon bg-blue">🦾</view>
+      <view class="feature-icon bg-blue">手</view>
       <text class="feature-label">假手控制</text>
     </view>
     <view class="feature-item" bindtap="goTo" data-url="/pages/control/control?tab=train">
-      <view class="feature-icon bg-green">📳</view>
+      <view class="feature-icon bg-green">训</view>
       <text class="feature-label">数据训练</text>
     </view>
     <view class="feature-item" bindtap="goTo" data-url="/pages/control/control?tab=health">
-      <view class="feature-icon bg-orange">🩺</view>
+      <view class="feature-icon bg-orange">康</view>
       <text class="feature-label">健康报告</text>
     </view>
     <view class="feature-item" bindtap="goTo" data-url="/pages/ai/ai">
-      <view class="feature-icon bg-purple">👩‍⚕️</view>
-      <text class="feature-label">联系医生</text>
+      <view class="feature-icon bg-purple">AI</view>
+      <text class="feature-label">AI 咨询</text>
     </view>
   </view>
 
   <view class="section">
     <view class="section-header">
-      <text class="section-title">康复知识</text>
-      <text class="section-more">查看更多 →</text>
+      <text class="section-title">康复与训练</text>
+      <text class="section-more">精选内容</text>
     </view>
     <view class="knowledge-list">
       <view class="knowledge-item" wx:for="{{knowledgeList}}" wx:key="id">
         <image class="knowledge-img" src="{{item.cover}}" mode="aspectFill" />
         <view class="knowledge-content">
           <text class="knowledge-title">{{item.title}}</text>
+          <text class="knowledge-tag">{{item.tag}}</text>
           <text class="knowledge-desc">{{item.desc}}</text>
         </view>
       </view>

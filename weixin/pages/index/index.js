@@ -4,13 +4,25 @@ const { request } = require('../../utils/request');
 Page({
   data: {
     banners: [
-      { id: 1, image: '/assets/images/banner1.png', title: '智能肌电假手 · 重塑生活' },
-      { id: 2, image: '/assets/images/banner2.png', title: '个性化训练 · 精准控制' },
-      { id: 3, image: '/assets/images/banner3.png', title: '康复指导 · 连续监测' },
+      { id: 1, image: '/assets/images/banner1.png', title: '智能肌电假手，重塑日常能力' },
+      { id: 2, image: '/assets/images/banner2.png', title: '个性化动作录入，让控制更贴合你' },
+      { id: 3, image: '/assets/images/banner3.png', title: '持续监测设备与肌电状态' },
     ],
     knowledgeList: [
-      { id: 1, cover: '/assets/images/banner1.png', title: '肌电假手使用入门指南', desc: '从佩戴到基础动作控制，快速建立使用路径。' },
-      { id: 2, cover: '/assets/images/banner2.png', title: '日常康复训练建议', desc: '结合训练节奏和状态反馈，逐步提升适应能力。' },
+      {
+        id: 1,
+        cover: '/assets/images/banner1.png',
+        title: '新手第一次连接假手：先确认这 3 件事',
+        tag: '设备连接',
+        desc: '确认 ESP32 已连上 Wi-Fi、串口出现 heartbeat status=200，再在小程序里一键绑定默认设备。',
+      },
+      {
+        id: 2,
+        cover: '/assets/images/banner2.png',
+        title: '动作录入怎么练：每次 5 秒更稳定',
+        tag: '训练建议',
+        desc: '录入握拳、张手、捏取等动作时保持姿势稳定，观察原始肌电波形和 RMS，逐步提高识别准确度。',
+      },
     ],
     deviceName: '',
     deviceOnline: false,
@@ -54,7 +66,7 @@ Page({
         this.setData({
           deviceName: name,
           deviceOnline: status,
-          deviceStatusText: status ? 'Wi-Fi 在线 · 后端已收到心跳' : 'Wi-Fi 离线 · 等待 Duo S 回连',
+          deviceStatusText: status ? 'Wi-Fi 在线 · 后端已收到心跳' : 'Wi-Fi 离线 · 等待 ESP32 回连',
         });
       } catch (e) {
         this.setData({

@@ -152,7 +152,7 @@
 
 .knowledge-item {
   display: flex;
-  padding: 24rpx;
+  padding: 26rpx;
   border-bottom: 1rpx solid #F0F0F0;
 }
 
@@ -161,11 +161,11 @@
 }
 
 .knowledge-img {
-  width: 160rpx;
-  height: 110rpx;
-  border-radius: 12rpx;
+  width: 172rpx;
+  height: 126rpx;
+  border-radius: 16rpx;
   flex-shrink: 0;
-  margin-right: 20rpx;
+  margin-right: 22rpx;
   background: #EEE;
 }
 
@@ -180,16 +180,27 @@
   font-size: 28rpx;
   font-weight: 600;
   color: #333;
-  margin-bottom: 8rpx;
+  margin-bottom: 10rpx;
   display: -webkit-box;
-  -webkit-line-clamp: 1;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
+.knowledge-tag {
+  align-self: flex-start;
+  margin-bottom: 8rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  background: rgba(0, 122, 255, 0.08);
+  color: #007AFF;
+  font-size: 20rpx;
+}
+
 .knowledge-desc {
-  font-size: 24rpx;
-  color: #999;
+  font-size: 23rpx;
+  line-height: 1.55;
+  color: #7a8799;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
