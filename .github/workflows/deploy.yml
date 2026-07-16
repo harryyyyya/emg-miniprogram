@@ -23,5 +23,9 @@ jobs:
             cd /opt/weixin
             git fetch origin main
             git reset --hard origin/main
-            docker compose up -d --build
+            if docker compose version >/dev/null 2>&1; then
+              docker compose up -d --build
+            else
+              docker-compose up -d --build
+            fi
             docker image prune -f
