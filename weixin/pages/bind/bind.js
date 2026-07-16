@@ -2,6 +2,22 @@ const ble = require('../../utils/ble_manager');
 const { request } = require('../../utils/request');
 const esp32Link = require('../../utils/esp32_link');
 
+const DEFAULT_WIFI_DEVICE = {
+  hardwareId: 'ESP32-HAND-001',
+  boardToken: 'esp32-secret',
+  deviceName: '我的智能假手',
+};
+
+const DEFAULT_DIRECT_DEVICE = {
+  ip: '',
+  deviceId: 'ESP32-HAND-001',
+  token: 'esp32-secret',
+  vendor: '',
+  name: '我的智能假手',
+  httpPort: '80',
+  wsPort: '81',
+};
+
 function buildStoredDevice(device, extras = {}) {
   const name = device.device_name || device.name || device.hardware_id || extras.hardware_id || '';
   return {
@@ -47,24 +63,14 @@ function parseWifiPayload(rawText) {
 
 Page({
   data: {
-    transportMode: 'ble',
+    transportMode: 'wifi',
     step: 'scan',
     targetDevice: '',
     failMsg: '',
-    wifiForm: {
-      hardwareId: '',
-      boardToken: '',
-      deviceName: '',
-    },
-    esp32Form: {
-      ip: '',
-      deviceId: '',
-      token: '',
-      vendor: '',
-      name: '',
-      httpPort: '80',
-      wsPort: '81',
-    },
+    showWifiAdvanced: false,
+    showDirectAdvanced: false,
+    wifiForm: { ...DEFAULT_WIFI_DEVICE },
+    esp32Form: { ...DEFAULT_DIRECT_DEVICE },
   },
 
   switchTransport(e) {
@@ -75,6 +81,26 @@ Page({
       targetDevice: '',
       failMsg: '',
     });
+  },
+
+  fillDefaultWifiDevice() {
+    this.setData({
+      wifiForm: { ...DEFAULT_WIFI_DEVICE },
+      failMsg: '',
+    });
+  },
+
+  quickBindWifiDevice() {
+    this.fillDefaultWifiDevice();
+    this.bindWifiDevice();
+  },
+
+  toggleWifiAdvanced() {
+    this.setData({ showWifiAdvanced: !this.data.showWifiAdvanced });
+  },
+
+  toggleDirectAdvanced() {
+    this.setData({ showDirectAdvanced: !this.data.showDirectAdvanced });
   },
 
   startScan() {
@@ -99,7 +125,7 @@ Page({
         this.connectBle(deviceIdentifier);
       },
       fail: () => {
-        wx.showToast({ title: '扫码已取消', icon: 'none' });
+        wx.showToast({ title: '已取消扫码', icon: 'none' });
       },
     });
   },
@@ -125,7 +151,7 @@ Page({
       success: (res) => {
         const payload = parseWifiPayload(res.result);
         if (!payload || !payload.hardware_id) {
-          wx.showToast({ title: '二维码中没有设备信息', icon: 'none' });
+          wx.showToast({ title: '二维码里没有设备信息', icon: 'none' });
           return;
         }
         this.setData({
@@ -137,7 +163,7 @@ Page({
         });
       },
       fail: () => {
-        wx.showToast({ title: '扫码已取消', icon: 'none' });
+        wx.showToast({ title: '已取消扫码', icon: 'none' });
       },
     });
   },
@@ -148,7 +174,7 @@ Page({
       success: (res) => {
         const payload = parseWifiPayload(res.result);
         if (!payload || !payload.ip) {
-          wx.showToast({ title: '二维码中没有 ESP32 IP', icon: 'none' });
+          wx.showToast({ title: '二维码里没有 ESP32 IP', icon: 'none' });
           return;
         }
         this.setData({
@@ -164,7 +190,7 @@ Page({
         });
       },
       fail: () => {
-        wx.showToast({ title: '扫码已取消', icon: 'none' });
+        wx.showToast({ title: '已取消扫码', icon: 'none' });
       },
     });
   },
@@ -191,7 +217,7 @@ Page({
       return;
     }
     if (!boardToken) {
-      wx.showToast({ title: '请输入板端密钥', icon: 'none' });
+      wx.showToast({ title: '请输入设备密钥', icon: 'none' });
       return;
     }
 
@@ -218,11 +244,11 @@ Page({
         transport: 'wifi',
       });
       wx.setStorageSync('boundDevice', storedDevice);
-      this.setData({ step: 'success' });
+      this.setData({ step: 'success', targetDevice: storedDevice.name || hardwareId });
     } catch (err) {
       this.setData({
         step: 'fail',
-        failMsg: (err && err.detail) || 'ESP32 设备绑定失败，请检查后端连接和设备编号',
+        failMsg: (err && err.detail) || 'ESP32 绑定失败，请检查登录状态、后端连接、设备编号和密钥。',
       });
     }
   },
@@ -274,7 +300,7 @@ Page({
     } catch (err) {
       this.setData({
         step: 'fail',
-        failMsg: err.message || 'ESP32 直连校验失败，请检查 IP、设备接口和身份信息',
+        failMsg: err.message || 'ESP32 直连校验失败，请检查手机和 ESP32 是否在同一 Wi-Fi，以及 IP 和端口是否正确。',
       });
     }
   },
@@ -300,12 +326,12 @@ Page({
         });
 
         wx.setStorageSync('boundDevice', storedDevice);
-        this.setData({ step: 'success' });
+        this.setData({ step: 'success', targetDevice: storedDevice.name || name });
       })
       .catch((err) => {
         this.setData({
           step: 'fail',
-          failMsg: err.message || '蓝牙连接失败，请检查设备是否已经开机',
+          failMsg: err.message || '蓝牙连接失败，请检查设备是否开机并在蓝牙范围内。',
         });
       });
   },
