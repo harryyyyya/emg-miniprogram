@@ -1,0 +1,27 @@
+<view class="article-page" wx:if="{{article}}">
+  <view class="article-hero">
+    <text class="article-tag">{{article.tag}}</text>
+    <text class="article-title">{{article.title}}</text>
+    <text class="article-summary">{{article.summary}}</text>
+  </view>
+
+  <view class="article-section" wx:for="{{article.sections}}" wx:key="heading">
+    <text class="section-heading">{{item.heading}}</text>
+    <view class="advice-list">
+      <view class="advice-item" wx:for="{{item.items}}" wx:for-item="advice" wx:key="*this">
+        <text class="advice-dot"></text>
+        <text class="advice-text">{{advice}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="article-section tips-section">
+    <text class="section-heading">Practical tips</text>
+    <view class="advice-list">
+      <view class="advice-item" wx:for="{{article.tips}}" wx:key="*this">
+        <text class="advice-dot accent"></text>
+        <text class="advice-text">{{item}}</text>
+      </view>
+    </view>
+  </view>
+</view>

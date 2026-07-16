@@ -4,29 +4,29 @@ const { request } = require('../../utils/request');
 Page({
   data: {
     banners: [
-      { id: 1, image: '/assets/images/banner1.png', title: '智能肌电假手，重塑日常能力' },
-      { id: 2, image: '/assets/images/banner2.png', title: '个性化动作录入，让控制更贴合你' },
-      { id: 3, image: '/assets/images/banner3.png', title: '持续监测设备与肌电状态' },
+      { id: 1, image: '/assets/images/banner1.png', title: 'Smart EMG hand for daily control' },
+      { id: 2, image: '/assets/images/banner2.png', title: 'Personal gesture training and recording' },
+      { id: 3, image: '/assets/images/banner3.png', title: 'Device status and EMG monitoring' },
     ],
     knowledgeList: [
       {
         id: 1,
         cover: '/assets/images/banner1.png',
-        title: '新手第一次连接假手：先确认这 3 件事',
-        tag: '设备连接',
-        desc: '确认 ESP32 已连上 Wi-Fi、串口出现 heartbeat status=200，再在小程序里一键绑定默认设备。',
+        title: 'First connection checklist for ESP32 hand',
+        tag: 'Connection',
+        desc: 'Check Wi-Fi, backend heartbeat, device id and token before binding.',
       },
       {
         id: 2,
         cover: '/assets/images/banner2.png',
-        title: '动作录入怎么练：每次 5 秒更稳定',
-        tag: '训练建议',
-        desc: '录入握拳、张手、捏取等动作时保持姿势稳定，观察原始肌电波形和 RMS，逐步提高识别准确度。',
+        title: 'How to record stable gesture EMG data',
+        tag: 'Training',
+        desc: 'Use short and stable 5-second sessions to improve gesture recognition.',
       },
     ],
     deviceName: '',
     deviceOnline: false,
-    deviceStatusText: '离线 · 点击绑定',
+    deviceStatusText: 'Offline · tap to bind',
   },
 
   onShow() {
@@ -45,7 +45,7 @@ Page({
       this.setData({
         deviceName: '',
         deviceOnline: false,
-        deviceStatusText: '离线 · 点击绑定',
+        deviceStatusText: 'Offline · tap to bind',
       });
       return;
     }
@@ -55,7 +55,7 @@ Page({
       this.setData({
         deviceName: name,
         deviceOnline: false,
-        deviceStatusText: 'Wi-Fi 设备 · 正在检查',
+        deviceStatusText: 'Wi-Fi device · checking',
       });
       try {
         const res = await request({
@@ -66,13 +66,13 @@ Page({
         this.setData({
           deviceName: name,
           deviceOnline: status,
-          deviceStatusText: status ? 'Wi-Fi 在线 · 后端已收到心跳' : 'Wi-Fi 离线 · 等待 ESP32 回连',
+          deviceStatusText: status ? 'Wi-Fi online · heartbeat received' : 'Wi-Fi offline · waiting for ESP32',
         });
       } catch (e) {
         this.setData({
           deviceName: name,
           deviceOnline: false,
-          deviceStatusText: 'Wi-Fi 离线 · 无法获取设备状态',
+          deviceStatusText: 'Wi-Fi offline · status unavailable',
         });
       }
       return;
@@ -81,16 +81,21 @@ Page({
     this.setData({
       deviceName: name,
       deviceOnline: ble.isConnected(),
-      deviceStatusText: ble.isConnected() ? '蓝牙在线 · 已连接' : '蓝牙离线 · 点击重新绑定',
+      deviceStatusText: ble.isConnected() ? 'BLE online · connected' : 'BLE offline · tap to reconnect',
     });
 
     ble.onStatus((status) => {
       const online = status === 'connected';
       this.setData({
         deviceOnline: online,
-        deviceStatusText: online ? '蓝牙在线 · 已连接' : '蓝牙离线 · 点击重新绑定',
+        deviceStatusText: online ? 'BLE online · connected' : 'BLE offline · tap to reconnect',
       });
     });
+  },
+
+  openArticle(e) {
+    const id = e.currentTarget.dataset.id;
+    wx.navigateTo({ url: `/pages/article/article?id=${id}` });
   },
 
   goToBind() {

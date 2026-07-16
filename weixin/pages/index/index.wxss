@@ -152,6 +152,7 @@
 
 .knowledge-item {
   display: flex;
+  align-items: center;
   padding: 26rpx;
   border-bottom: 1rpx solid #F0F0F0;
 }
@@ -174,6 +175,7 @@
   flex-direction: column;
   justify-content: center;
   flex: 1;
+  min-width: 0;
 }
 
 .knowledge-title {
@@ -205,4 +207,11 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.knowledge-arrow {
+  margin-left: 14rpx;
+  color: #b0bac8;
+  font-size: 48rpx;
+  flex-shrink: 0;
 }
