@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "backend/**"
+      - "docker-compose.yml"
+      - "Caddyfile"
+      - ".env.deploy.example"
+      - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 jobs:
@@ -24,8 +30,10 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             if docker compose version >/dev/null 2>&1; then
-              docker compose up -d --build
+              docker compose down --remove-orphans
+              docker compose up -d --build --force-recreate
             else
-              docker-compose up -d --build
+              docker-compose down --remove-orphans
+              docker-compose up -d --build --force-recreate
             fi
             docker image prune -f
