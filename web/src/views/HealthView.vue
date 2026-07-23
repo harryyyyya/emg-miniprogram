@@ -1,10 +1,25 @@
 <template>
   <div>
     <div class="page-header">
-      <h2 class="page-title gradient-text">肌肉健康可视化</h2>
+      <div>
+        <h2 class="page-title gradient-text">肌肉健康可视化</h2>
+        <p class="page-subtitle">用户列表来自后端数据库，会和小程序登录用户、健康报告数据保持同步。</p>
+      </div>
       <div class="header-actions">
-        <el-select v-model="selectedUser" placeholder="选择患者" style="width: 200px;">
-          <el-option v-for="u in users" :key="u.id" :label="u.name" :value="u.id" />
+        <el-select
+          v-model="selectedUser"
+          placeholder="选择小程序用户"
+          style="width: 240px"
+          :loading="loadingUsers"
+          filterable
+          @change="loadData"
+        >
+          <el-option
+            v-for="u in users"
+            :key="u.id"
+            :label="userLabel(u)"
+            :value="u.id"
+          />
         </el-select>
         <el-radio-group v-model="timeRange" size="default">
           <el-radio-button value="24h">24小时</el-radio-button>
@@ -13,7 +28,6 @@
       </div>
     </div>
 
-    <!-- 风险等级卡片 -->
     <div class="risk-row">
       <div class="glass-card risk-card">
         <div class="risk-indicator" :class="riskLevel">
@@ -44,25 +58,24 @@
       </div>
     </div>
 
-    <!-- ECharts 双轴图 -->
-    <div class="glass-card" style="margin-top: 20px;">
-      <h3 style="margin-bottom: 8px;">RMS 肌电强度 & 侧边压力趋势</h3>
-      <p style="color: var(--color-text-muted); font-size: 13px; margin-bottom: 16px;">
-        支持鼠标滚轮缩放、拖拽查看详情，已启用大数据性能优化
+    <div class="glass-card" style="margin-top: 20px">
+      <h3 style="margin-bottom: 8px">RMS 肌电强度 & 侧边压力趋势</h3>
+      <p style="color: var(--color-text-muted); font-size: 13px; margin-bottom: 16px">
+        当前展示的是所选小程序用户在后端数据库中的健康记录。
       </p>
-      <div style="position: relative;">
+      <div style="position: relative">
         <div ref="healthChartRef" class="chart-area"></div>
         <div v-if="loading" class="chart-loading">
           <el-icon class="is-loading" :size="32"><Loading /></el-icon>
         </div>
+        <el-empty v-if="!loading && healthData.length === 0" class="chart-empty" description="暂无健康数据" />
       </div>
     </div>
 
-    <!-- LLM 诊断结论 -->
-    <div class="glass-card" style="margin-top: 20px;">
+    <div class="glass-card" style="margin-top: 20px">
       <div class="diag-header">
         <h3>AI 诊断评估</h3>
-        <el-tag type="success" size="small">LLM 分析</el-tag>
+        <el-tag type="success" size="small">规则分析</el-tag>
       </div>
       <div class="diag-content">
         {{ diagnosticText }}
@@ -72,8 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, shallowRef } from 'vue'
-// ECharts 按需引入 — 健康视图：折线图 + 数据缩放
+import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import * as echarts from 'echarts/core'
 import { LineChart } from 'echarts/charts'
 import {
@@ -84,136 +96,113 @@ import {
 } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import { graphic } from 'echarts/core'
+import { Histogram, Loading, TrendCharts, Warning } from '@element-plus/icons-vue'
+import { fetchHealthLogs, fetchHealthUsers } from '@/api/health'
+import type { HealthLog, HealthUser } from '@/api/health'
+import { normalizeStrength } from '@/utils/math.js'
 
 echarts.use([LineChart, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent, CanvasRenderer])
 
-import { Loading } from '@element-plus/icons-vue'
-import { fetchHealthLogs } from '@/api/health'
-import type { HealthLog } from '@/api/health'
-import { normalizeStrength } from '@/utils/math.js'
-
-// ─── LTTB 降采样（Largest-Triangle-Three-Buckets）─────────────────────────
-// 当数据点 > LTTB_THRESHOLD 时启用，保留关键形态，避免 Canvas 渲染过万点
-const LTTB_THRESHOLD = 5000
-
-/**
- * LTTB 降采样：在保留信号形态的前提下，将 data 压缩到 threshold 个点
- * @param data   原始数组 [{time, rms, pressure}, ...]
- * @param threshold  目标点数
- */
 type HealthPoint = { time: string; rms: number; pressure: number; strength: number }
-
-function lttbDownsample(data: HealthPoint[], threshold: number): HealthPoint[] {
-  const len = data.length
-  if (threshold >= len || threshold <= 0) return data
-
-  const sampled: typeof data = []
-  sampled.push(data[0]) // 始终保留首点
-
-  const bucketSize = (len - 2) / (threshold - 2)
-  let a = 0 // 上一个选中点的索引
-
-  for (let i = 0; i < threshold - 2; i++) {
-    // 当前桶
-    const bucketStart = Math.floor((i + 1) * bucketSize) + 1
-    const bucketEnd   = Math.min(Math.floor((i + 2) * bucketSize) + 1, len)
-
-    // 下一个桶的平均值（作为 C 点）
-    const nextStart = bucketEnd
-    const nextEnd   = Math.min(Math.floor((i + 3) * bucketSize) + 1, len)
-    let avgRms = 0, avgX = 0, avgCount = 0
-    for (let j = nextStart; j < nextEnd; j++) {
-      avgRms += data[j].rms
-      avgX   += j
-      avgCount++
-    }
-    if (avgCount) { avgRms /= avgCount; avgX /= avgCount }
-
-    // 在当前桶中选三角形面积最大的点
-    let maxArea = -1, maxIdx = bucketStart
-    const aX = a, aRms = data[a].rms
-    for (let j = bucketStart; j < bucketEnd; j++) {
-      const area = Math.abs((aX - avgX) * (data[j].rms - aRms) - (aX - j) * (avgRms - aRms))
-      if (area > maxArea) { maxArea = area; maxIdx = j }
-    }
-
-    sampled.push(data[maxIdx])
-    a = maxIdx
-  }
-
-  sampled.push(data[len - 1]) // 始终保留尾点
-  return sampled
-}
 
 const healthChartRef = ref<HTMLElement>()
 let chart: echarts.ECharts | null = null
 
-const selectedUser = ref(1)
+const users = ref<HealthUser[]>([])
+const selectedUser = ref<number | null>(null)
 const timeRange = ref<'24h' | '7d'>('24h')
 const loading = ref(false)
+const loadingUsers = ref(false)
 
-const users = [
-  { id: 1, name: '患者张三' },
-  { id: 2, name: '患者李四' },
-  { id: 3, name: '患者王五' },
-]
-
-// shallowRef 避免对大数据数组进行深层响应式劫持，提升渲染性能
 const healthData = shallowRef<HealthPoint[]>([])
 const rawHealthData = shallowRef<HealthPoint[]>([])
-
-async function loadData() {
-  loading.value = true
-  try {
-    const logs: HealthLog[] = await fetchHealthLogs(selectedUser.value, { range: timeRange.value })
-    const mapped: HealthPoint[] = logs.map((log) => ({
-      time: log.created_at.slice(5, 16).replace('T', ' '), // "MM-DD HH:mm"
-      rms: log.rms_value,
-      pressure: log.side_pressure,
-      strength: normalizeStrength(log.rms_value),
-    }))
-    rawHealthData.value = [...mapped]
-
-    let displayData = mapped
-    // LTTB 降采样：超过 5000 点时压缩，保留信号形态
-    if (displayData.length > LTTB_THRESHOLD) {
-      displayData = lttbDownsample(displayData, LTTB_THRESHOLD)
-    }
-    // 赋值新数组引用以触发 shallowRef 侦测
-    healthData.value = [...displayData]
-  } catch {
-    healthData.value = []
-    rawHealthData.value = []
-  } finally {
-    loading.value = false
-  }
-}
 
 const rmsAvg = ref(0)
 const pressureAvg = ref(0)
 const riskLevel = ref('low')
-const riskText = ref('低风险')
-const diagnosticText = ref('')
+const riskText = ref('暂无数据')
+const diagnosticText = ref('请选择用户查看肌肉健康数据。')
+
+function userLabel(user: HealthUser) {
+  const name = user.name || user.username || user.phone || `用户#${user.id}`
+  const suffix = user.health_log_count ? `${user.health_log_count}条健康记录` : '暂无健康记录'
+  return `${name} · ${suffix}`
+}
+
+async function loadUsers() {
+  loadingUsers.value = true
+  try {
+    users.value = await fetchHealthUsers()
+    if (!selectedUser.value && users.value.length) {
+      selectedUser.value = users.value[0].id
+    }
+  } catch {
+    users.value = []
+    selectedUser.value = null
+  } finally {
+    loadingUsers.value = false
+  }
+}
+
+async function loadData() {
+  if (!selectedUser.value) {
+    rawHealthData.value = []
+    healthData.value = []
+    computeMetrics()
+    renderChart()
+    return
+  }
+
+  loading.value = true
+  try {
+    const logs: HealthLog[] = await fetchHealthLogs(selectedUser.value, { range: timeRange.value })
+    const mapped = logs.map((log) => ({
+      time: (log.created_at || '').slice(5, 16).replace('T', ' '),
+      rms: Number(log.rms_value || 0),
+      pressure: Number(log.side_pressure ?? log.side_presure ?? 0),
+      strength: normalizeStrength(Number(log.rms_value || 0)),
+    }))
+    rawHealthData.value = mapped
+    healthData.value = mapped.length > 5000 ? lttbDownsample(mapped, 5000) : mapped
+  } catch {
+    rawHealthData.value = []
+    healthData.value = []
+  } finally {
+    loading.value = false
+    computeMetrics()
+    renderChart()
+  }
+}
 
 function computeMetrics() {
   const d = rawHealthData.value
-  if (!d.length) return
-  rmsAvg.value = d.reduce((s, v) => s + v.rms, 0) / d.length
-  pressureAvg.value = d.reduce((s, v) => s + v.pressure, 0) / d.length
-  const strengthAvg = d.reduce((s, v) => s + v.strength, 0) / d.length
+  if (!d.length) {
+    rmsAvg.value = 0
+    pressureAvg.value = 0
+    riskLevel.value = 'low'
+    riskText.value = '暂无数据'
+    diagnosticText.value = selectedUser.value
+      ? '该用户暂无健康记录。请先在小程序端完成健康报告生成或肌电数据采集。'
+      : '暂无可查看用户。请先使用小程序登录，或由管理员创建用户。'
+    return
+  }
 
-  if (rmsAvg.value < 800) {
+  rmsAvg.value = d.reduce((sum, item) => sum + item.rms, 0) / d.length
+  pressureAvg.value = d.reduce((sum, item) => sum + item.pressure, 0) / d.length
+  const strengthAvg = d.reduce((sum, item) => sum + item.strength, 0) / d.length
+
+  if (rmsAvg.value < 80) {
     riskLevel.value = 'high'
     riskText.value = '高风险'
-    diagnosticText.value = `患者 RMS 肌电均值为 ${rmsAvg.value.toFixed(1)}，归一化强度均值为 ${strengthAvg.toFixed(1)}。结合侧边压力均值 ${pressureAvg.value.toFixed(1)}，LLM 评估该患者存在较高的肌肉萎缩风险。建议立即启动线下康复训练计划并每日监测信号变化。`
-  } else if (rmsAvg.value < 1200) {
+    diagnosticText.value = `该用户 RMS 肌电均值为 ${rmsAvg.value.toFixed(1)}，归一化强度均值为 ${strengthAvg.toFixed(1)}。结合侧边压力均值 ${pressureAvg.value.toFixed(1)}，存在较高肌肉萎缩风险，建议增加康复训练频率并咨询专业医生。`
+  } else if (rmsAvg.value < 150) {
     riskLevel.value = 'medium'
     riskText.value = '中等风险'
-    diagnosticText.value = `患者 RMS 肌电均值为 ${rmsAvg.value.toFixed(1)}，归一化强度均值为 ${strengthAvg.toFixed(1)}。侧边压力均值 ${pressureAvg.value.toFixed(1)} 相对平稳。LLM 建议持续观察，适当增加穿戴频率以提高肌肉活跃度。`
+    diagnosticText.value = `该用户 RMS 肌电均值为 ${rmsAvg.value.toFixed(1)}，归一化强度均值为 ${strengthAvg.toFixed(1)}。侧边压力均值 ${pressureAvg.value.toFixed(1)} 相对平稳，建议持续观察并保持规律训练。`
   } else {
     riskLevel.value = 'low'
     riskText.value = '低风险'
-    diagnosticText.value = `患者 RMS 肌电均值为 ${rmsAvg.value.toFixed(1)}，归一化强度均值为 ${strengthAvg.toFixed(1)}。侧边压力均值 ${pressureAvg.value.toFixed(1)} 表现稳定。LLM 评估当前肌肉状态良好，建议维持当前训练方案。`
+    diagnosticText.value = `该用户 RMS 肌电均值为 ${rmsAvg.value.toFixed(1)}，归一化强度均值为 ${strengthAvg.toFixed(1)}。侧边压力均值 ${pressureAvg.value.toFixed(1)} 表现稳定，当前肌肉状态较好，建议维持训练方案。`
   }
 }
 
@@ -228,7 +217,16 @@ function renderChart() {
     grid: { left: 60, right: 60, top: 50, bottom: 60 },
     dataZoom: [
       { type: 'inside', xAxisIndex: 0 },
-      { type: 'slider', xAxisIndex: 0, height: 20, bottom: 8, borderColor: 'transparent', backgroundColor: 'rgba(30,41,59,0.5)', fillerColor: 'rgba(99,102,241,0.2)', handleStyle: { color: '#6366f1' } },
+      {
+        type: 'slider',
+        xAxisIndex: 0,
+        height: 20,
+        bottom: 8,
+        borderColor: 'transparent',
+        backgroundColor: 'rgba(30,41,59,0.5)',
+        fillerColor: 'rgba(99,102,241,0.2)',
+        handleStyle: { color: '#6366f1' },
+      },
     ],
     xAxis: {
       type: 'category',
@@ -237,8 +235,20 @@ function renderChart() {
       axisLabel: { color: '#94a3b8', fontSize: 10 },
     },
     yAxis: [
-      { type: 'value', name: 'RMS', max: 4096, nameTextStyle: { color: '#94a3b8' }, axisLabel: { color: '#94a3b8' }, splitLine: { lineStyle: { color: 'rgba(99,102,241,0.06)' } } },
-      { type: 'value', name: '压力', max: 100, nameTextStyle: { color: '#94a3b8' }, axisLabel: { color: '#94a3b8' }, splitLine: { show: false } },
+      {
+        type: 'value',
+        name: 'RMS',
+        nameTextStyle: { color: '#94a3b8' },
+        axisLabel: { color: '#94a3b8' },
+        splitLine: { lineStyle: { color: 'rgba(99,102,241,0.06)' } },
+      },
+      {
+        type: 'value',
+        name: '压力',
+        nameTextStyle: { color: '#94a3b8' },
+        axisLabel: { color: '#94a3b8' },
+        splitLine: { show: false },
+      },
     ],
     series: [
       {
@@ -247,8 +257,6 @@ function renderChart() {
         data: d.map((v) => v.rms),
         yAxisIndex: 0,
         showSymbol: false,
-        large: true,
-        largeThreshold: 2000,
         smooth: true,
         lineStyle: { color: '#6366f1', width: 2 },
         areaStyle: {
@@ -257,7 +265,6 @@ function renderChart() {
             { offset: 1, color: 'rgba(99,102,241,0)' },
           ]),
         },
-        itemStyle: { color: '#818cf8' },
       },
       {
         name: '侧边压力',
@@ -265,30 +272,65 @@ function renderChart() {
         data: d.map((v) => v.pressure),
         yAxisIndex: 1,
         showSymbol: false,
-        large: true,
-        largeThreshold: 2000,
         smooth: true,
         lineStyle: { color: '#06b6d4', width: 2 },
-        itemStyle: { color: '#22d3ee' },
       },
     ],
-  })
+  }, true)
 }
 
-function handleResize() { chart?.resize() }
+function lttbDownsample(data: HealthPoint[], threshold: number): HealthPoint[] {
+  if (threshold >= data.length || threshold <= 0) return data
+  const sampled: HealthPoint[] = [data[0]]
+  const bucketSize = (data.length - 2) / (threshold - 2)
+  let a = 0
 
-watch([selectedUser, timeRange], async () => {
-  await loadData()
-  computeMetrics()
-  renderChart()
-})
+  for (let i = 0; i < threshold - 2; i++) {
+    const bucketStart = Math.floor((i + 1) * bucketSize) + 1
+    const bucketEnd = Math.min(Math.floor((i + 2) * bucketSize) + 1, data.length)
+    const nextStart = bucketEnd
+    const nextEnd = Math.min(Math.floor((i + 3) * bucketSize) + 1, data.length)
+    let avgRms = 0
+    let avgX = 0
+    let avgCount = 0
+    for (let j = nextStart; j < nextEnd; j++) {
+      avgRms += data[j].rms
+      avgX += j
+      avgCount += 1
+    }
+    if (avgCount) {
+      avgRms /= avgCount
+      avgX /= avgCount
+    }
+
+    let maxArea = -1
+    let maxIdx = bucketStart
+    for (let j = bucketStart; j < bucketEnd; j++) {
+      const area = Math.abs((a - avgX) * (data[j].rms - data[a].rms) - (a - j) * (avgRms - data[a].rms))
+      if (area > maxArea) {
+        maxArea = area
+        maxIdx = j
+      }
+    }
+    sampled.push(data[maxIdx])
+    a = maxIdx
+  }
+  sampled.push(data[data.length - 1])
+  return sampled
+}
+
+function handleResize() {
+  chart?.resize()
+}
+
+watch(timeRange, loadData)
 
 onMounted(async () => {
+  await loadUsers()
   await loadData()
-  computeMetrics()
-  renderChart()
   window.addEventListener('resize', handleResize)
 })
+
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
   chart?.dispose()
@@ -297,10 +339,16 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .page-header {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
-.page-title { font-size: 28px; font-weight: 700; }
-.header-actions { display: flex; gap: 12px; align-items: center; }
+.page-title { font-size: 28px; font-weight: 700; margin: 0; }
+.page-subtitle { margin: 8px 0 0; color: var(--color-text-muted); font-size: 14px; }
+.header-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 
 .risk-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .risk-card { display: flex; align-items: center; gap: 16px; padding: 20px; }
@@ -319,7 +367,18 @@ onBeforeUnmount(() => {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
   background: rgba(15,23,42,0.6); border-radius: 10px; color: var(--color-primary);
 }
-
+.chart-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
 .diag-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .diag-content { color: var(--color-text-muted); line-height: 1.8; font-size: 14px; padding: 16px; background: rgba(15,23,42,0.5); border-radius: 10px; border: 1px solid rgba(99,102,241,0.1); }
+
+@media (max-width: 900px) {
+  .risk-row { grid-template-columns: 1fr; }
+}
 </style>

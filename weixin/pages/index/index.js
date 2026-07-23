@@ -65,9 +65,9 @@ Page({
   async loadKnowledgeArticles() {
     try {
       const articles = await request({
-        url: '/knowledge/articles?published=true&limit=3',
+        url: '/knowledge/articles?published=true&limit=100',
         method: 'GET',
-        timeout: 4000,
+        timeout: 5000,
         silent: true,
       });
       const list = (articles || []).map(normalizeKnowledgeArticle).filter((item) => item.id);

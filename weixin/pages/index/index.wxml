@@ -41,7 +41,7 @@
   <view class="section">
     <view class="section-header">
       <text class="section-title">康复与训练</text>
-      <text class="section-more">点击查看</text>
+      <text class="section-more">共 {{knowledgeList.length}} 篇</text>
     </view>
     <view class="knowledge-list">
       <view class="knowledge-item {{item.tone || ''}}" wx:for="{{knowledgeList}}" wx:key="id" bindtap="openArticle" data-id="{{item.id}}">

@@ -81,6 +81,40 @@ def _device_row(device: Device) -> dict[str, Any]:
     }
 
 
+def _user_row(user: User, db: Session) -> dict[str, Any]:
+    latest_health = (
+        db.query(HealthRecord)
+        .filter(HealthRecord.user_id == user.id)
+        .order_by(HealthRecord.recorded_at.desc(), HealthRecord.id.desc())
+        .first()
+    )
+    return {
+        "id": user.id,
+        "user_id": user.id,
+        "name": user.name or user.username or user.phone or f"用户#{user.id}",
+        "username": user.username or "",
+        "phone": user.phone or "",
+        "role": user.role or "user",
+        "avatar_url": user.avatar_url or "",
+        "created_at": _dt(user.created_at),
+        "device_count": db.query(Device).filter(Device.user_id == user.id).count(),
+        "health_log_count": db.query(HealthRecord).filter(HealthRecord.user_id == user.id).count(),
+        "latest_health_at": _dt(latest_health.recorded_at) if latest_health else "",
+    }
+
+
+@router.get("/users")
+def list_users(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if (current_user.role or "user") != "admin":
+        return [_user_row(current_user, db)]
+
+    users = db.query(User).order_by(User.created_at.desc(), User.id.desc()).all()
+    return [_user_row(user, db) for user in users]
+
+
 def _safe_json_dumps(value: Any) -> str:
     return json.dumps(value or [], ensure_ascii=False)
 

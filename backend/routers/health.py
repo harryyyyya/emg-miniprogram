@@ -6,7 +6,7 @@ routers/health.py - 健康数据 & 报告接口
 import random
 from datetime import datetime
 
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -23,6 +23,7 @@ class ReportIn(BaseModel):
 @router.post("/report/generate")
 def generate_report(
     body:         ReportIn | None = Body(default=None),
+    user_id:      int | None = None,
     db:           Session = Depends(get_db),
     current_user: User    = Depends(get_current_user),
 ):
@@ -30,7 +31,14 @@ def generate_report(
     根据该用户最近一次训练会话的 EMG 数据生成健康报告。
     当前为规则引擎实现（生产可替换为 ML 模型）。
     """
-    uid = current_user.id
+    requested_user_id = user_id or (body.user_id if body else None)
+    if requested_user_id and (current_user.role or "user") == "admin":
+        target_user = db.query(User).filter(User.id == requested_user_id).first()
+        if not target_user:
+            raise HTTPException(status_code=404, detail="用户不存在")
+        uid = target_user.id
+    else:
+        uid = current_user.id
 
     # 取最近一次训练会话
     last_session = (

@@ -65,12 +65,13 @@ Page({
     const page = reset ? 1 : this.data.page;
     this.setData({ loading: true });
     try {
-      const res = await Forum.getPosts(page, 15);
+      const pageSize = 50;
+      const res = await Forum.getPosts(page, pageSize);
       const newPosts = res.posts || [];
       this.setData({
         posts: reset ? newPosts : [...this.data.posts, ...newPosts],
         page: page + 1,
-        noMore: newPosts.length < 15,
+        noMore: newPosts.length < pageSize,
       });
     } catch {
       if (reset) {
