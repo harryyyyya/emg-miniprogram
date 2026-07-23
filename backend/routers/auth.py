@@ -1,11 +1,11 @@
 """
 Authentication routes.
 """
-import random
-import string
 import hashlib
 import hmac
 import os
+import random
+import string
 from datetime import datetime, timedelta
 
 import jwt
@@ -35,6 +35,8 @@ def _user_dict(user: User) -> dict:
         "username": user.username or "",
         "role": user.role or "user",
         "avatar_url": user.avatar_url or "",
+        "amputation_part": user.amputation_part or "",
+        "illness_duration_months": user.illness_duration_months or 0,
     }
 
 
@@ -56,13 +58,12 @@ def _ensure_default_web_accounts(db: Session) -> None:
     for username, password, name, role in defaults:
         user = db.query(User).filter(User.username == username).first()
         if not user:
-            user = User(
+            db.add(User(
                 username=username,
                 password_hash=_hash_password(password),
                 name=name,
                 role=role,
-            )
-            db.add(user)
+            ))
             changed = True
         elif not user.password_hash:
             user.password_hash = _hash_password(password)
@@ -76,6 +77,8 @@ class WechatLoginIn(BaseModel):
     code: str
     name: str = Field(default="", max_length=32)
     avatar_url: str = Field(default="", max_length=512)
+    amputation_part: str = Field(default="", max_length=128)
+    illness_duration_months: int = Field(default=0, ge=0, le=1200)
 
 
 class PasswordLoginIn(BaseModel):
@@ -85,10 +88,6 @@ class PasswordLoginIn(BaseModel):
 
 @router.post("/login")
 def password_login(body: PasswordLoginIn, db: Session = Depends(get_db)):
-    """
-    Web 管理端/用户端账号密码登录。
-    默认演示账号：admin/admin、user/user；生产环境请在 .env 设置 ADMIN_PASSWORD/USER_PASSWORD。
-    """
     _ensure_default_web_accounts(db)
     username = body.username.strip()
     user = db.query(User).filter(User.username == username).first()
@@ -120,10 +119,14 @@ def wechat_login(body: WechatLoginIn, db: Session = Depends(get_db)):
 
     name = body.name.strip()
     avatar_url = body.avatar_url.strip()
+    amputation_part = body.amputation_part.strip()
     if name:
         user.name = name[:32]
     if avatar_url:
         user.avatar_url = avatar_url[:512]
+    if amputation_part:
+        user.amputation_part = amputation_part[:128]
+    user.illness_duration_months = max(0, int(body.illness_duration_months or 0))
 
     db.commit()
     db.refresh(user)
@@ -173,7 +176,6 @@ def sms_verify(body: SmsVerifyIn, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="验证码已过期")
 
     record.used = True
-
     user = db.query(User).filter(User.phone == body.phone).first()
     if not user:
         user = User(phone=body.phone, name=f"用户{body.phone[-4:]}")
@@ -187,6 +189,8 @@ def sms_verify(body: SmsVerifyIn, db: Session = Depends(get_db)):
 class UpdateProfileIn(BaseModel):
     name: str = Field(default="", max_length=32)
     avatar_url: str = Field(default="", max_length=512)
+    amputation_part: str = Field(default="", max_length=128)
+    illness_duration_months: int | None = Field(default=None, ge=0, le=1200)
 
 
 @router.put("/profile")
@@ -197,13 +201,19 @@ def update_profile(
 ):
     name = body.name.strip()
     avatar_url = body.avatar_url.strip()
-    if not name and not avatar_url:
+    amputation_part = body.amputation_part.strip()
+    has_duration = body.illness_duration_months is not None
+    if not name and not avatar_url and not amputation_part and not has_duration:
         raise HTTPException(status_code=400, detail="请至少提交一项更新内容")
 
     if name:
         current_user.name = name[:32]
     if avatar_url:
         current_user.avatar_url = avatar_url[:512]
+    if amputation_part:
+        current_user.amputation_part = amputation_part[:128]
+    if has_duration:
+        current_user.illness_duration_months = max(0, int(body.illness_duration_months or 0))
 
     db.commit()
     db.refresh(current_user)

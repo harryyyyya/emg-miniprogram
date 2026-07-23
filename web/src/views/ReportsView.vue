@@ -1,62 +1,122 @@
 <template>
   <div>
     <div class="page-header">
-      <h2 class="page-title gradient-text">报表管控</h2>
+      <div>
+        <h2 class="page-title gradient-text">报表管控</h2>
+        <p class="page-subtitle">这里的患者资料来自后端真实用户数据，会和小程序登录页录入的信息同步。</p>
+      </div>
+      <div class="header-actions">
+        <el-button :loading="loading" @click="loadPatients">刷新</el-button>
+        <el-button type="primary" @click="openCreate">
+          <el-icon><Plus /></el-icon>
+          新增患者
+        </el-button>
+      </div>
     </div>
 
     <div class="glass-card">
-      <h3 style="margin-bottom: 16px;">患者列表 —— 点击生成诊断报告</h3>
-      <el-table :data="patients" style="width: 100%" :header-cell-style="tableHeaderStyle">
+      <h3 style="margin-bottom: 16px">患者列表 · 点击生成诊断报告</h3>
+      <el-table :data="patients" style="width: 100%" :header-cell-style="tableHeaderStyle" v-loading="loading">
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="name" label="姓名" width="140" />
-        <el-table-column prop="amputation_part" label="截肢部位" width="140" />
-        <el-table-column prop="illness_duration_months" label="患病时长" width="120">
-          <template #default="{ row }">{{ row.illness_duration_months }} 个月</template>
+        <el-table-column prop="name" label="姓名" min-width="140" />
+        <el-table-column prop="phone" label="手机号" min-width="140">
+          <template #default="{ row }">{{ row.phone || '-' }}</template>
         </el-table-column>
-        <el-table-column prop="last_report" label="上次报告" width="180" />
-        <el-table-column label="操作" width="240">
+        <el-table-column prop="amputation_part" label="截肢部位" min-width="150">
+          <template #default="{ row }">{{ row.amputation_part || '-' }}</template>
+        </el-table-column>
+        <el-table-column prop="illness_duration_months" label="患病时长" width="130">
+          <template #default="{ row }">{{ formatDuration(row.illness_duration_months) }}</template>
+        </el-table-column>
+        <el-table-column prop="last_report" label="上次报告" width="150">
+          <template #default="{ row }">{{ row.last_report || '-' }}</template>
+        </el-table-column>
+        <el-table-column label="操作" width="330" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" size="small" :loading="row.generating" @click="generateReport(row)">
               <el-icon><Document /></el-icon>
               生成报告
             </el-button>
-            <el-button
-              v-if="row.report_url"
-              type="success"
-              size="small"
-              @click="downloadReport(row)"
-            >
-              <el-icon><Download /></el-icon>
-              下载 PDF
+            <el-button size="small" @click="openEdit(row)">
+              <el-icon><Edit /></el-icon>
+              编辑
+            </el-button>
+            <el-button type="danger" size="small" @click="removePatient(row)">
+              <el-icon><Delete /></el-icon>
+              删除
             </el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
 
-    <!-- 诊断结论弹窗 -->
-    <el-dialog v-model="dialogVisible" title="AI 诊断结论" width="600">
+    <el-dialog v-model="dialogVisible" title="诊断结论" width="620">
       <div class="diag-dialog-content">
         <div class="diag-meta">
-          <el-tag type="success" size="small">LLM 分析结果</el-tag>
-          <span style="color: var(--color-text-muted); font-size: 13px;">患者：{{ currentPatient?.name }}</span>
+          <el-tag type="success" size="small">健康报告结果</el-tag>
+          <span style="color: var(--color-text-muted); font-size: 13px">患者：{{ currentPatient?.name }}</span>
         </div>
         <div class="diag-text">{{ currentDiagnostics }}</div>
       </div>
+    </el-dialog>
+
+    <el-dialog v-model="editorVisible" :title="editingId ? '编辑患者资料' : '新增患者资料'" width="560">
+      <el-form label-position="top">
+        <el-form-item label="姓名">
+          <el-input v-model="form.name" placeholder="请输入患者姓名" />
+        </el-form-item>
+        <el-form-item label="手机号">
+          <el-input v-model="form.phone" placeholder="可选，用于和手机号登录用户关联" maxlength="20" />
+        </el-form-item>
+        <el-form-item label="截肢部位">
+          <el-input v-model="form.amputation_part" placeholder="例如：左前臂、右手掌、左小腿" />
+        </el-form-item>
+        <el-form-item label="患病时长（月）">
+          <el-input-number v-model="form.illness_duration_months" :min="0" :max="1200" style="width: 180px" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editorVisible = false">取消</el-button>
+        <el-button type="primary" :loading="saving" @click="savePatient">
+          {{ editingId ? '保存修改' : '新增' }}
+        </el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import axios from 'axios'
-import { generateReport as apiGenerateReport } from '@/api/health'
-import { useAuthStore } from '@/stores/auth'
+import { onMounted, reactive, ref } from 'vue'
+import { Delete, Document, Edit, Plus } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  createHealthUser,
+  deleteHealthUser,
+  fetchHealthUsers,
+  generateReport as apiGenerateReport,
+  updateHealthUser,
+} from '@/api/health'
+import type { HealthUser } from '@/api/health'
 
+interface PatientRow extends HealthUser {
+  generating?: boolean
+}
+
+const loading = ref(false)
+const saving = ref(false)
 const dialogVisible = ref(false)
-const currentPatient = ref<any>(null)
+const editorVisible = ref(false)
+const editingId = ref<number | null>(null)
+const currentPatient = ref<PatientRow | null>(null)
 const currentDiagnostics = ref('')
+const patients = ref<PatientRow[]>([])
+
+const form = reactive({
+  name: '',
+  phone: '',
+  amputation_part: '',
+  illness_duration_months: 0,
+})
 
 const tableHeaderStyle = {
   background: 'rgba(30, 41, 59, 0.8)',
@@ -64,77 +124,111 @@ const tableHeaderStyle = {
   borderBottom: '1px solid rgba(99,102,241,0.1)',
 }
 
-const patients = ref([
-  { id: 1, name: '张三', amputation_part: '左前臂', illness_duration_months: 18, last_report: '2026-03-20', generating: false, report_url: '' },
-  { id: 2, name: '李四', amputation_part: '右手掌', illness_duration_months: 6, last_report: '2026-03-15', generating: false, report_url: '' },
-  { id: 3, name: '王五', amputation_part: '左手掌', illness_duration_months: 24, last_report: '-', generating: false, report_url: '' },
-])
+async function loadPatients() {
+  loading.value = true
+  try {
+    patients.value = (await fetchHealthUsers()).map((item) => ({ ...item, generating: false }))
+  } finally {
+    loading.value = false
+  }
+}
 
-async function generateReport(patient: any) {
-  if (patient.generating) return // 防重复点击
+function openCreate() {
+  editingId.value = null
+  form.name = ''
+  form.phone = ''
+  form.amputation_part = ''
+  form.illness_duration_months = 0
+  editorVisible.value = true
+}
 
+function openEdit(row: PatientRow) {
+  editingId.value = row.id
+  form.name = row.name || ''
+  form.phone = row.phone || ''
+  form.amputation_part = row.amputation_part || ''
+  form.illness_duration_months = row.illness_duration_months || 0
+  editorVisible.value = true
+}
+
+async function savePatient() {
+  if (!form.name.trim()) return ElMessage.warning('请填写患者姓名')
+  saving.value = true
+  try {
+    const payload = {
+      name: form.name.trim(),
+      phone: form.phone.trim(),
+      amputation_part: form.amputation_part.trim(),
+      illness_duration_months: form.illness_duration_months || 0,
+    }
+    if (editingId.value) {
+      await updateHealthUser(editingId.value, payload)
+      ElMessage.success('患者资料已更新')
+    } else {
+      await createHealthUser(payload)
+      ElMessage.success('患者已新增')
+    }
+    editorVisible.value = false
+    await loadPatients()
+  } finally {
+    saving.value = false
+  }
+}
+
+async function removePatient(row: PatientRow) {
+  await ElMessageBox.confirm(
+    `确定删除患者「${row.name}」吗？相关设备、健康记录、训练记录、帖子和评论也会被删除。`,
+    '删除患者',
+    {
+      type: 'warning',
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
+    },
+  )
+  await deleteHealthUser(row.id)
+  ElMessage.success('患者已删除')
+  await loadPatients()
+}
+
+async function generateReport(patient: PatientRow) {
+  if (patient.generating) return
   patient.generating = true
-  // LLM 调用可能耗时 10-30s，提前告知用户
   const loadingMsg = ElMessage({
-    message: `正在为 ${patient.name} 调用 AI 生成诊断报告，请稍候（约 10-30 秒）...`,
+    message: `正在为 ${patient.name} 生成诊断报告，请稍候...`,
     type: 'info',
-    duration: 0, // 手动关闭，不自动消失
+    duration: 0,
   })
 
   try {
-    // apiGenerateReport 内部已设置 user_id 为 Query 参数
-    // health.ts 使用全局 request 实例（timeout: 30000），后端 LLM 可能超 30s
-    // 因此此处直接调用，如遇超时用户重试即可（当前后端无 streaming 支持）
     const response = await apiGenerateReport(patient.id)
-
-    patient.report_url = response.report_url
-    patient.last_report = new Date().toISOString().slice(0, 10)
     currentPatient.value = patient
-    currentDiagnostics.value = response.diagnostics
+    currentDiagnostics.value = response.diagnostics || '报告已生成，但暂无诊断建议。'
     dialogVisible.value = true
-
     ElMessage.success('报告生成完毕')
-  } catch {
-    // 全局拦截器已弹出错误，此处不重复弹
+    await loadPatients()
   } finally {
     loadingMsg.close()
     patient.generating = false
   }
 }
 
-// 方案 B: Blob 流下载 —— 带 Authorization Token，绕过 request.ts 响应拦截器
-// request.ts 拦截器 return response.data 会破坏 Blob，必须用裸 axios 实例
-async function downloadReport(patient: any) {
-  const authStore = useAuthStore()
-  const reportUrl = patient.report_url // 形如 "/download/report_user_1.pdf"
-
-  const downloading = ElMessage({ message: '正在下载 PDF...', type: 'info', duration: 0 })
-  try {
-    const resp = await axios.get(`/api${reportUrl}`, {
-      responseType: 'blob',
-      headers: authStore.token ? { Authorization: `Bearer ${authStore.token}` } : {},
-    })
-
-    const blob = new Blob([resp.data], { type: 'application/pdf' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = reportUrl.split('/').pop() || 'report.pdf'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url) // 必须释放，否则内存泄漏
-  } catch {
-    ElMessage.error('PDF 下载失败，请检查网络或联系管理员')
-  } finally {
-    downloading.close()
-  }
+function formatDuration(months: number) {
+  const value = Number(months || 0)
+  if (value <= 0) return '-'
+  if (value < 12) return `${value}个月`
+  const years = Math.floor(value / 12)
+  const rest = value % 12
+  return rest ? `${years}年${rest}个月` : `${years}年`
 }
+
+onMounted(loadPatients)
 </script>
 
 <style scoped>
-.page-header { margin-bottom: 24px; }
-.page-title { font-size: 28px; font-weight: 700; }
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.page-title { font-size: 28px; font-weight: 700; margin: 0; }
+.page-subtitle { margin: 8px 0 0; color: var(--color-text-muted); font-size: 14px; }
+.header-actions { display: flex; gap: 10px; }
 
 :deep(.el-table) {
   --el-table-bg-color: transparent;
@@ -145,7 +239,6 @@ async function downloadReport(patient: any) {
   --el-table-row-hover-bg-color: rgba(99,102,241,0.06);
 }
 
-.diag-dialog-content {}
 .diag-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .diag-text {
   white-space: pre-wrap;

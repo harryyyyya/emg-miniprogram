@@ -16,19 +16,24 @@
       <view class="tab-item {{loginMode === 'phone' ? 'active' : ''}}" bindtap="switchMode" data-mode="phone">手机号登录</view>
     </view>
 
-    <view wx:if="{{loginMode === 'wechat'}}" class="wechat-login">
+    <view class="patient-section">
+      <text class="section-caption">患者信息</text>
       <view class="input-group">
-        <text class="input-label">昵称</text>
-        <input
-          class="input-field"
-          type="nickname"
-          placeholder="请输入你的昵称"
-          maxlength="32"
-          bindinput="onNicknameInput"
-          value="{{nickname}}"
-        />
+        <text class="input-label">姓名</text>
+        <input class="input-field" placeholder="请输入患者姓名" maxlength="32" bindinput="onPatientNameInput" value="{{patientName}}" />
       </view>
-      <text class="wechat-hint">先点上方头像选择，再登录，帖子和评论就会显示你的真实头像。</text>
+      <view class="input-group">
+        <text class="input-label">截肢部位</text>
+        <input class="input-field" placeholder="例如：左前臂、右手掌" maxlength="64" bindinput="onAmputationPartInput" value="{{amputationPart}}" />
+      </view>
+      <view class="input-group">
+        <text class="input-label">患病时长（月）</text>
+        <input class="input-field" type="number" placeholder="例如：6" maxlength="4" bindinput="onIllnessDurationInput" value="{{illnessDurationMonths}}" />
+      </view>
+    </view>
+
+    <view wx:if="{{loginMode === 'wechat'}}" class="wechat-login">
+      <text class="wechat-hint">登录后，患者资料会同步到网页端“报表管控”。</text>
       <button class="btn-primary btn-wechat" bindtap="onWechatLogin" loading="{{loggingIn}}" disabled="{{loggingIn}}">
         微信一键登录
       </button>

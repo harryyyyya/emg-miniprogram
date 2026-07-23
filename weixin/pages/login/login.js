@@ -9,7 +9,9 @@ Page({
     code: '',
     codeCooldown: 0,
     avatarUrl: '',
-    nickname: '',
+    patientName: '',
+    amputationPart: '',
+    illnessDurationMonths: '',
     loggingIn: false,
   },
 
@@ -31,8 +33,17 @@ Page({
     }
   },
 
-  onNicknameInput(e) {
-    this.setData({ nickname: (e.detail.value || '').trim() });
+  onPatientNameInput(e) {
+    this.setData({ patientName: (e.detail.value || '').trim() });
+  },
+
+  onAmputationPartInput(e) {
+    this.setData({ amputationPart: (e.detail.value || '').trim() });
+  },
+
+  onIllnessDurationInput(e) {
+    const value = String(e.detail.value || '').replace(/[^\d]/g, '');
+    this.setData({ illnessDurationMonths: value });
   },
 
   onPhoneInput(e) {
@@ -44,7 +55,7 @@ Page({
   },
 
   async onWechatLogin() {
-    if (this.data.loggingIn) return;
+    if (this.data.loggingIn || !this._validatePatientProfile()) return;
 
     this.setData({ loggingIn: true });
     try {
@@ -67,6 +78,8 @@ Page({
           code: loginRes.code,
           name: draftProfile.name,
           avatar_url: draftProfile.avatarUrl.startsWith('http') ? draftProfile.avatarUrl : '',
+          amputation_part: draftProfile.amputationPart,
+          illness_duration_months: draftProfile.illnessDurationMonths,
         },
       });
 
@@ -110,7 +123,7 @@ Page({
 
   async onPhoneLogin() {
     const { phone, code, loggingIn } = this.data;
-    if (loggingIn) return;
+    if (loggingIn || !this._validatePatientProfile()) return;
 
     if (!/^1\d{10}$/.test(phone)) {
       wx.showToast({ title: '请输入正确手机号', icon: 'none' });
@@ -151,12 +164,24 @@ Page({
     }
   },
 
+  _validatePatientProfile() {
+    if (!this.data.patientName.trim()) {
+      wx.showToast({ title: '请填写患者姓名', icon: 'none' });
+      return false;
+    }
+    if (!this.data.amputationPart.trim()) {
+      wx.showToast({ title: '请填写截肢部位', icon: 'none' });
+      return false;
+    }
+    return true;
+  },
+
   _getDraftProfile() {
-    const name = (this.data.nickname || '').trim();
-    const avatarUrl = this.data.avatarUrl || '';
     return {
-      name,
-      avatarUrl,
+      name: (this.data.patientName || '').trim(),
+      avatarUrl: this.data.avatarUrl || '',
+      amputationPart: (this.data.amputationPart || '').trim(),
+      illnessDurationMonths: Number(this.data.illnessDurationMonths || 0),
     };
   },
 
@@ -165,6 +190,14 @@ Page({
 
     if (draftProfile.name && draftProfile.name !== currentUser.name) {
       payload.name = draftProfile.name;
+    }
+
+    if (draftProfile.amputationPart && draftProfile.amputationPart !== currentUser.amputation_part) {
+      payload.amputation_part = draftProfile.amputationPart;
+    }
+
+    if (draftProfile.illnessDurationMonths !== (currentUser.illness_duration_months || 0)) {
+      payload.illness_duration_months = draftProfile.illnessDurationMonths;
     }
 
     if (
@@ -182,7 +215,7 @@ Page({
       payload.avatar_url = draftProfile.avatarUrl;
     }
 
-    if (!payload.name && !payload.avatar_url) {
+    if (!Object.keys(payload).length) {
       return;
     }
 
@@ -199,7 +232,7 @@ Page({
   _showBackendUnavailable() {
     wx.removeStorageSync('token');
     wx.showToast({
-      title: '后端连接失败，请先启动服务',
+      title: '后端连接失败，请检查服务',
       icon: 'none',
       duration: 2000,
     });

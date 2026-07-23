@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 from deps import get_current_user, get_current_user_optional
 from models import (
     Device,
+    EmgCollectionBatch,
     EmgCollectionSession,
     ErrorLog,
     ForumComment,
@@ -96,11 +97,21 @@ def _user_row(user: User, db: Session) -> dict[str, Any]:
         "phone": user.phone or "",
         "role": user.role or "user",
         "avatar_url": user.avatar_url or "",
+        "amputation_part": user.amputation_part or "",
+        "illness_duration_months": user.illness_duration_months or 0,
         "created_at": _dt(user.created_at),
         "device_count": db.query(Device).filter(Device.user_id == user.id).count(),
         "health_log_count": db.query(HealthRecord).filter(HealthRecord.user_id == user.id).count(),
         "latest_health_at": _dt(latest_health.recorded_at) if latest_health else "",
+        "last_report": latest_health.recorded_at.date().isoformat() if latest_health and latest_health.recorded_at else "-",
     }
+
+
+class UserManageIn(BaseModel):
+    name: str = Field(default="", max_length=64)
+    phone: str = Field(default="", max_length=20)
+    amputation_part: str = Field(default="", max_length=128)
+    illness_duration_months: int = Field(default=0, ge=0, le=1200)
 
 
 @router.get("/users")
@@ -113,6 +124,105 @@ def list_users(
 
     users = db.query(User).order_by(User.created_at.desc(), User.id.desc()).all()
     return [_user_row(user, db) for user in users]
+
+
+@router.post("/users")
+def create_user(
+    body: UserManageIn,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    _require_admin(current_user)
+    name = body.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="请填写患者姓名")
+
+    phone = body.phone.strip()
+    if phone and db.query(User).filter(User.phone == phone).first():
+        raise HTTPException(status_code=400, detail="手机号已存在")
+
+    user = User(
+        name=name[:64],
+        phone=phone or None,
+        role="user",
+        amputation_part=body.amputation_part.strip()[:128],
+        illness_duration_months=max(0, int(body.illness_duration_months or 0)),
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return _user_row(user, db)
+
+
+@router.put("/users/{user_id}")
+def update_user(
+    user_id: int,
+    body: UserManageIn,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    _require_admin(current_user)
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    if (user.role or "user") == "admin":
+        raise HTTPException(status_code=403, detail="不能在报表页修改管理员账号")
+
+    name = body.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="请填写患者姓名")
+
+    phone = body.phone.strip()
+    if phone:
+        duplicate = db.query(User).filter(User.phone == phone, User.id != user_id).first()
+        if duplicate:
+            raise HTTPException(status_code=400, detail="手机号已存在")
+
+    user.name = name[:64]
+    user.phone = phone or None
+    user.amputation_part = body.amputation_part.strip()[:128]
+    user.illness_duration_months = max(0, int(body.illness_duration_months or 0))
+    db.commit()
+    db.refresh(user)
+    return _user_row(user, db)
+
+
+@router.delete("/users/{user_id}")
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    _require_admin(current_user)
+    if user_id == current_user.id:
+        raise HTTPException(status_code=400, detail="不能删除当前登录管理员")
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    if (user.role or "user") == "admin":
+        raise HTTPException(status_code=403, detail="不能删除管理员账号")
+
+    post_ids = [row[0] for row in db.query(ForumPost.id).filter(ForumPost.user_id == user_id).all()]
+    if post_ids:
+        db.query(PostLike).filter(PostLike.post_id.in_(post_ids)).delete(synchronize_session=False)
+        db.query(ForumComment).filter(ForumComment.post_id.in_(post_ids)).delete(synchronize_session=False)
+        db.query(ForumPost).filter(ForumPost.id.in_(post_ids)).delete(synchronize_session=False)
+
+    db.query(PostLike).filter(PostLike.user_id == user_id).delete(synchronize_session=False)
+    db.query(ForumComment).filter(ForumComment.reply_to_user_id == user_id).update(
+        {ForumComment.reply_to_user_id: None},
+        synchronize_session=False,
+    )
+    db.query(ForumComment).filter(ForumComment.user_id == user_id).delete(synchronize_session=False)
+    db.query(Device).filter(Device.user_id == user_id).delete(synchronize_session=False)
+    db.query(HealthRecord).filter(HealthRecord.user_id == user_id).delete(synchronize_session=False)
+    db.query(TrainingSession).filter(TrainingSession.user_id == user_id).delete(synchronize_session=False)
+    db.query(EmgCollectionBatch).filter(EmgCollectionBatch.user_id == user_id).delete(synchronize_session=False)
+    db.query(EmgCollectionSession).filter(EmgCollectionSession.user_id == user_id).delete(synchronize_session=False)
+    db.delete(user)
+    db.commit()
+    return {"message": "用户已删除"}
 
 
 def _safe_json_dumps(value: Any) -> str:

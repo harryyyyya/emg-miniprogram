@@ -20,9 +20,12 @@ export interface HealthUser {
   phone: string
   role: string
   avatar_url: string
+  amputation_part: string
+  illness_duration_months: number
   device_count: number
   health_log_count: number
   latest_health_at: string
+  last_report: string
 }
 
 export interface ReportResponse {
@@ -36,6 +39,28 @@ export interface ReportResponse {
 
 export function fetchHealthUsers() {
   return request.get<any, HealthUser[]>('/users')
+}
+
+export function createHealthUser(data: {
+  name: string
+  phone?: string
+  amputation_part?: string
+  illness_duration_months?: number
+}) {
+  return request.post<any, HealthUser>('/users', data)
+}
+
+export function updateHealthUser(userId: number, data: {
+  name: string
+  phone?: string
+  amputation_part?: string
+  illness_duration_months?: number
+}) {
+  return request.put<any, HealthUser>(`/users/${userId}`, data)
+}
+
+export function deleteHealthUser(userId: number) {
+  return request.delete<any, { message: string }>(`/users/${userId}`)
 }
 
 export function fetchHealthLogs(userId: number, params?: { range?: '24h' | '7d' }) {

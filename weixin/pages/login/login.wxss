@@ -107,6 +107,26 @@
   margin-bottom: 32rpx;
 }
 
+.patient-section {
+  padding: 24rpx;
+  margin-bottom: 28rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(180deg, #F7FAFF, #FFFFFF);
+  border: 2rpx solid rgba(0, 122, 255, 0.08);
+}
+
+.patient-section .input-group:last-child {
+  margin-bottom: 0;
+}
+
+.section-caption {
+  display: block;
+  margin-bottom: 22rpx;
+  color: #007AFF;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
 .input-label {
   font-size: 26rpx;
   color: #666;

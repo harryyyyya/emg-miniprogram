@@ -47,6 +47,8 @@ class User(Base):
     role = Column(String(16), default="user")
     name = Column(String(64), default="用户")
     avatar_url = Column(String(512), default="")
+    amputation_part = Column(String(128), default="")
+    illness_duration_months = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     devices = relationship("Device", back_populates="user")
@@ -255,6 +257,8 @@ def _ensure_user_columns():
         "username": "ALTER TABLE users ADD COLUMN username VARCHAR(64)",
         "password_hash": "ALTER TABLE users ADD COLUMN password_hash VARCHAR(256) DEFAULT ''",
         "role": "ALTER TABLE users ADD COLUMN role VARCHAR(16) DEFAULT 'user'",
+        "amputation_part": "ALTER TABLE users ADD COLUMN amputation_part VARCHAR(128) DEFAULT ''",
+        "illness_duration_months": "ALTER TABLE users ADD COLUMN illness_duration_months INTEGER DEFAULT 0",
     }
 
     with engine.begin() as conn:
