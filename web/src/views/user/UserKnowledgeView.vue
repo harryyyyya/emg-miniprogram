@@ -25,7 +25,7 @@
     <el-dialog
       v-model="showDetail"
       :title="currentArticle?.title || ''"
-      width="740"
+      width="760"
       top="5vh"
       class="article-dialog"
       :close-on-click-modal="true"
@@ -37,7 +37,18 @@
           <span class="article-date">{{ currentArticle.date }}</span>
         </div>
         <p class="article-summary">{{ currentArticle.summary }}</p>
-        <div class="article-body">{{ currentArticle.content }}</div>
+        <div v-for="section in displaySections(currentArticle)" :key="section.heading" class="article-section">
+          <h3>{{ section.heading }}</h3>
+          <ul>
+            <li v-for="item in section.items" :key="item">{{ item }}</li>
+          </ul>
+        </div>
+        <div v-if="currentArticle.tips?.length" class="article-tips">
+          <h3>实用提醒</h3>
+          <ul>
+            <li v-for="tip in currentArticle.tips" :key="tip">{{ tip }}</li>
+          </ul>
+        </div>
       </div>
     </el-dialog>
   </div>
@@ -51,6 +62,11 @@ const searchText = ref('')
 const showDetail = ref(false)
 const loading = ref(false)
 
+interface ArticleSection {
+  heading: string
+  items: string[]
+}
+
 interface Article {
   id: number
   type: string
@@ -59,6 +75,8 @@ interface Article {
   content: string
   cover_url: string
   date: string
+  sections?: ArticleSection[]
+  tips?: string[]
 }
 
 const currentArticle = ref<Article | null>(null)
@@ -86,6 +104,12 @@ async function loadArticles() {
 function openArticle(article: Article) {
   currentArticle.value = article
   showDetail.value = true
+}
+
+function displaySections(article: Article) {
+  if (Array.isArray(article.sections) && article.sections.length) return article.sections
+  const lines = (article.content || '').split(/\r?\n/).map(item => item.trim()).filter(Boolean)
+  return lines.length ? [{ heading: '正文', items: lines }] : []
 }
 
 function typeLabel(type: string) {
@@ -141,5 +165,9 @@ onMounted(loadArticles)
 .article-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid rgba(99,102,241,0.1); }
 .article-date { font-size: 13px; color: var(--color-text-muted); }
 .article-summary { padding: 12px 14px; border-radius: 14px; background: rgba(99, 102, 241, 0.08); color: #cbd5e1; line-height: 1.75; }
-.article-body { margin-top: 18px; font-size: 14px; line-height: 1.9; color: #e2e8f0; white-space: pre-wrap; }
+.article-section, .article-tips { margin-top: 20px; }
+.article-section h3, .article-tips h3 { margin: 0 0 10px; font-size: 17px; color: var(--color-text); }
+.article-section ul, .article-tips ul { margin: 0; padding-left: 20px; color: #cbd5e1; line-height: 1.9; }
+.article-section li, .article-tips li { margin-bottom: 6px; }
+.article-tips { padding: 14px 16px; border-radius: 16px; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.16); }
 </style>

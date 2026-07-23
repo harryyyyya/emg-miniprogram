@@ -265,6 +265,7 @@ DEFAULT_KNOWLEDGE_ARTICLES = [
 
 def _ensure_default_knowledge_articles(db: Session) -> None:
     if db.query(KnowledgeArticle).count() > 0:
+        _promote_unsorted_knowledge_articles(db)
         return
 
     for item in DEFAULT_KNOWLEDGE_ARTICLES:
@@ -280,6 +281,22 @@ def _ensure_default_knowledge_articles(db: Session) -> None:
             tips_json=_safe_json_dumps(item["tips"]),
             is_published=True,
         ))
+    db.commit()
+
+
+def _promote_unsorted_knowledge_articles(db: Session) -> None:
+    rows = (
+        db.query(KnowledgeArticle)
+        .filter(KnowledgeArticle.sort_order <= 0, KnowledgeArticle.is_published == True)
+        .order_by(KnowledgeArticle.created_at.asc(), KnowledgeArticle.id.asc())
+        .all()
+    )
+    if not rows:
+        return
+
+    max_sort_order = db.query(func.max(KnowledgeArticle.sort_order)).scalar() or 0
+    for index, article in enumerate(rows, start=1):
+        article.sort_order = int(max_sort_order) + index * 10
     db.commit()
 
 
@@ -356,6 +373,11 @@ def create_knowledge_article(
     current_user: User = Depends(get_current_user),
 ):
     _require_admin(current_user)
+    sort_order = body.sort_order
+    if sort_order <= 0:
+        max_sort_order = db.query(func.max(KnowledgeArticle.sort_order)).scalar() or 0
+        sort_order = int(max_sort_order) + 10
+
     article = KnowledgeArticle(
         title=body.title.strip(),
         type=(body.type or "guide").strip(),
@@ -364,7 +386,7 @@ def create_knowledge_article(
         cover_url=body.cover_url.strip(),
         theme=body.theme.strip(),
         is_published=body.is_published,
-        sort_order=body.sort_order,
+        sort_order=sort_order,
         sections_json=_safe_json_dumps(body.sections),
         tips_json=_safe_json_dumps(body.tips),
         created_by=current_user.id,

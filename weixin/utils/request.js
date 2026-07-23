@@ -18,7 +18,12 @@ const buildBaseUrl = (host, port, protocol = DEFAULT_PROTOCOL) => {
 const DEFAULT_BASE_URL = normalizeBaseUrl(PRODUCTION_BASE_URL) || buildBaseUrl(DEFAULT_HOST, DEFAULT_PORT);
 
 const isLegacyLocalBaseUrl = (url) => {
-  return url.includes('127.0.0.1') || url.includes('localhost');
+  const normalized = normalizeBaseUrl(url);
+  return (
+    normalized.includes('127.0.0.1')
+    || normalized.includes('localhost')
+    || /^https?:\/\/(10\.|192\.168\.|172\.(1[6-9]|2\d|3[0-1])\.)/.test(normalized)
+  );
 };
 
 const parseBaseUrl = (url) => {
