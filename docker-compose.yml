@@ -13,13 +13,16 @@ services:
       - "8000"
 
   caddy:
-    image: caddy:2.8-alpine
+    build:
+      context: .
+      dockerfile: ./web/Dockerfile
     container_name: emg-caddy
     restart: unless-stopped
     depends_on:
       - backend
     environment:
       API_DOMAIN: ${API_DOMAIN}
+      WEB_DOMAIN: ${WEB_DOMAIN}
     ports:
       - "80:80"
       - "443:443"

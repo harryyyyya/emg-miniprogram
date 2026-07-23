@@ -31,7 +31,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from models import init_db
-from routers import ai, auth, devices, forum, health, upload
+from routers import ai, auth, devices, forum, health, upload, web
 
 init_db()
 
@@ -59,6 +59,7 @@ app.include_router(upload.router)
 app.include_router(health.router)
 app.include_router(ai.router)
 app.include_router(forum.router)
+app.include_router(web.router)
 
 
 @app.get("/", tags=["health"])

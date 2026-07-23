@@ -42,6 +42,9 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     openid = Column(String(64), unique=True, index=True, nullable=True)
     phone = Column(String(20), unique=True, index=True, nullable=True)
+    username = Column(String(64), unique=True, index=True, nullable=True)
+    password_hash = Column(String(256), default="")
+    role = Column(String(16), default="user")
     name = Column(String(64), default="用户")
     avatar_url = Column(String(512), default="")
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -204,10 +207,40 @@ class SmsCode(Base):
     used = Column(Boolean, default=False)
 
 
+class ErrorLog(Base):
+    __tablename__ = "error_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    hardware_id = Column(String(64), index=True, default="")
+    error_code = Column(String(64), index=True, default="")
+    error_msg = Column(Text, default="")
+    level = Column(String(16), default="warning")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 def init_db():
     Base.metadata.create_all(bind=engine)
+    _ensure_user_columns()
     _ensure_device_columns()
     _ensure_forum_comment_columns()
+
+
+def _ensure_user_columns():
+    inspector = inspect(engine)
+    if "users" not in inspector.get_table_names():
+        return
+
+    existing = {col["name"] for col in inspector.get_columns("users")}
+    column_ddls = {
+        "username": "ALTER TABLE users ADD COLUMN username VARCHAR(64)",
+        "password_hash": "ALTER TABLE users ADD COLUMN password_hash VARCHAR(256) DEFAULT ''",
+        "role": "ALTER TABLE users ADD COLUMN role VARCHAR(16) DEFAULT 'user'",
+    }
+
+    with engine.begin() as conn:
+        for name, ddl in column_ddls.items():
+            if name not in existing:
+                conn.execute(text(ddl))
 
 
 def _ensure_device_columns():

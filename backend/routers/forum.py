@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session, selectinload
 
 from deps import get_current_user, get_current_user_optional
@@ -38,10 +38,15 @@ def _post_dict(post: ForumPost, current_user: User | None) -> dict:
     return {
         "id": post.id,
         "author_id": post.user_id,
+        "user_id": post.user_id,
         "author_name": post.author.name,
         "author_avatar": post.author.avatar_url or "/assets/icons/default_avatar.png",
         "created_at": _time_ago(post.created_at),
+        "title": (post.content or "")[:24],
         "content": post.content,
+        "parent_id": None,
+        "pinned": False,
+        "hidden": False,
         "image_urls": json.loads(post.image_urls) if post.image_urls else [],
         "like_count": post.like_count,
         "comment_count": post.comment_count,
@@ -128,17 +133,38 @@ class CommentIn(BaseModel):
     parent_id: int | None = None
 
 
+class LegacyLikeIn(BaseModel):
+    post_id: int
+
+
+class LegacyCommentIn(BaseModel):
+    post_id: int
+    content: str
+    parent_id: int | None = None
+
+
+class AdminPostUpdateIn(BaseModel):
+    pinned: bool | None = None
+    hidden: bool | None = None
+    content: str | None = Field(default=None, max_length=1000)
+
+
 @router.get("/posts")
 def list_posts(
     page: int = 1,
     size: int = 15,
+    search: str = "",
     db: Session = Depends(get_db),
     current_user: User | None = Depends(get_current_user_optional),
 ):
     offset = (page - 1) * size
+    query = db.query(ForumPost).options(selectinload(ForumPost.author), selectinload(ForumPost.likes))
+    keyword = (search or "").strip()
+    if keyword:
+        query = query.filter(ForumPost.content.contains(keyword))
+
     posts = (
-        db.query(ForumPost)
-        .options(selectinload(ForumPost.author), selectinload(ForumPost.likes))
+        query
         .order_by(ForumPost.created_at.desc())
         .offset(offset)
         .limit(size)
@@ -196,6 +222,34 @@ def like_post(
     return {"liked": liked, "like_count": post.like_count}
 
 
+@router.post("/like")
+def legacy_like_post(
+    body: LegacyLikeIn,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return like_post(body.post_id, db, current_user)
+
+
+@router.put("/posts/{post_id}")
+def update_post_for_web(
+    post_id: int,
+    body: AdminPostUpdateIn,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    post = db.query(ForumPost).filter(ForumPost.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="帖子不存在")
+    if post.user_id != current_user.id and (current_user.role or "user") != "admin":
+        raise HTTPException(status_code=403, detail="无权修改该帖子")
+    if body.content is not None and body.content.strip():
+        post.content = body.content.strip()
+    db.commit()
+    db.refresh(post)
+    return _post_dict(post, current_user)
+
+
 @router.delete("/posts/{post_id}")
 def delete_post(
     post_id: int,
@@ -206,7 +260,7 @@ def delete_post(
     if not post:
         raise HTTPException(status_code=404, detail="帖子不存在")
 
-    if post.user_id != current_user.id:
+    if post.user_id != current_user.id and (current_user.role or "user") != "admin":
         raise HTTPException(status_code=403, detail="只能删除自己发布的帖子")
 
     db.query(PostLike).filter(PostLike.post_id == post_id).delete(synchronize_session=False)
@@ -255,6 +309,17 @@ def list_comments(
     }
 
 
+@router.get("/comments")
+def legacy_list_comments(
+    post_id: int,
+    page: int = 1,
+    pageSize: int = 20,
+    db: Session = Depends(get_db),
+    current_user: User | None = Depends(get_current_user_optional),
+):
+    return list_comments(post_id, page, pageSize, db, current_user)
+
+
 @router.post("/posts/{post_id}/comments")
 def add_comment(
     post_id: int,
@@ -293,6 +358,20 @@ def add_comment(
     db.commit()
     db.refresh(comment)
     return {"comment_id": comment.id, "message": "评论成功"}
+
+
+@router.post("/comments")
+def legacy_add_comment(
+    body: LegacyCommentIn,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return add_comment(
+        body.post_id,
+        CommentIn(content=body.content, parent_id=body.parent_id),
+        db,
+        current_user,
+    )
 
 
 @router.delete("/posts/{post_id}/comments/{comment_id}")

@@ -1,6 +1,8 @@
 # Secrets and local environment
 .env
 *.env
+.env.*
+!.env.deploy.example
 backend/.env
 服务器密钥/
 *.pem
@@ -38,6 +40,14 @@ backend/uploads/
 # Build archives and backups
 *.zip
 large-assets-backup/
+image_originals/
+
+# Node dependencies and frontend build outputs
+node_modules/
+web/node_modules/
+dist/
+web/dist/
+web/.git_backup/
 
 # Large local documents/media not needed for deployment
 *.mp4

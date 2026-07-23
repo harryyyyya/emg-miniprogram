@@ -3,3 +3,18 @@
 
     reverse_proxy backend:8000
 }
+
+{$WEB_DOMAIN} {
+    encode gzip
+    root * /srv/web
+
+    handle /api/* {
+        uri strip_prefix /api
+        reverse_proxy backend:8000
+    }
+
+    handle {
+        try_files {path} /index.html
+        file_server
+    }
+}

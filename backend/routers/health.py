@@ -6,7 +6,7 @@ routers/health.py - 健康数据 & 报告接口
 import random
 from datetime import datetime
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Body, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -22,7 +22,7 @@ class ReportIn(BaseModel):
 
 @router.post("/report/generate")
 def generate_report(
-    body:         ReportIn,
+    body:         ReportIn | None = Body(default=None),
     db:           Session = Depends(get_db),
     current_user: User    = Depends(get_current_user),
 ):

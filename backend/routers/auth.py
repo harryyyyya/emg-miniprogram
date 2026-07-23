@@ -3,6 +3,9 @@ Authentication routes.
 """
 import random
 import string
+import hashlib
+import hmac
+import os
 from datetime import datetime, timedelta
 
 import jwt
@@ -26,16 +29,81 @@ def _make_token(user_id: int) -> str:
 def _user_dict(user: User) -> dict:
     return {
         "id": user.id,
+        "user_id": user.id,
         "name": user.name,
         "phone": user.phone or "",
+        "username": user.username or "",
+        "role": user.role or "user",
         "avatar_url": user.avatar_url or "",
     }
+
+
+def _hash_password(password: str) -> str:
+    salt = os.getenv("PASSWORD_SALT", "emg-hand-web-admin")
+    return hashlib.sha256(f"{salt}:{password}".encode("utf-8")).hexdigest()
+
+
+def _verify_password(password: str, password_hash: str) -> bool:
+    return hmac.compare_digest(_hash_password(password), password_hash or "")
+
+
+def _ensure_default_web_accounts(db: Session) -> None:
+    defaults = [
+        ("admin", os.getenv("ADMIN_PASSWORD", "admin"), "管理员", "admin"),
+        ("user", os.getenv("USER_PASSWORD", "user"), "普通用户", "user"),
+    ]
+    changed = False
+    for username, password, name, role in defaults:
+        user = db.query(User).filter(User.username == username).first()
+        if not user:
+            user = User(
+                username=username,
+                password_hash=_hash_password(password),
+                name=name,
+                role=role,
+            )
+            db.add(user)
+            changed = True
+        elif not user.password_hash:
+            user.password_hash = _hash_password(password)
+            user.role = user.role or role
+            changed = True
+    if changed:
+        db.commit()
 
 
 class WechatLoginIn(BaseModel):
     code: str
     name: str = Field(default="", max_length=32)
     avatar_url: str = Field(default="", max_length=512)
+
+
+class PasswordLoginIn(BaseModel):
+    username: str = Field(min_length=1, max_length=64)
+    password: str = Field(min_length=1, max_length=128)
+
+
+@router.post("/login")
+def password_login(body: PasswordLoginIn, db: Session = Depends(get_db)):
+    """
+    Web 管理端/用户端账号密码登录。
+    默认演示账号：admin/admin、user/user；生产环境请在 .env 设置 ADMIN_PASSWORD/USER_PASSWORD。
+    """
+    _ensure_default_web_accounts(db)
+    username = body.username.strip()
+    user = db.query(User).filter(User.username == username).first()
+    if not user or not _verify_password(body.password, user.password_hash or ""):
+        raise HTTPException(status_code=401, detail="账号或密码错误")
+
+    role = user.role or "user"
+    return {
+        "token": _make_token(user.id),
+        "role": role,
+        "username": user.username or "",
+        "name": user.name or user.username or "用户",
+        "user_id": user.id,
+        "user": _user_dict(user),
+    }
 
 
 @router.post("/wechat")
