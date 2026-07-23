@@ -6,6 +6,13 @@
     linear-gradient(180deg, #f5f8ff 0%, #ffffff 54%, #f2f8f1 100%);
 }
 
+.article-page.warm {
+  background:
+    radial-gradient(circle at 82% 8%, rgba(255, 176, 96, 0.24), transparent 34%),
+    radial-gradient(circle at 10% 26%, rgba(255, 226, 190, 0.48), transparent 30%),
+    linear-gradient(180deg, #fff8ef 0%, #fffdf8 52%, #fff1e5 100%);
+}
+
 .article-hero,
 .article-section {
   border-radius: 28rpx;
@@ -19,6 +26,12 @@
     radial-gradient(circle at 82% 12%, rgba(255,255,255,0.28), transparent 28%),
     linear-gradient(135deg, #082b62, #0b59d6 62%, #19a56b);
   color: #ffffff;
+}
+
+.article-hero.warm {
+  background:
+    radial-gradient(circle at 86% 10%, rgba(255, 255, 255, 0.32), transparent 28%),
+    linear-gradient(135deg, #a84f20, #e07b39 58%, #f6b25f);
 }
 
 .article-tag {
@@ -89,6 +102,14 @@
 
 .advice-dot.accent {
   background: #1f9d55;
+}
+
+.article-page.warm .advice-dot {
+  background: #e07b39;
+}
+
+.article-page.warm .advice-dot.accent {
+  background: #d05f28;
 }
 
 .advice-text {

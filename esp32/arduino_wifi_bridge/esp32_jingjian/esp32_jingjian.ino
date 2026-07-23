@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include "BLEDevice.h"
@@ -10,8 +11,9 @@
 static const char* WIFI_SSID = "weixin";
 static const char* WIFI_PASSWORD = "88888888a";
 // Must match the cloud backend address used by the mini-program request helper.
-static const char* BACKEND_HOST = "47.239.150.223";
-static const uint16_t BACKEND_PORT = 80;
+static const char* BACKEND_HOST = "api.handemglsh.cloud";
+static const uint16_t BACKEND_PORT = 443;
+static const bool BACKEND_USE_HTTPS = true;
 
 static const char* HARDWARE_ID = "ESP32-HAND-001";
 static const char* BOARD_TOKEN = "esp32-secret";
@@ -82,7 +84,7 @@ static const uint32_t BLE_RESCAN_INTERVAL_MS = 5000;
 static const uint32_t BLE_SCAN_WINDOW_SECONDS = 3;
 
 String buildBaseUrl() {
-  return String("http://") + BACKEND_HOST + ":" + String(BACKEND_PORT);
+  return String(BACKEND_USE_HTTPS ? "https://" : "http://") + BACKEND_HOST + ":" + String(BACKEND_PORT);
 }
 
 String buildUrl(const String& path) {
@@ -93,7 +95,13 @@ String buildUrl(const String& path) {
 
 bool postJson(const String& url, const String& body, String& responseBody, int& statusCode) {
   HTTPClient http;
-  http.begin(url);
+  WiFiClientSecure secureClient;
+  if (BACKEND_USE_HTTPS) {
+    secureClient.setInsecure();
+    http.begin(secureClient, url);
+  } else {
+    http.begin(url);
+  }
   http.addHeader("Content-Type", "application/json");
   statusCode = http.POST(body);
   responseBody = http.getString();

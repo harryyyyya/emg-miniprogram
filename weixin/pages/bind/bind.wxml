@@ -66,7 +66,7 @@
     <view class="tips-card">
       <text class="tips-title">ESP32 需要先完成这些事</text>
       <text class="tips-line">1. 已连接 Wi-Fi。</text>
-      <text class="tips-line">2. 后端地址已烧录为 47.239.150.223:80。</text>
+      <text class="tips-line">2. 后端地址已烧录为 api.handemglsh.cloud:443。</text>
       <text class="tips-line">3. 串口能看到 registerBoard status=200 和 heartbeat status=200。</text>
     </view>
   </view>

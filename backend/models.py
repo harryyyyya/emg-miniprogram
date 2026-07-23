@@ -218,11 +218,31 @@ class ErrorLog(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class KnowledgeArticle(Base):
+    __tablename__ = "knowledge_articles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(160), nullable=False)
+    type = Column(String(32), default="guide")
+    summary = Column(Text, default="")
+    content = Column(Text, default="")
+    cover_url = Column(String(512), default="")
+    theme = Column(String(32), default="")
+    sections_json = Column(Text, default="[]")
+    tips_json = Column(Text, default="[]")
+    is_published = Column(Boolean, default=True)
+    sort_order = Column(Integer, default=0)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 def init_db():
     Base.metadata.create_all(bind=engine)
     _ensure_user_columns()
     _ensure_device_columns()
     _ensure_forum_comment_columns()
+    _ensure_knowledge_article_columns()
 
 
 def _ensure_user_columns():
@@ -282,6 +302,33 @@ def _ensure_forum_comment_columns():
     column_ddls = {
         "parent_id": "ALTER TABLE forum_comments ADD COLUMN parent_id INTEGER",
         "reply_to_user_id": "ALTER TABLE forum_comments ADD COLUMN reply_to_user_id INTEGER",
+    }
+
+    with engine.begin() as conn:
+        for name, ddl in column_ddls.items():
+            if name not in existing:
+                conn.execute(text(ddl))
+
+
+def _ensure_knowledge_article_columns():
+    inspector = inspect(engine)
+    if "knowledge_articles" not in inspector.get_table_names():
+        return
+
+    existing = {col["name"] for col in inspector.get_columns("knowledge_articles")}
+    column_ddls = {
+        "type": "ALTER TABLE knowledge_articles ADD COLUMN type VARCHAR(32) DEFAULT 'guide'",
+        "summary": "ALTER TABLE knowledge_articles ADD COLUMN summary TEXT",
+        "content": "ALTER TABLE knowledge_articles ADD COLUMN content TEXT",
+        "cover_url": "ALTER TABLE knowledge_articles ADD COLUMN cover_url VARCHAR(512) DEFAULT ''",
+        "theme": "ALTER TABLE knowledge_articles ADD COLUMN theme VARCHAR(32) DEFAULT ''",
+        "sections_json": "ALTER TABLE knowledge_articles ADD COLUMN sections_json TEXT",
+        "tips_json": "ALTER TABLE knowledge_articles ADD COLUMN tips_json TEXT",
+        "is_published": "ALTER TABLE knowledge_articles ADD COLUMN is_published BOOLEAN DEFAULT 1",
+        "sort_order": "ALTER TABLE knowledge_articles ADD COLUMN sort_order INTEGER DEFAULT 0",
+        "created_by": "ALTER TABLE knowledge_articles ADD COLUMN created_by INTEGER",
+        "created_at": "ALTER TABLE knowledge_articles ADD COLUMN created_at DATETIME",
+        "updated_at": "ALTER TABLE knowledge_articles ADD COLUMN updated_at DATETIME",
     }
 
     with engine.begin() as conn:

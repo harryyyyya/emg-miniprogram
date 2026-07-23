@@ -656,6 +656,23 @@
   color: #5a6b84;
 }
 
+.gesture-guide {
+  display: block;
+  margin-top: 12rpx;
+  max-width: 520rpx;
+  text-align: center;
+  line-height: 1.55;
+  font-size: 23rpx;
+  color: #6c7c91;
+}
+
+.gesture-time {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #8b9ab0;
+}
+
 .countdown {
   position: absolute;
   top: 26rpx;
@@ -672,6 +689,67 @@
   display: flex;
   justify-content: center;
   margin-top: 24rpx;
+}
+
+.collect-flow {
+  margin-top: 20rpx;
+  display: flex;
+  align-items: stretch;
+  gap: 12rpx;
+}
+
+.flow-step {
+  flex: 1;
+  padding: 18rpx 14rpx;
+  border-radius: 18rpx;
+  background: #f7fafc;
+  border: 2rpx solid transparent;
+  text-align: center;
+}
+
+.flow-step.active {
+  background: linear-gradient(135deg, rgba(31, 157, 85, 0.13), rgba(74, 193, 121, 0.08));
+  border-color: rgba(31, 157, 85, 0.28);
+}
+
+.flow-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  background: #e5edf8;
+  color: #50627e;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.flow-step.active .flow-step-num {
+  background: #1f9d55;
+  color: #ffffff;
+}
+
+.flow-step-title {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 25rpx;
+  font-weight: 700;
+  color: #20304a;
+}
+
+.flow-step-desc {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 21rpx;
+  color: #718096;
+}
+
+.flow-arrow {
+  display: flex;
+  align-items: center;
+  color: #9aa8ba;
+  font-size: 34rpx;
 }
 
 .btn-collect {

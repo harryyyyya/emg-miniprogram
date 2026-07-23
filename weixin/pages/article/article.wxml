@@ -1,5 +1,5 @@
-<view class="article-page" wx:if="{{article}}">
-  <view class="article-hero">
+<view class="article-page {{article.theme || ''}}" wx:if="{{article}}">
+  <view class="article-hero {{article.theme || ''}}">
     <text class="article-tag">{{article.tag}}</text>
     <text class="article-title">{{article.title}}</text>
     <text class="article-summary">{{article.summary}}</text>
@@ -15,8 +15,8 @@
     </view>
   </view>
 
-  <view class="article-section tips-section">
-    <text class="section-heading">Practical tips</text>
+  <view class="article-section tips-section" wx:if="{{article.tips && article.tips.length}}">
+    <text class="section-heading">实用提醒</text>
     <view class="advice-list">
       <view class="advice-item" wx:for="{{article.tips}}" wx:key="*this">
         <text class="advice-dot accent"></text>

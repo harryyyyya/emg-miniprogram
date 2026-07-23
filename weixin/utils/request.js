@@ -1,4 +1,4 @@
-const PRODUCTION_BASE_URL = 'http://47.239.150.223';
+const PRODUCTION_BASE_URL = 'https://api.handemglsh.cloud';
 const DEFAULT_PROTOCOL = 'http';
 const DEFAULT_HOST = '192.168.43.9';
 const DEFAULT_PORT = 8000;
@@ -158,6 +158,7 @@ const ensureBaseUrl = async () => {
 const request = (options) => {
   return new Promise(async (resolve, reject) => {
     const token = wx.getStorageSync('token') || '';
+    const silent = Boolean(options.silent);
     const baseUrl = options.url.startsWith('http') ? '' : await ensureBaseUrl();
     const resolvedUrl = options.url.startsWith('http') ? options.url : baseUrl + options.url;
 
@@ -190,10 +191,12 @@ const request = (options) => {
           return;
         }
 
-        wx.showToast({
-          title: res.data.detail || res.data.message || '请求异常',
-          icon: 'none',
-        });
+        if (!silent) {
+          wx.showToast({
+            title: res.data.detail || res.data.message || '请求异常',
+            icon: 'none',
+          });
+        }
         reject(res.data);
       },
       fail: (err) => {
@@ -201,10 +204,12 @@ const request = (options) => {
           wx.removeStorageSync(RESOLVED_BASE_URL_KEY);
         }
         console.error('[request] failed:', resolvedUrl, err);
-        wx.showToast({
-          title: '网络连接失败，请检查后端地址',
-          icon: 'none',
-        });
+        if (!silent) {
+          wx.showToast({
+            title: '网络连接失败，请检查后端地址',
+            icon: 'none',
+          });
+        }
         reject(err);
       },
     });

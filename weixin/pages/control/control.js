@@ -3,14 +3,14 @@ const { request, uploadChunk } = require('../../utils/request');
 const esp32Link = require('../../utils/esp32_link');
 
 const DEFAULT_GESTURES = [
-  { emoji: '✊', name: '握拳', duration: 5 },
-  { emoji: '✋', name: '张手', duration: 5 },
-  { emoji: '🤏', name: '捏取', duration: 5 },
-  { emoji: '🤝', name: '捏合', duration: 5 },
+  { emoji: '🖐️', name: '目标动作', duration: 3 },
 ];
 
 const EMG_STORAGE_PREFIX = 'realtime_emg_';
 const EMG_CACHE_LIMIT = 240;
+const RELAX_SECONDS = 3;
+const ACTION_SECONDS = 3;
+const MAX_COLLECT_SECONDS = 60;
 const fs = wx.getFileSystemManager();
 const TEMP_DIR = `${wx.env.USER_DATA_PATH}/emg_collect`;
 
@@ -59,8 +59,11 @@ Page({
     emgLiveMax: '--',
 
     isCollecting: false,
-    gestureEmoji: '✋',
+    gestureEmoji: '🌿',
     gestureName: '等待开始',
+    collectGuide: '点击开始后，按 3 秒放松、3 秒目标动作循环采集。',
+    collectElapsedText: '最长 1 分钟，可随时停止',
+    collectPhase: 'idle',
     countdown: 0,
     hasCollectedData: false,
     canUpload: false,
@@ -84,6 +87,7 @@ Page({
   _statusTimer: null,
   _gestureIndex: 0,
   _activeGestures: DEFAULT_GESTURES,
+  _collectStartedAt: 0,
   _sessionId: '',
   _collectBuffer: [],
   _tempFilePath: '',
@@ -169,7 +173,7 @@ Page({
   updateConnectionState(status = this.data.deviceStatus, hint = '') {
     const online = status === 'online';
     const transport = this.data.deviceTransport;
-    let autoHint = '绛夊緟璁惧杩炴帴';
+    let autoHint = '等待设备连接';
 
     if (transport === 'wifi') {
       autoHint = online ? 'ESP32 已在线，后端心跳正常' : '等待 ESP32 通过 Wi-Fi 上报心跳和肌电数据';
@@ -417,7 +421,7 @@ Page({
       this.updateArmbandState(info.bluetooth_status || info.ble_status || info.module_statuses && info.module_statuses.bluetooth);
     } catch (err) {
       if (!silent) {
-        wx.showToast({ title: 'ESP32 淇℃伅鏌ヨ澶辫触', icon: 'none' });
+        wx.showToast({ title: 'ESP32 信息查询失败', icon: 'none' });
       }
       this.setData({ deviceStatus: 'offline' });
       this.updateConnectionState('offline', 'ESP32 信息请求失败');
@@ -533,11 +537,11 @@ Page({
   },
 
   addGesture() {
-    const emojiOptions = ['✊', '✋', '🤏', '🤝', '👍', '👌', '☝️', '🖐️'];
+    const emojiOptions = ['🖐️', '🤏', '🤝', '👍', '👌', '☝️'];
     wx.showModal({
       title: '录入动作',
       editable: true,
-      placeholderText: '例如：握拳、张手、夹取',
+      placeholderText: '例如：张开、抬腕、夹取',
       success: (res) => {
         if (!res.confirm || !res.content || !res.content.trim()) return;
         const name = res.content.trim();
@@ -792,11 +796,22 @@ Page({
   },
 
   buildGestureSequence() {
+    const actionName = this.data.mode === 'personal' && this.data.selectedGestureIndex >= 0
+      ? this.data.customGestures[this.data.selectedGestureIndex].name
+      : '目标动作';
+
     if (this.data.mode === 'personal' && this.data.selectedGestureIndex >= 0) {
       const gesture = this.data.customGestures[this.data.selectedGestureIndex];
-      return [gesture, gesture, gesture].map((item) => ({ ...item, duration: 5 }));
+      return [
+        { emoji: '🌿', name: '放松准备', duration: RELAX_SECONDS },
+        { emoji: gesture.emoji || '🖐️', name: actionName, duration: ACTION_SECONDS },
+      ];
     }
-    return DEFAULT_GESTURES;
+
+    return [
+      { emoji: '🌿', name: '放松准备', duration: RELAX_SECONDS },
+      { emoji: DEFAULT_GESTURES[0].emoji, name: actionName, duration: ACTION_SECONDS },
+    ];
   },
 
   async ensureDeviceOnlineForCollect() {
@@ -831,6 +846,7 @@ Page({
     this._gestureIndex = 0;
     this._collectBuffer = [];
     this._activeGestures = this.buildGestureSequence();
+    this._collectStartedAt = Date.now();
 
     this.setData({
       isCollecting: true,
@@ -841,6 +857,12 @@ Page({
       recordingBatches: 0,
       recordingRms: '',
       recordingActive: this.data.deviceTransport !== 'ble',
+      gestureEmoji: '🌿',
+      gestureName: '放松准备',
+      collectGuide: '先放松 3 秒，听从提示切换到目标动作。',
+      collectElapsedText: `00:00 / 01:00`,
+      collectPhase: 'relax',
+      countdown: RELAX_SECONDS,
     });
 
     try {
@@ -855,6 +877,9 @@ Page({
             name: gesture.name,
             duration: gesture.duration,
           })),
+          phase_rule: '3秒放松 + 3秒目标动作循环',
+          max_duration: MAX_COLLECT_SECONDS,
+          manual_stop: true,
           emg_upload_path: '/devices/wifi/emg',
         });
         this.setData({ lastCommandMessage: '已通过后端向 ESP32 下发开始采集命令' });
@@ -870,6 +895,9 @@ Page({
             name: gesture.name,
             duration: gesture.duration,
           })),
+          phase_rule: '3秒放松 + 3秒目标动作循环',
+          max_duration: MAX_COLLECT_SECONDS,
+          manual_stop: true,
         });
         this.setData({ lastCommandMessage: '已通过 WebSocket 向 ESP32 下发开始采集命令' });
       } else if (ble.isConnected()) {
@@ -881,33 +909,50 @@ Page({
       return;
     }
 
-    this.playGestureSequence();
+    this.playGestureGuide();
   },
 
-  playGestureSequence() {
-    if (this._gestureIndex >= this._activeGestures.length) {
+  playGestureGuide() {
+    if (this._collectTimer) {
+      clearInterval(this._collectTimer);
+      this._collectTimer = null;
+    }
+
+    this.updateCollectGuide();
+    this._collectTimer = setInterval(() => {
+      this.updateCollectGuide();
+    }, 1000);
+  },
+
+  updateCollectGuide() {
+    if (!this.data.isCollecting || !this._collectStartedAt) return;
+
+    const elapsed = Math.floor((Date.now() - this._collectStartedAt) / 1000);
+    if (elapsed >= MAX_COLLECT_SECONDS) {
+      wx.showToast({ title: '已达到 1 分钟，自动停止采集', icon: 'none' });
       this.stopCollect();
       return;
     }
 
-    const gesture = this._activeGestures[this._gestureIndex];
-    let countdown = gesture.duration;
-    this.setData({
-      gestureEmoji: gesture.emoji,
-      gestureName: gesture.name,
-      countdown,
-    });
+    const cycle = RELAX_SECONDS + ACTION_SECONDS;
+    const cycleOffset = elapsed % cycle;
+    const isRelaxPhase = cycleOffset < RELAX_SECONDS;
+    const secondsLeft = isRelaxPhase
+      ? RELAX_SECONDS - cycleOffset
+      : cycle - cycleOffset;
+    const actionGesture = this._activeGestures[1] || DEFAULT_GESTURES[0];
+    const elapsedText = `00:${String(Math.min(elapsed, MAX_COLLECT_SECONDS)).padStart(2, '0')} / 01:00`;
 
-    this._collectTimer = setInterval(() => {
-      countdown -= 1;
-      if (countdown <= 0) {
-        clearInterval(this._collectTimer);
-        this._gestureIndex += 1;
-        this.playGestureSequence();
-      } else {
-        this.setData({ countdown });
-      }
-    }, 1000);
+    this.setData({
+      gestureEmoji: isRelaxPhase ? '🌿' : '🖐️',
+      gestureName: isRelaxPhase ? '放松 3 秒' : `执行动作：${actionGesture.name}`,
+      collectGuide: isRelaxPhase
+        ? '手臂自然放松，不要主动用力。'
+        : '保持目标动作，力度尽量稳定。',
+      collectElapsedText: elapsedText,
+      collectPhase: isRelaxPhase ? 'relax' : 'action',
+      countdown: secondsLeft,
+    });
   },
 
   async stopCollect() {
@@ -915,6 +960,7 @@ Page({
       clearInterval(this._collectTimer);
       this._collectTimer = null;
     }
+    this._collectStartedAt = 0;
 
     if (this.data.deviceTransport === 'wifi') {
       try {
@@ -936,8 +982,11 @@ Page({
     const hasLocalData = this.data.deviceTransport === 'ble' && this._collectBuffer.length > 0;
     this.setData({
       isCollecting: false,
-      gestureEmoji: '✋',
+      gestureEmoji: '🌿',
       gestureName: this.data.deviceTransport === 'ble' ? '采集完成' : '等待设备返回结果',
+      collectGuide: '一次采集已结束，可以查看波形和存储记录。',
+      collectElapsedText: '最长 1 分钟，可随时停止',
+      collectPhase: 'idle',
       countdown: 0,
       hasCollectedData: hasLocalData,
       recordingActive: false,

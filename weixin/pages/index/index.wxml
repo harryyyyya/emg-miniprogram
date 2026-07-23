@@ -12,7 +12,7 @@
     <view class="device-left">
       <view class="device-dot {{deviceOnline ? 'online' : 'offline'}}"></view>
       <view class="device-info">
-        <text class="device-name">{{deviceName || 'No device bound'}}</text>
+        <text class="device-name">{{deviceName || '未绑定设备'}}</text>
         <text class="device-status">{{deviceStatusText}}</text>
       </view>
     </view>
@@ -21,30 +21,30 @@
 
   <view class="feature-grid">
     <view class="feature-item" bindtap="goTo" data-url="/pages/control/control">
-      <view class="feature-icon bg-blue">H</view>
-      <text class="feature-label">Control</text>
+      <view class="feature-icon bg-blue">手</view>
+      <text class="feature-label">假手控制</text>
     </view>
     <view class="feature-item" bindtap="goTo" data-url="/pages/control/control?tab=train">
-      <view class="feature-icon bg-green">T</view>
-      <text class="feature-label">Training</text>
+      <view class="feature-icon bg-green">训</view>
+      <text class="feature-label">数据训练</text>
     </view>
     <view class="feature-item" bindtap="goTo" data-url="/pages/control/control?tab=health">
-      <view class="feature-icon bg-orange">R</view>
-      <text class="feature-label">Report</text>
+      <view class="feature-icon bg-orange">康</view>
+      <text class="feature-label">健康报告</text>
     </view>
     <view class="feature-item" bindtap="goTo" data-url="/pages/ai/ai">
       <view class="feature-icon bg-purple">AI</view>
-      <text class="feature-label">AI Help</text>
+      <text class="feature-label">AI 咨询</text>
     </view>
   </view>
 
   <view class="section">
     <view class="section-header">
-      <text class="section-title">Guides and Advice</text>
-      <text class="section-more">Tap to read</text>
+      <text class="section-title">康复与训练</text>
+      <text class="section-more">点击查看</text>
     </view>
     <view class="knowledge-list">
-      <view class="knowledge-item" wx:for="{{knowledgeList}}" wx:key="id" bindtap="openArticle" data-id="{{item.id}}">
+      <view class="knowledge-item {{item.tone || ''}}" wx:for="{{knowledgeList}}" wx:key="id" bindtap="openArticle" data-id="{{item.id}}">
         <image class="knowledge-img" src="{{item.cover}}" mode="aspectFill" />
         <view class="knowledge-content">
           <text class="knowledge-title">{{item.title}}</text>
