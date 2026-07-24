@@ -1,0 +1,18 @@
+{
+  "status": "PASS_FOR_STAGEK1_BLE_SCAN_RESILIENCE_AND_PROCESS_SMOKE",
+  "not_a_pass_claim": true,
+  "inherited_prompt10": "PASS_FOR_DUO_S_TPU_RECORDED_FULL_CHAIN_REPLAY",
+  "inherited_prompt13": "PASS_FOR_DUOS_HCI_AND_BLE_ADAPTER_OFFLINE_NO_BT11_TARGET",
+  "this_package_duo_acceptance": "NOT_RUN",
+  "stagek1_host_unittest": "PASS_42_TESTS",
+  "stagek1_recorded_full_chain_10_cycles": "PASS",
+  "stagek1_five_minute_mock_smoke": "PASS",
+  "credentials_included": false,
+  "live_ble_pass": false,
+  "live_uart_stm32_pass": false,
+  "real_backend_pass": false,
+  "actuator_pass": false,
+  "stagek1_duo_board_unittest": "PASS_42_TESTS",
+  "stagek1_duo_preflight": "PASS",
+  "stagek1_log_dir": "logs/stagek1_19700101T013328_3341"
+}

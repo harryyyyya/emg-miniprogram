@@ -1,0 +1,7 @@
+{
+  "disconnect_callback_count": 1,
+  "help_transcript": "help\nhelp                                           Show this help\nexit                                           Exit interactive mode\nquit                                           Exit interactive mode\nconnect         [address [address type]]       Connect to a remote device\ndisconnect                                     Disconnect from a remote device\nprimary         [UUID]                         Primary Service Discovery\nincluded        [start hnd [end hnd]]          Find Included Services\ncharacteristics [start hnd [end hnd [UUID]]]   Characteristics Discovery\nchar-desc       [start hnd] [end hnd]          Characteristics Descriptor Discovery\nchar-read-hnd   <handle>                       Characteristics Value/Descriptor Read by handle\nchar-read-uuid  <UUID> [start hnd] [end hnd]   Characteristics Value/Descriptor Read by UUID\nchar-write-req  <handle> <new value>           Characteristic Value Write (Write Request)\nchar-write-cmd  <handle> <new value>           Characteristic Value Write (No response)\nsec-level       [low | medium | high]          Set security level. Default: low\nmtu             <value>                        Exchange MTU for GATT/ATT\n[                 ][LE]> ",
+  "missing_commands": [],
+  "scope": "PTY_COMMAND_CONTROL_ONLY_NO_HCI_NO_CONNECTION",
+  "status": "PASS"
+}

@@ -1,0 +1,6 @@
+/root/duo_fc_competition_v1_1/bin/start_safe_demo.sh: line 27: /root/duo_fc_competition_v1_1/bin/preflight.sh: Permission denied
+/root/duo_fc_competition_v1_1/bin/start_safe_demo.sh: line 40: /root/duo_fc_competition_v1_1/bin/hci_start.sh: Permission denied
+SAFE_DEMO_START=PASS
+EVIDENCE_BOUNDARY=BT11_LIVE_NOT_RUN_UNTIL_REAL_TARGET_LOG_EXISTS
+UART_SINK=file:/root/duo_fc_competition_v1_1/logs/uart_mock.bin
+BACKEND_MODE=mock

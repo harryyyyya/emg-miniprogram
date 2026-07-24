@@ -63,14 +63,45 @@ def _device_online(device: Device) -> bool:
     return datetime.utcnow() - device.last_seen_at <= timedelta(seconds=DEVICE_OFFLINE_SECONDS)
 
 
+def _infer_board_type(device: Device, telemetry: dict[str, Any] | None = None) -> str:
+    text = " ".join([
+        device.hardware_id or "",
+        device.device_name or "",
+        device.firmware_version or "",
+        str((telemetry or {}).get("board_type", "")),
+        str((telemetry or {}).get("platform", "")),
+        json.dumps(telemetry or {}, ensure_ascii=False),
+    ]).lower()
+    if any(key in text for key in ("milk", "duo", "duos", "milk-v")):
+        return "milk_duo_s"
+    if "esp32" in text:
+        return "esp32"
+    if (device.transport or "") == "wifi":
+        return "wifi_board"
+    return device.transport or "ble"
+
+
+def _board_label(board_type: str) -> str:
+    labels = {
+        "milk_duo_s": "Milk Duo S",
+        "esp32": "ESP32",
+        "wifi_board": "Wi-Fi 板子",
+        "ble": "蓝牙设备",
+    }
+    return labels.get(board_type or "", "智能设备")
+
+
 def _device_row(device: Device) -> dict[str, Any]:
     telemetry = _parse_json(device.telemetry_json, {})
+    board_type = _infer_board_type(device, telemetry)
     return {
         "id": device.id,
         "user_id": device.user_id,
         "user_name": device.user.name if device.user else f"用户#{device.user_id}",
         "hardware_id": device.hardware_id,
         "device_name": device.device_name or device.hardware_id,
+        "board_type": board_type,
+        "board_label": _board_label(board_type),
         "transport": device.transport or "ble",
         "battery_level": device.battery_level if device.battery_level is not None else 0,
         "firmware_version": device.firmware_version or "-",

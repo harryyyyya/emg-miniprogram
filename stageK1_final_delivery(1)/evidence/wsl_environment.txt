@@ -1,0 +1,9 @@
+utc=2026-07-23T02:18:38Z
+Python 3.10.12
+onnx=1.14.1
+onnxruntime=1.16.3
+torch=2.1.0+cpu
+tpu_mlir=unknown
+/root/venvs/tpu-mlir-1.28.1/bin/model_transform.py
+/root/venvs/tpu-mlir-1.28.1/bin/model_deploy.py
+/root/venvs/tpu-mlir-1.28.1/bin/model_runner.py

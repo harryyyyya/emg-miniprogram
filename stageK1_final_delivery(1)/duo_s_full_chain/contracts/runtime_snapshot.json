@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "immutability": "frozen_value_object_published_by_locked_copy_on_write_store",
+  "fields": {
+    "identity": ["runtime_version", "mode", "model_version", "pipeline_sha256"],
+    "signal": ["timestamp_ms", "battery_level", "gesture_id", "raw_top1", "validity", "margin", "state_seq", "frame_seq"],
+    "ble": ["connected", "signal_timeout", "notify_count", "notify_bytes", "valid_frames", "invalid_frames", "discarded_bytes", "timestamp_gaps", "estimated_missing_packets", "queue_overflows", "queue_dropped_bytes"],
+    "inference": ["inference_count", "inference_failures", "model_last_us", "model_p50_us", "model_p95_us", "model_max_us"],
+    "uart": ["uart_tx_count", "uart_no_stable_count", "uart_last_sequence"],
+    "network": ["wifi_connected", "registered", "http_ok_count", "http_fail_count", "http_timeout_count", "last_http_path"],
+    "safety": ["safety_event_count", "safety_counters", "last_safety_reason"]
+  }
+}

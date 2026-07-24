@@ -259,6 +259,40 @@
   background: linear-gradient(135deg, rgba(11, 89, 214, 0.08), rgba(31, 157, 85, 0.08));
 }
 
+.board-preset-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18rpx;
+  margin-bottom: 24rpx;
+}
+
+.board-preset {
+  padding: 22rpx 20rpx;
+  border-radius: 24rpx;
+  background: #f5f8ff;
+  border: 2rpx solid rgba(11, 89, 214, 0.1);
+}
+
+.board-preset.active {
+  background: linear-gradient(135deg, rgba(11, 89, 214, 0.12), rgba(31, 157, 85, 0.12));
+  border-color: rgba(11, 89, 214, 0.36);
+  box-shadow: 0 12rpx 28rpx rgba(11, 89, 214, 0.12);
+}
+
+.board-preset-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 800;
+  color: #20304a;
+}
+
+.board-preset-desc {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #6b7d99;
+}
+
 .summary-row {
   display: flex;
   justify-content: space-between;

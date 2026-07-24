@@ -1,0 +1,236 @@
+{
+  "manifest_version": "retry2_risk_accepted_handoff_v1",
+  "status": "RISK_ACCEPTED_MODEL_HANDOFF_READY_FOR_TPU_CONVERSION",
+  "generated_at_utc": "2026-07-22T09:16:58+00:00",
+  "model_id": "duo_fc_mlp_3session_v1_retry2_risk_accepted",
+  "interface_version": "DuoS-MLP-v1-retry2-risk-accepted",
+  "release_status": "RISK_ACCEPTED_FOR_STUDENT_COMPETITION_DEMO",
+  "selected_candidate_id": "48-64-32-16-9|seed=20260725|class7w=2|wd=0.001",
+  "architecture": "48-64-32-16-9",
+  "final_epochs": 77,
+  "oof_metrics": {
+    "macro_f1": 0.8684194776396189,
+    "macro_recall": 0.886281076133004,
+    "rest_recall": 0.9162393162393162,
+    "rest_false_activation": 0.08376068376068375,
+    "action7_recall": 0.670514165792235,
+    "minimum_fold_rest_recall": 0.8331622176591376,
+    "minimum_fold_macro_recall": 0.8612911872365672,
+    "action7_recall_by_validation_session": {
+      "S3": 0.6163522012578616,
+      "S2": 0.9463722397476341,
+      "S1": 0.449685534591195
+    }
+  },
+  "original_blocked_status": "BLOCKED_MLP_ACTION7_GATE_AFTER_RETRY2",
+  "original_blocked_zip_sha256": "b47ece23a4bb019330073daa4b8f776093fedac95d73f918d3d4a5824309b71d",
+  "engineering_gate_pass": false,
+  "margin_gate_pass": false,
+  "quality_gates_passed": false,
+  "passing_candidate_count": 0,
+  "user_risk_accepted": true,
+  "conversion_authorized": true,
+  "competition_demo_only": true,
+  "medical_or_commercial_claims_authorized": false,
+  "retry3_authorized": false,
+  "model_sha256": "3f388f88bf8130fbeb7bc3cd0faba76f129b204db9b70731d197a3d7e3322241",
+  "checkpoint_sha256": "bcef733c032a6e560df4d4a7f89700dacc0f764be17543d519ba295215d66918",
+  "pipeline_sha256": "836a520473ca4bbe857b17501a349a5ff11f385d8593f66970ee4a83021f5273",
+  "data_manifest_sha256": "069fca2e10a6b3d7d2f9f3d067d455fb45cc6b5063b6c245094bf1398e1bed6d",
+  "default_margin_profile": {
+    "profile_id": "competition_demo_default_user_risk_accepted",
+    "threshold": 1.8798933982849122,
+    "coverage": 0.8,
+    "accepted_error": 0.05392339159538862,
+    "rest_false_activation": 0.04051282051282051,
+    "accepted_count": 10756,
+    "accepted_error_count": 580,
+    "rest_false_activation_count": 237,
+    "oof_count": 13445,
+    "margin_gate_pass": false,
+    "accepted_error_gate": 0.05,
+    "accepted_error_excess": 0.00392339159538862
+  },
+  "safety_priority_margin_profile": {
+    "profile_id": "safety_priority_optional_logged_fallback",
+    "threshold": 2.9189772462844847,
+    "coverage": 0.6299739680178505,
+    "accepted_error": 0.04946871310507674,
+    "rest_false_activation": 0.03196581196581197,
+    "accepted_count": 8470,
+    "accepted_error_count": 419,
+    "rest_false_activation_count": 187,
+    "oof_count": 13445,
+    "margin_gate_pass": true,
+    "changes_frozen_model_identity": false,
+    "switch_requires_site_log": true
+  },
+  "fixture_count": 90,
+  "pytorch_onnx_top1_match_count": 90,
+  "pytorch_onnx_max_logit_abs_diff": 7.62939453125e-06,
+  "onnx_checker": "PASS",
+  "D1": {
+    "status": "D1_EXTERNAL_STRESS_TEST_COMPLETE_POST_FREEZE",
+    "scope": "partial_labels_0_2_3_6_8_not_full_nine_class_generalization",
+    "used_for_selection": false,
+    "metrics": {
+      "window_count": 2551,
+      "actual_labels": [
+        0,
+        2,
+        3,
+        6,
+        8
+      ],
+      "partial_label_accuracy_not_full_9class": 0.7969423755390043,
+      "macro_f1_actual_labels": 0.6393869910687286,
+      "macro_recall_actual_labels": 0.62210683666979,
+      "rest_recall": 0.9218377088305489,
+      "rest_false_activation": 0.07816229116945107,
+      "per_class_actual_labels": [
+        {
+          "label": 0,
+          "precision": 1.0,
+          "recall": 0.9218377088305489,
+          "f1": 0.9593294008072027,
+          "support": 1676
+        },
+        {
+          "label": 2,
+          "precision": 0.5178082191780822,
+          "recall": 0.9174757281553398,
+          "f1": 0.6619964973730298,
+          "support": 206
+        },
+        {
+          "label": 3,
+          "precision": 0.7857142857142857,
+          "recall": 0.11827956989247312,
+          "f1": 0.205607476635514,
+          "support": 186
+        },
+        {
+          "label": 6,
+          "precision": 0.9029126213592233,
+          "recall": 0.7815126050420168,
+          "f1": 0.8378378378378378,
+          "support": 238
+        },
+        {
+          "label": 8,
+          "precision": 0.9381443298969072,
+          "recall": 0.37142857142857144,
+          "f1": 0.5321637426900585,
+          "support": 245
+        }
+      ],
+      "confusion_matrix": {
+        "rows_actual_labels": [
+          0,
+          2,
+          3,
+          6,
+          8
+        ],
+        "columns_model_labels": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "counts": [
+          [
+            1545,
+            0,
+            0,
+            0,
+            37,
+            42,
+            10,
+            42,
+            0
+          ],
+          [
+            0,
+            12,
+            189,
+            0,
+            5,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            17,
+            96,
+            22,
+            0,
+            1,
+            0,
+            44,
+            6
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            186,
+            52,
+            0
+          ],
+          [
+            0,
+            24,
+            80,
+            6,
+            0,
+            4,
+            10,
+            30,
+            91
+          ]
+        ]
+      }
+    },
+    "frozen_margin_application": {
+      "threshold": 1.8798933982849122,
+      "threshold_source": "S1/S2/S3 selected-candidate OOF logits only",
+      "coverage": 0.8518228145825166,
+      "accepted_count": 2173,
+      "accepted_error": 0.13989875747814082,
+      "accepted_error_count": 304,
+      "rest_false_activation": 0.02028639618138425
+    }
+  },
+  "historical_sha_unchanged": true,
+  "package_entry_count": 33,
+  "preseal_verifier": {
+    "status": "PASS",
+    "check_count": 58,
+    "passed_count": 58,
+    "checkpoint_max_logit_abs_diff_vs_onnx": 7.62939453125e-06
+  },
+  "TPU_conversion_performed": false,
+  "DuoS_validation_performed": false,
+  "BLE_validation_performed": false,
+  "excluded_from_package": [
+    "raw CSV",
+    "Stage 6.1C cached windows",
+    "Retry2 OOF arrays",
+    "old models",
+    "old D1-R2 weights",
+    "old mean/std",
+    "credentials",
+    "__pycache__"
+  ]
+}

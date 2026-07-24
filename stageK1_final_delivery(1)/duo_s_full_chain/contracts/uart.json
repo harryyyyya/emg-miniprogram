@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "baud": 115200,
+  "format": "8N1",
+  "frame_size_bytes": 6,
+  "layout": ["0xAA", "0x55", "mode", "sequence", "status", "xor_bytes_0_to_4"],
+  "valid": {"mode_min": 0, "mode_max": 8, "status": 1},
+  "no_stable": {"mode": 254, "status": 0},
+  "sequence": "increment_after_every_actual_transmit_modulo_256",
+  "keepalive_ms": 500,
+  "safety_reset": "immediate_no_stable"
+}

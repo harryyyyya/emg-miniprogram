@@ -1,0 +1,10 @@
+{
+  "scope": "LOCAL_MOCK_NOT_REAL_BACKEND",
+  "counts": {
+    "/devices/wifi/register": 1,
+    "/devices/wifi/heartbeat": 287,
+    "/devices/wifi/command/ack": 1
+  },
+  "emg_upload_count": 0,
+  "pending_command_sent": true
+}

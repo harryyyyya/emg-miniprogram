@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "scope": "WSL_TPU_MLIR_AND_BF16_PARITY_NOT_DUO_HARDWARE",
+  "python": "3.10.12 (main, Jun 22 2026, 18:55:27) [GCC 11.4.0]",
+  "onnxruntime": "1.16.3",
+  "identities": {
+    "onnx_sha256": "3f388f88bf8130fbeb7bc3cd0faba76f129b204db9b70731d197a3d7e3322241",
+    "mlir_sha256": "3075027c933766a247240c3ce531fd11ddce5910f467222902ad1c43521d4f83",
+    "cvimodel_sha256": "184f567ab263efc8349e4ce8ca251262bfcda777eab4afefa7f73b494e41e6fa",
+    "golden_bin_sha256": "224907a3d2d44ff9670945fb942966e8da9141ab85eec2fbf4cba6caa505ae14",
+    "recorded_features_sha256": "c08625c59a3d42fadb03f783d5fc1c49ad60323d152310f9443549c79963c049"
+  },
+  "mlir_golden_vs_onnx": {
+    "rows": 90,
+    "top1_matches": 90,
+    "top1_match_rate": 1.0,
+    "max_logit_abs_diff": 0.0,
+    "mean_logit_abs_diff": 0.0,
+    "p99_logit_abs_diff": 0.0
+  },
+  "bf16_golden_vs_onnx": {
+    "rows": 90,
+    "top1_matches": 90,
+    "top1_match_rate": 1.0,
+    "max_logit_abs_diff": 0.30283355712890625,
+    "mean_logit_abs_diff": 0.027996946512549012,
+    "p99_logit_abs_diff": 0.17363325119018536
+  },
+  "bf16_recorded_vs_onnx": {
+    "rows": 267,
+    "top1_matches": 267,
+    "top1_match_rate": 1.0,
+    "max_logit_abs_diff": 0.6235733032226562,
+    "mean_logit_abs_diff": 0.03022800186510216,
+    "p99_logit_abs_diff": 0.22902740478515635
+  }
+}

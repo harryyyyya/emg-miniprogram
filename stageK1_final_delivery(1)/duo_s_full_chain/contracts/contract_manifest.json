@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "runtime_contracts": ["ble.json", "frame.json", "signal_pipeline.json", "controller.json", "uart.json", "network.json", "gesture_map.json", "modes.json", "model_contract.example.json", "runtime_snapshot.json"],
+  "authority_priority": ["explicit_user_contract", "AGENT.md", "authoritative_stage6_full_chain_source", "verified_reports", "D3_reference_only"],
+  "known_differences": [
+    "D3 allowed_actions_0_2_8_removed_all_0_to_8_supported",
+    "D3 simplified_vote_controller_replaced_with_emg_controller_c_semantics",
+    "LDA_margin_3_0_not_reused_threshold_required_from_MLP_model_contract",
+    "Arduino_FreeRTOS_platform_bindings_replaced_by_injected_Linux_interfaces",
+    "recorded_replay_uses_notify_queue_parser_path_and_is_not_formal_input",
+    "signed_D2_replay_schedules_at_frame_boundary_formal_modes_keep_ESP32_sample_wise_schedule",
+    "queue_overflow_is_promoted_to_required_safety_reset_per_explicit_user_contract"
+  ]
+}

@@ -15,13 +15,29 @@
         </div>
         <div class="device-meta">
           <h3 class="device-hw-id">{{ device.hardware_id }}</h3>
+          <div class="board-line">
+            <span class="board-badge" :class="device.board_type || 'wifi_board'">{{ device.board_label || 'Wi-Fi 板子' }}</span>
+            <span class="board-name">{{ device.device_name || device.hardware_id }}</span>
+          </div>
           <div class="device-detail-row">
             <span class="detail-label">绑定用户</span>
             <span class="detail-val">{{ device.user_name || '未知' }}</span>
           </div>
           <div class="device-detail-row">
+            <span class="detail-label">传输方式</span>
+            <el-tag size="small" :type="device.transport === 'wifi' ? 'success' : 'info'">{{ device.transport || '未知' }}</el-tag>
+          </div>
+          <div class="device-detail-row" v-if="device.last_ip">
+            <span class="detail-label">最近 IP</span>
+            <span class="detail-val">{{ device.last_ip }}</span>
+          </div>
+          <div class="device-detail-row">
             <span class="detail-label">固件版本</span>
             <el-tag size="small" type="info">{{ device.firmware_version }}</el-tag>
+          </div>
+          <div class="device-detail-row" v-if="device.prediction_result">
+            <span class="detail-label">识别结果</span>
+            <span class="detail-val">{{ device.prediction_result }}</span>
           </div>
           <div class="device-detail-row">
             <span class="detail-label">电量</span>
@@ -253,7 +269,8 @@ async function loadDevice() {
     // mock
     device.value = {
       hardware_id: 'ESP32-A7F3', user_id: 1, user_name: '患者张三',
-      battery_level: 78, firmware_version: 'v2.1.0', is_online: true, id: 1,
+      device_name: '演示 ESP32 假手', board_type: 'esp32', board_label: 'ESP32',
+      transport: 'wifi', battery_level: 78, firmware_version: 'v2.1.0', is_online: true, id: 1,
     } as any
   } finally {
     loadingDevice.value = false
@@ -475,6 +492,14 @@ onBeforeUnmount(() => {
 .device-status-badge.offline { background: rgba(100,116,139,0.15); color: #64748b; }
 .device-meta { flex: 1; }
 .device-hw-id { font-size: 22px; font-weight: 700; margin-bottom: 12px; color: var(--color-primary-light); }
+.board-line { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.board-badge {
+  display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; background: rgba(6,182,212,0.14); color: #22d3ee;
+}
+.board-badge.milk_duo_s { background: rgba(34,197,94,0.15); color: #4ade80; }
+.board-badge.esp32 { background: rgba(99,102,241,0.16); color: #a5b4fc; }
+.board-name { font-size: 13px; color: var(--color-text-muted); }
 .device-detail-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
 .detail-label { font-size: 13px; color: var(--color-text-muted); width: 70px; }
 .detail-val { font-weight: 500; }

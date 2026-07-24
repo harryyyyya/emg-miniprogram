@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "threading": "network_worker_isolated_from_signal_thread",
+  "paths": {
+    "register": "/devices/wifi/register",
+    "heartbeat": "/devices/wifi/heartbeat",
+    "ack": "/devices/wifi/command/ack",
+    "emg": "/devices/wifi/emg"
+  },
+  "commands": ["start_collect", "stop_collect"],
+  "pending_command_field": "pending_command",
+  "safe_mode_uploads_emg": false,
+  "credentials": "environment_or_uncommitted_local_config_only",
+  "required_compatible_fields": {
+    "register": ["hardware_id", "board_token", "firmware_version", "wifi_host", "wifi_port", "model_version", "pipeline_sha256"],
+    "heartbeat": ["hardware_id", "board_token", "ip_address", "firmware_version", "battery_level", "signal_strength", "telemetry"],
+    "ack": ["hardware_id", "board_token", "command_id", "success", "message", "result"],
+    "emg": ["hardware_id", "board_token", "session_id", "gesture_name", "sample_rate_hz", "sequence_no", "is_final", "samples"]
+  }
+}

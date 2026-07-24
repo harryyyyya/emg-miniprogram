@@ -19,11 +19,39 @@ function statusText(value) {
   return String(value);
 }
 
+function inferBoardType(device = {}, telemetry = {}) {
+  const text = [
+    device.board_type,
+    device.board_label,
+    device.hardware_id,
+    device.device_name,
+    device.name,
+    device.firmware_version,
+    telemetry.duo_runtime,
+    telemetry.model_version,
+  ].filter(Boolean).join(' ').toLowerCase();
+  if (text.includes('milk') || text.includes('duo') || text.includes('duos')) return 'milk_duo_s';
+  if (text.includes('esp32')) return 'esp32';
+  return (device.transport || '') === 'wifi' ? 'wifi_board' : 'ble';
+}
+
+function boardLabel(boardType) {
+  const labels = {
+    milk_duo_s: 'Milk Duo S',
+    esp32: 'ESP32',
+    wifi_board: 'Wi-Fi 板子',
+    ble: '蓝牙设备',
+  };
+  return labels[boardType] || '智能设备';
+}
+
 Page({
   data: {
     mode: 'public',
     deviceTransport: 'ble',
     deviceName: '',
+    boardType: 'ble',
+    boardLabel: '蓝牙设备',
     deviceStatus: 'offline',
     deviceStatusLabel: '离线',
     deviceStatusHint: '等待设备连接',
@@ -160,6 +188,8 @@ Page({
     this.setData({
       deviceTransport: transport,
       deviceName,
+      boardType: inferBoardType(this._boundDevice || {}),
+      boardLabel: boardLabel(inferBoardType(this._boundDevice || {})),
       deviceIp: (this._boundDevice && this._boundDevice.ip) || '',
       canUpload: transport === 'ble',
       deviceStatus: transport === 'wifi' || transport === 'esp32_direct'
@@ -173,10 +203,11 @@ Page({
   updateConnectionState(status = this.data.deviceStatus, hint = '') {
     const online = status === 'online';
     const transport = this.data.deviceTransport;
+    const label = this.data.boardLabel || 'Wi-Fi 板子';
     let autoHint = '等待设备连接';
 
     if (transport === 'wifi') {
-      autoHint = online ? 'ESP32 已在线，后端心跳正常' : '等待 ESP32 通过 Wi-Fi 上报心跳和肌电数据';
+      autoHint = online ? `${label} 已在线，后端心跳正常` : `等待 ${label} 通过 Wi-Fi 上报心跳和肌电数据`;
     } else if (transport === 'esp32_direct') {
       autoHint = online ? 'ESP32 直连已建立，波形实时刷新' : '等待 ESP32 直连 WebSocket 恢复';
     } else {
@@ -450,6 +481,8 @@ Page({
       const rmsValue = telemetry.rms_value;
       const sidePressure = telemetry.side_pressure !== undefined ? telemetry.side_pressure : telemetry.side_presure;
       const moduleStatuses = telemetry.module_statuses || {};
+      const boardType = device.board_type || inferBoardType(device, telemetry);
+      const label = device.board_label || boardLabel(boardType);
       const predictionResult = telemetry.prediction_result || '';
       const predictionConfidence = telemetry.prediction_confidence;
       const collectState = telemetry.collect_state || telemetry.last_collection || {};
@@ -463,6 +496,8 @@ Page({
 
       this.setData({
         deviceName: device.device_name || this.data.deviceName,
+        boardType,
+        boardLabel: label,
         deviceStatus: device.status || 'offline',
         deviceIp: device.last_ip || this.data.deviceIp,
         firmwareVersion: device.firmware_version || '',
@@ -827,9 +862,9 @@ Page({
     if (this.data.deviceStatus === 'online') return true;
 
     wx.showModal({
-      title: transport === 'wifi' ? 'ESP32 未在线' : 'ESP32 直连失败',
+      title: transport === 'wifi' ? `${this.data.boardLabel || 'Wi-Fi 板子'} 未在线` : 'ESP32 直连失败',
       content: transport === 'wifi'
-        ? '绑定成功只代表后端保存了设备。请确认 ESP32 串口打印 registerBoard status=200 和 heartbeat status=200，并检查 BACKEND_HOST、HARDWARE_ID、BOARD_TOKEN 与小程序绑定值一致。'
+        ? `绑定成功只代表后端保存了设备。请确认 ${this.data.boardLabel || 'Wi-Fi 板子'} 的运行日志里 register/heartbeat 返回 200，并检查后端地址、设备编号和设备密钥与小程序绑定值一致。`
         : '请确认手机和 ESP32 在同一 Wi-Fi，且 ESP32 的 /esp32/info 和 WebSocket 服务已开启。',
       showCancel: false,
     });
@@ -882,7 +917,7 @@ Page({
           manual_stop: true,
           emg_upload_path: '/devices/wifi/emg',
         });
-        this.setData({ lastCommandMessage: '已通过后端向 ESP32 下发开始采集命令' });
+        this.setData({ lastCommandMessage: `已通过后端向 ${this.data.boardLabel || 'Wi-Fi 板子'} 下发开始采集命令` });
       } else if (this.data.deviceTransport === 'esp32_direct') {
         await esp32Link.sendControl({
           action: 'start_collect',
@@ -965,7 +1000,7 @@ Page({
     if (this.data.deviceTransport === 'wifi') {
       try {
         await this.sendWifiCommand('stop_collect', { session_id: this._sessionId });
-        this.setData({ lastCommandMessage: '已通过后端向 ESP32 下发停止采集命令' });
+        this.setData({ lastCommandMessage: `已通过后端向 ${this.data.boardLabel || 'Wi-Fi 板子'} 下发停止采集命令` });
       } catch (e) {}
     } else if (this.data.deviceTransport === 'esp32_direct') {
       try {

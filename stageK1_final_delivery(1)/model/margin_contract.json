@@ -1,0 +1,37 @@
+{
+  "model_id": "duo_fc_mlp_3session_v1_retry2_risk_accepted",
+  "release_status": "RISK_ACCEPTED_FOR_STUDENT_COMPETITION_DEMO",
+  "source": "fixed candidate three-fold Retry2 OOF validation logits only",
+  "D1_used": false,
+  "quality_gate_pass": false,
+  "default_profile": {
+    "profile_id": "competition_demo_default_user_risk_accepted",
+    "threshold": 1.8798933982849122,
+    "coverage": 0.8,
+    "accepted_error": 0.05392339159538862,
+    "rest_false_activation": 0.04051282051282051,
+    "accepted_count": 10756,
+    "accepted_error_count": 580,
+    "rest_false_activation_count": 237,
+    "oof_count": 13445,
+    "margin_gate_pass": false,
+    "accepted_error_gate": 0.05,
+    "accepted_error_excess": 0.00392339159538862
+  },
+  "safety_priority_profile": {
+    "profile_id": "safety_priority_optional_logged_fallback",
+    "threshold": 2.9189772462844847,
+    "coverage": 0.6299739680178505,
+    "accepted_error": 0.04946871310507674,
+    "rest_false_activation": 0.03196581196581197,
+    "accepted_count": 8470,
+    "accepted_error_count": 419,
+    "rest_false_activation_count": 187,
+    "oof_count": 13445,
+    "margin_gate_pass": true,
+    "changes_frozen_model_identity": false,
+    "switch_requires_site_log": true
+  },
+  "default_profile_is_user_risk_accepted": true,
+  "safety_profile_switch_requires_site_log": true
+}

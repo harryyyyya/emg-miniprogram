@@ -1,0 +1,35 @@
+本轮执行边界
+============
+板端新增命令：WYH 手工执行，Codex 未连接/控制板端
+SSH/MobaXterm：WYH 手工执行
+刷写：NOT_RUN
+GPIO/pinmux/boot/autostart 修改：NOT_RUN
+HCI attach：NOT_RUN
+
+电脑端已执行的操作类别
+======================
+1. 读取 Stage E/F 已保存日志与任务文档。
+2. 下载 Milk-V 官方 v2.0.1 镜像、官方 release 源文件及官方硬件 PDF。
+3. 计算下载文件、IMG、模块、firmware、源码与 PDF 的 SHA256。
+4. 只读解析 IMG 的 MBR、FAT boot 分区和 ext4 rootfs；未挂载/写入 SD 卡。
+5. 搜索官方源码中的 aicbt_init、patch/adid/table、CONFIG_SDIO_BT、UART baud/flow control、rfkill 与 HCI 注册路径。
+6. 对比 v2.0.1 与 main；确认没有更新的公开 release 镜像，也没有新增完整 AIC HCI helper。
+7. 视觉核对官方 Duo S V1.1 原理图第 7/10 页与 V1.2 placement PDF。
+8. 生成只供审核的下一轮命令草案。
+9. WYH 手工执行只读 preflight，结果保存为 evidence/duos_stageg_step1.txt。
+10. WYH 手工执行临时 UART4/H4 验证，结果保存为 evidence/duos_stageg_hci_test.txt；脚本自动清理完成。
+
+可复核原始/索引证据
+===================
+evidence/F6_AIC_HCI_RAW.txt
+evidence/offline_image_filelist.json
+evidence/offline_bootfs_filelist.json
+evidence/official_sources_v2.0.1/*
+evidence/schematic/*
+evidence/duos_stageg_step1.txt
+evidence/duos_stageg_hci_test.txt
+
+缺失的任务引用
+==============
+在可读项目树中未找到 AGENT.md、07_CHECKPOINT_RETRY1_AIC与下一步计划.md、04_RESULT_RETURN_TEMPLATE.md。
+本交付按 09_PROMPT 的明确字段组织，并将缺失项如实记录，未推测其内容。

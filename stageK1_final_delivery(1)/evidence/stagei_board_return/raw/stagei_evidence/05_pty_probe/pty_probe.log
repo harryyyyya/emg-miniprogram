@@ -1,0 +1,26 @@
+SLAVE_ISATTY=True
+=== INITIAL ===
+[                 ][LE]> 
+=== HELP ===
+help
+help                                           Show this help
+exit                                           Exit interactive mode
+quit                                           Exit interactive mode
+connect         [address [address type]]       Connect to a remote device
+disconnect                                     Disconnect from a remote device
+primary         [UUID]                         Primary Service Discovery
+included        [start hnd [end hnd]]          Find Included Services
+characteristics [start hnd [end hnd [UUID]]]   Characteristics Discovery
+char-desc       [start hnd] [end hnd]          Characteristics Descriptor Discovery
+char-read-hnd   <handle>                       Characteristics Value/Descriptor Read by handle
+char-read-uuid  <UUID> [start hnd] [end hnd]   Characteristics Value/Descriptor Read by UUID
+char-write-req  <handle> <new value>           Characteristic Value Write (Write Request)
+char-write-cmd  <handle> <new value>           Characteristic Value Write (No response)
+sec-level       [low | medium | high]          Set security level. Default: low
+mtu             <value>                        Exchange MTU for GATT/ATT
+[                 ][LE]> 
+=== EXIT ===
+PTY_READ_END=OSError(5, 'I/O error')
+exit
+
+PROCESS_EXIT=0

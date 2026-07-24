@@ -1,0 +1,70 @@
+{
+  "baseline": [
+    {
+      "elapsed_seconds": 0.20689468000000488,
+      "http_requests": 0,
+      "inference_count": 4,
+      "valid_frames": 20
+    },
+    {
+      "elapsed_seconds": 0.21241267999994307,
+      "http_requests": 0,
+      "inference_count": 4,
+      "valid_frames": 20
+    },
+    {
+      "elapsed_seconds": 0.20698671999980434,
+      "http_requests": 0,
+      "inference_count": 4,
+      "valid_frames": 20
+    },
+    {
+      "elapsed_seconds": 0.20689828000013222,
+      "http_requests": 0,
+      "inference_count": 4,
+      "valid_frames": 20
+    },
+    {
+      "elapsed_seconds": 0.2178049999997711,
+      "http_requests": 0,
+      "inference_count": 4,
+      "valid_frames": 20
+    }
+  ],
+  "baseline_mean": 0.2101994719999311,
+  "mean_difference": 0.004407807999996294,
+  "slow_http": [
+    {
+      "elapsed_seconds": 0.21046479999995427,
+      "http_requests": 2,
+      "inference_count": 4,
+      "valid_frames": 20
+    },
+    {
+      "elapsed_seconds": 0.2109580799997275,
+      "http_requests": 2,
+      "inference_count": 4,
+      "valid_frames": 20
+    },
+    {
+      "elapsed_seconds": 0.22084687999995367,
+      "http_requests": 2,
+      "inference_count": 4,
+      "valid_frames": 20
+    },
+    {
+      "elapsed_seconds": 0.22122416000001976,
+      "http_requests": 2,
+      "inference_count": 4,
+      "valid_frames": 20
+    },
+    {
+      "elapsed_seconds": 0.20954247999998188,
+      "http_requests": 2,
+      "inference_count": 4,
+      "valid_frames": 20
+    }
+  ],
+  "slow_http_mean": 0.2146072799999274,
+  "slow_to_baseline_ratio": 1.0209696435393412
+}

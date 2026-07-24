@@ -30,6 +30,8 @@ class BindIn(BaseModel):
     transport: str = "ble"
     device_name: str = ""
     board_token: str = ""
+    board_type: str = ""
+    platform: str = ""
     wifi_host: str = ""
     wifi_port: int = 0
 
@@ -38,6 +40,10 @@ class BoardRegisterIn(BaseModel):
     hardware_id: str
     board_token: str
     firmware_version: str = ""
+    board_type: str = ""
+    platform: str = ""
+    model_version: str = ""
+    pipeline_sha256: str = ""
     wifi_host: str = ""
     wifi_port: int = 0
 
@@ -77,6 +83,34 @@ class Esp32EmgUploadIn(BaseModel):
     is_final: bool = False
 
 
+def _infer_board_type(device: Device, telemetry: dict[str, Any] | None = None) -> str:
+    text = " ".join([
+        device.hardware_id or "",
+        device.device_name or "",
+        device.firmware_version or "",
+        str((telemetry or {}).get("board_type", "")),
+        str((telemetry or {}).get("platform", "")),
+        json.dumps(telemetry or {}, ensure_ascii=False),
+    ]).lower()
+    if any(key in text for key in ("milk", "duo", "duos", "milk-v")):
+        return "milk_duo_s"
+    if "esp32" in text:
+        return "esp32"
+    if (device.transport or "") == "wifi":
+        return "wifi_board"
+    return device.transport or "ble"
+
+
+def _board_label(board_type: str) -> str:
+    labels = {
+        "milk_duo_s": "Milk Duo S",
+        "esp32": "ESP32",
+        "wifi_board": "Wi-Fi 板子",
+        "ble": "蓝牙设备",
+    }
+    return labels.get(board_type or "", "智能设备")
+
+
 def _now() -> datetime:
     return datetime.utcnow()
 
@@ -106,9 +140,13 @@ def _effective_status(device: Device) -> str:
 
 
 def _serialize_device(device: Device) -> dict[str, Any]:
+    telemetry = _parse_json_blob(device.telemetry_json, {})
+    board_type = _infer_board_type(device, telemetry)
     return {
         "hardware_id": device.hardware_id,
         "device_name": device.device_name or device.hardware_id,
+        "board_type": board_type,
+        "board_label": _board_label(board_type),
         "transport": device.transport or "ble",
         "status": _effective_status(device),
         "bind_time": device.bind_time.isoformat() if device.bind_time else None,
@@ -119,7 +157,7 @@ def _serialize_device(device: Device) -> dict[str, Any]:
         "last_ip": device.last_ip or "",
         "battery_level": device.battery_level,
         "signal_strength": device.signal_strength,
-        "telemetry": _parse_json_blob(device.telemetry_json, {}),
+        "telemetry": telemetry,
         "last_command_ack": _parse_json_blob(device.last_command_ack_json, {}),
     }
 
@@ -213,6 +251,15 @@ def _normalize_telemetry(raw: dict[str, Any], existing: dict[str, Any] | None = 
         collect_state = {}
     telemetry["collect_state"] = collect_state
     return telemetry
+
+
+def _remember_board_identity(device: Device, **values: str) -> None:
+    telemetry = _parse_json_blob(device.telemetry_json, {})
+    for key, value in values.items():
+        if value not in (None, ""):
+            telemetry[key] = value
+    if telemetry:
+        device.telemetry_json = json.dumps(_normalize_telemetry(telemetry), ensure_ascii=False)
 
 
 def _session_data_path(session_id: str) -> Path:
@@ -441,6 +488,7 @@ def bind_device(
             existing.board_token = body.board_token or existing.board_token
             existing.wifi_host = body.wifi_host or existing.wifi_host
             existing.wifi_port = body.wifi_port or existing.wifi_port
+            _remember_board_identity(existing, board_type=body.board_type, platform=body.platform)
         db.commit()
         db.refresh(existing)
         return {"message": "device rebound", "device": _serialize_device(existing)}
@@ -457,6 +505,8 @@ def bind_device(
         telemetry_json="{}",
     )
     db.add(device)
+    if transport == "wifi":
+        _remember_board_identity(device, board_type=body.board_type, platform=body.platform)
     db.commit()
     db.refresh(device)
     return {"message": "device bound", "device": _serialize_device(device)}
@@ -588,6 +638,13 @@ def wifi_register(
 ):
     device = _get_board_device(db, body.hardware_id, body.board_token)
     _update_wifi_presence(device, body)
+    _remember_board_identity(
+        device,
+        board_type=body.board_type,
+        platform=body.platform,
+        model_version=body.model_version,
+        pipeline_sha256=body.pipeline_sha256,
+    )
     db.commit()
     db.refresh(device)
     return {"message": "register ok", "device": _serialize_device(device)}

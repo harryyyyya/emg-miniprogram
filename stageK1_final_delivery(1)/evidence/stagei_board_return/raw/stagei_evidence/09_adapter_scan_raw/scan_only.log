@@ -1,0 +1,55 @@
+EVIDENCE_DIR=/root/stagei_evidence/09_adapter_scan_raw
+=== preflight ===
+Linux milkv-duo 5.10.4-tag- #1 PREEMPT Fri May 30 14:51:54 CST 2025 riscv64 GNU/Linux
+NAME=Buildroot
+VERSION=-g6b03c2762
+ID=buildroot
+VERSION_ID=2025.02
+PRETTY_NAME="Buildroot 2025.02"
+5: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UNKNOWN qlen 1000
+    link/ether 88:00:33:77:78:f7 brd ff:ff:ff:ff:ff:ff
+=== Stage G authoritative attach command ===
+hci0:	Type: Primary  Bus: UART
+	BD Address: 0B:3B:22:AC:88:20  ACL MTU: 1021:9  SCO MTU: 255:4
+	UP RUNNING 
+	RX bytes:751 acl:0 sco:0 events:48 errors:0
+	TX bytes:1757 acl:0 sco:0 commands:48 errors:0
+	Features: 0xbf 0x2e 0x4d 0xfe 0xd8 0x3f 0x7b 0x87
+	Packet type: DM1 DM3 DM5 DH1 DH3 DH5 HV1 HV3 
+	Link policy: RSWITCH SNIFF 
+	Link mode: PERIPHERAL ACCEPT 
+	Name: 'BlueZ 5.79'
+	Class: 0x000000
+	Service Classes: Unspecified
+	Device Class: Miscellaneous, 
+	HCI Version: 5.4 (0xd)  Revision: 0xb
+	LMP Version: 5.4 (0xd)  Subversion: 0xb
+	Manufacturer: not assigned (2875)
+
+=== adapter scan only ===
+{
+  "advertisement_count": 1,
+  "advertisements": [
+    {
+      "address": "C0:CC:12:0C:5F:4F",
+      "name": "C0-CC-12-0C-5F-4F",
+      "service_uuids": []
+    }
+  ],
+  "raw_command_log": "/root/stagei_evidence/09_adapter_scan_raw/raw_bluetoothctl_commands.log",
+  "scope": "SCAN_ONLY_NO_CONNECTION",
+  "status": "PASS",
+  "target_name": "BT-11(BLE)",
+  "target_present": false,
+  "target_service": "0000ffe0-0000-1000-8000-00805f9b34fb"
+}
+TARGET_PRESENT=NO
+ADAPTER_SCAN_EXIT=0
+=== cleanup ===
+Failed to stop discovery: org.bluez.Error.Failed
+=== post-cleanup ===
+aic8800_fdrv          551304  0 
+aic8800_bsp           102080  1 aic8800_fdrv
+5: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UNKNOWN qlen 1000
+    link/ether 88:00:33:77:78:f7 brd ff:ff:ff:ff:ff:ff
+POST_HCI0_ABSENT=PASS

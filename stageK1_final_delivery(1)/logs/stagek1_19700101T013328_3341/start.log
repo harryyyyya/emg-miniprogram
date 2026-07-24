@@ -1,0 +1,15 @@
+model/duo_fc_mlp_3session_v1_retry2_risk_accepted.cvimodel: OK
+model/RISK_ACCEPTANCE.json: OK
+model/pipeline_contract.json: OK
+fixtures/demo_sequence.bin: OK
+MODEL_RISK_IDENTITY=PASS quality_gates_passed=false
+UART_GATE=MOCK_FILE sink=file:/root/duo_fc_competition_v1_1/logs/uart_mock.bin
+BACKEND_GATE=LOCAL_MOCK_NOT_REAL_BACKEND
+BT11_LIVE_GATE=NOT_RUN_UNLESS_TARGET_IS_ACTUALLY_LOGGED
+ACTUATOR_GATE=NOT_RUN
+PREFLIGHT=PASS
+HCI_START=PASS scope=DUO_S_HCI_NOT_BT11_GATT
+SAFE_DEMO_START=PASS
+EVIDENCE_BOUNDARY=BT11_LIVE_NOT_RUN_UNTIL_REAL_TARGET_LOG_EXISTS
+UART_SINK=file:/root/duo_fc_competition_v1_1/logs/uart_mock.bin
+BACKEND_MODE=mock

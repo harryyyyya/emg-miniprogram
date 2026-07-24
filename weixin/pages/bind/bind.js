@@ -2,11 +2,52 @@ const ble = require('../../utils/ble_manager');
 const { request } = require('../../utils/request');
 const esp32Link = require('../../utils/esp32_link');
 
-const DEFAULT_WIFI_DEVICE = {
-  hardwareId: 'ESP32-HAND-001',
-  boardToken: 'esp32-secret',
-  deviceName: '我的智能假手',
-};
+const WIFI_DEVICE_PRESETS = [
+  {
+    key: 'milk_duo_s',
+    label: 'Milk Duo S',
+    hardwareId: 'DUOS-WIFI-001',
+    boardToken: 'duos-secret',
+    deviceName: '我的 Milk Duo S 智能假手',
+  },
+  {
+    key: 'esp32',
+    label: 'ESP32',
+    hardwareId: 'ESP32-HAND-001',
+    boardToken: 'esp32-secret',
+    deviceName: '我的 ESP32 智能假手',
+  },
+];
+
+const DEFAULT_WIFI_DEVICE = WIFI_DEVICE_PRESETS[0];
+
+function getWifiPreset(key) {
+  return WIFI_DEVICE_PRESETS.find((item) => item.key === key) || DEFAULT_WIFI_DEVICE;
+}
+
+function inferBoardType(device = {}, extras = {}) {
+  const text = [
+    device.board_type,
+    extras.board_type,
+    device.hardware_id,
+    extras.hardware_id,
+    device.device_name,
+    device.name,
+  ].filter(Boolean).join(' ').toLowerCase();
+  if (text.includes('milk') || text.includes('duo') || text.includes('duos')) return 'milk_duo_s';
+  if (text.includes('esp32')) return 'esp32';
+  return (device.transport || extras.transport) === 'wifi' ? 'wifi_board' : 'ble';
+}
+
+function boardLabel(boardType) {
+  const labels = {
+    milk_duo_s: 'Milk Duo S',
+    esp32: 'ESP32',
+    wifi_board: 'Wi-Fi 板子',
+    ble: '蓝牙设备',
+  };
+  return labels[boardType] || '智能设备';
+}
 
 const DEFAULT_DIRECT_DEVICE = {
   ip: '',
@@ -20,10 +61,13 @@ const DEFAULT_DIRECT_DEVICE = {
 
 function buildStoredDevice(device, extras = {}) {
   const name = device.device_name || device.name || device.hardware_id || extras.hardware_id || '';
+  const board_type = device.board_type || extras.board_type || inferBoardType(device, extras);
   return {
     name,
     deviceName: name,
     hardware_id: device.hardware_id || extras.hardware_id || '',
+    board_type,
+    board_label: device.board_label || extras.board_label || boardLabel(board_type),
     transport: device.transport || extras.transport || 'ble',
     bindTime: Date.now(),
     status: device.status || extras.status || 'offline',
@@ -69,6 +113,8 @@ Page({
     failMsg: '',
     showWifiAdvanced: false,
     showDirectAdvanced: false,
+    wifiPresets: WIFI_DEVICE_PRESETS,
+    wifiBoardType: DEFAULT_WIFI_DEVICE.key,
     wifiForm: { ...DEFAULT_WIFI_DEVICE },
     esp32Form: { ...DEFAULT_DIRECT_DEVICE },
   },
@@ -84,8 +130,19 @@ Page({
   },
 
   fillDefaultWifiDevice() {
+    const preset = getWifiPreset(this.data.wifiBoardType);
     this.setData({
-      wifiForm: { ...DEFAULT_WIFI_DEVICE },
+      wifiForm: { ...preset },
+      failMsg: '',
+    });
+  },
+
+  selectWifiPreset(e) {
+    const boardType = e.currentTarget.dataset.type || DEFAULT_WIFI_DEVICE.key;
+    const preset = getWifiPreset(boardType);
+    this.setData({
+      wifiBoardType: preset.key,
+      wifiForm: { ...preset },
       failMsg: '',
     });
   },
@@ -154,7 +211,13 @@ Page({
           wx.showToast({ title: '二维码里没有设备信息', icon: 'none' });
           return;
         }
+        const boardType = inferBoardType({
+          board_type: payload.board_type || payload.platform,
+          hardware_id: payload.hardware_id,
+          device_name: payload.device_name || payload.name,
+        }, {});
         this.setData({
+          wifiBoardType: boardType === 'milk_duo_s' ? 'milk_duo_s' : 'esp32',
           wifiForm: {
             hardwareId: payload.hardware_id || '',
             boardToken: payload.board_token || '',
@@ -236,19 +299,21 @@ Page({
           transport: 'wifi',
           board_token: boardToken,
           device_name: deviceName || hardwareId,
+          board_type: this.data.wifiBoardType,
         },
       });
 
       const storedDevice = buildStoredDevice(res.device || {}, {
         hardware_id: hardwareId,
         transport: 'wifi',
+        board_type: this.data.wifiBoardType,
       });
       wx.setStorageSync('boundDevice', storedDevice);
       this.setData({ step: 'success', targetDevice: storedDevice.name || hardwareId });
     } catch (err) {
       this.setData({
         step: 'fail',
-        failMsg: (err && err.detail) || 'ESP32 绑定失败，请检查登录状态、后端连接、设备编号和密钥。',
+        failMsg: (err && err.detail) || 'Wi-Fi 设备绑定失败，请检查登录状态、后端连接、设备编号和密钥。',
       });
     }
   },

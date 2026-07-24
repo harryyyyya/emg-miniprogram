@@ -1,0 +1,29 @@
+utc=2026-07-23T02:38:22Z
+compiler=/usr/bin/riscv64-linux-gnu-gcc
+riscv64-linux-gnu-gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+/mnt/d/Deep Learning/AAA_Part_two/stageH/stageh_run/wsl_results/board_native_retry1/libduo_emg_features.so: ELF 64-bit LSB shared object, UCB RISC-V, RVC, double-float ABI, version 1 (SYSV), dynamically linked, not stripped
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Shared object file)
+  Machine:                           RISC-V
+  Version:                           0x1
+  Entry point address:               0x0
+  Start of program headers:          64 (bytes into file)
+  Start of section headers:          4816 (bytes into file)
+  Flags:                             0x5, RVC, double-float ABI
+  Size of this header:               64 (bytes)
+  Size of program headers:           56 (bytes)
+  Number of program headers:         6
+  Size of section headers:           64 (bytes)
+  Number of section headers:         13
+  Section header string table index: 12
+dynamic_dependencies=NONE
+8b015f0d5cef20283a9c141f73bbec494d93929651f478ec45f7786d0663a493  /mnt/d/Deep Learning/AAA_Part_two/stageH/stageh_run/integration/duo_s_full_chain/native/emg_features_board.c
+efe004eca2c8e1c9e92f1196fb85d2621124e9f9cf063c23addf259802fc848c  /mnt/d/Deep Learning/AAA_Part_two/stageH/stageh_run/wsl_results/board_native_retry1/libduo_emg_features.so
+STAGEH_BOARD_NATIVE_BUILD=PASS
+OUTPUT=/mnt/d/Deep Learning/AAA_Part_two/stageH/stageh_run/wsl_results/board_native_retry1/libduo_emg_features.so

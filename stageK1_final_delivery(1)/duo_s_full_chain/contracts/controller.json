@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "authority": "experiments/stage6_full_chain_meng77_3session_v1/esp32_full_chain/src/emg_controller.c",
+  "labels": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+  "rest_label": 0,
+  "validity": {"VALID": 0, "LOW_CONFIDENCE": 1, "SIGNAL_INVALID": 2},
+  "vote_horizon_ms": 300,
+  "vote_required_fraction": 0.70,
+  "nominal_step_ms": 40,
+  "maximum_low_confidence_hold_ms": 200,
+  "margin_threshold": {"value": null, "source": "model_contract", "required": true},
+  "margin_boundary": "margin_equal_threshold_is_confident",
+  "state_seq": "increments_when_emitted_gesture_id_or_validity_changes",
+  "frame_seq": "increments_per_controller_update",
+  "continuity_reset": "clear_votes_and_hold_reset_to_rest_then_emit_signal_invalid",
+  "forbidden_whitelist": [0, 2, 8]
+}

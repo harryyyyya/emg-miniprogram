@@ -1,0 +1,18 @@
+Duo S competition v1 current return
+
+status: PACKAGE_PREPARED_AWAITING_DUO_ACCEPTANCE
+reason: host package tests passed, but the new package has not yet been executed on Duo S.
+
+host validation: 38/38 PASS on Windows, including inherited offline tests and new competition file-UART/mock-HTTP tests.
+host validation is not Duo S, BT-11, STM32, real backend, or actuator evidence.
+
+inherited Prompt 10 status: PASS_FOR_DUO_S_TPU_RECORDED_FULL_CHAIN_REPLAY
+inherited Prompt 13 status: PASS_FOR_DUOS_HCI_AND_BLE_ADAPTER_OFFLINE_NO_BT11_TARGET
+
+BT-11 live: NOT_RUN
+J3 to STM32: NOT_RUN
+real backend: NOT_RUN
+actuator: NOT_RUN
+
+Use RESULT_RETURN_TEMPLATE.md after running bin/run_board_acceptance.sh on Duo S.
+

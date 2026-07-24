@@ -1,0 +1,250 @@
+=== GATTTOOL HELP ALL ===
+Usage:
+  gatttool [OPTION*]
+
+Help Options:
+  -h, --help                                Show help options
+  --help-all                                Show all help options
+  --help-gatt                               Show all GATT commands
+  --help-params                             Show all Primary Services/Characteristics arguments
+  --help-char-read-write                    Show all Characteristics Value/Descriptor Read/Write arguments
+
+GATT commands
+  --primary                                 Primary Service Discovery
+  --characteristics                         Characteristics Discovery
+  --char-read                               Characteristics Value/Descriptor Read
+  --char-write                              Characteristics Value Write Without Response (Write Command)
+  --char-write-req                          Characteristics Value Write (Write Request)
+  --char-desc                               Characteristics Descriptor Discovery
+  --listen                                  Listen for notifications and indications
+
+Primary Services/Characteristics arguments
+  -s, --start=0x0001                        Starting handle (optional)
+  -e, --end=0xffff                          Ending handle (optional)
+  -u, --uuid=0x1801                         UUID16 or UUID128 (optional)
+
+Characteristics Value/Descriptor Read/Write arguments
+  -a, --handle=0x0001                       Read/Write characteristic by handle (required)
+  -n, --value=0x0001                        Write characteristic value (required for write operation)
+
+Application Options:
+  -i, --adapter=hciX                        Specify local adapter interface
+  -b, --device=MAC                          Specify remote Bluetooth address
+  -t, --addr-type=[public | random]         Set LE address type. Default: public
+  -m, --mtu=MTU                             Specify the MTU size
+  -p, --psm=PSM                             Specify the PSM for GATT/ATT over BR/EDR
+  -l, --sec-level=[low | medium | high]     Set security level. Default: low
+  -I, --interactive                         Use interactive mode
+
+=== GATTTOOL HELP GATT ===
+Usage:
+  gatttool [OPTION*]
+
+GATT commands
+  --primary                                 Primary Service Discovery
+  --characteristics                         Characteristics Discovery
+  --char-read                               Characteristics Value/Descriptor Read
+  --char-write                              Characteristics Value Write Without Response (Write Command)
+  --char-write-req                          Characteristics Value Write (Write Request)
+  --char-desc                               Characteristics Descriptor Discovery
+  --listen                                  Listen for notifications and indications
+  -I, --interactive                         Use interactive mode
+
+=== GATTTOOL HELP PARAMS ===
+Usage:
+  gatttool [OPTION*]
+
+Primary Services/Characteristics arguments
+  -s, --start=0x0001                        Starting handle (optional)
+  -e, --end=0xffff                          Ending handle (optional)
+  -u, --uuid=0x1801                         UUID16 or UUID128 (optional)
+
+=== GATTTOOL HELP CHAR READ WRITE ===
+Usage:
+  gatttool [OPTION*]
+
+Characteristics Value/Descriptor Read/Write arguments
+  -a, --handle=0x0001                       Read/Write characteristic by handle (required)
+  -n, --value=0x0001                        Write characteristic value (required for write operation)
+
+=== STRINGS TOOL ===
+/usr/bin/strings
+=== GATTTOOL RELEVANT BINARY STRINGS ===
+Can't detect MTU, using default: %s
+Notification handle = 0x%04x value: 
+Indication   handle = 0x%04x value: 
+Discover all characteristics failed: %s
+Discover all primary services failed: %s
+Discover primary services by UUID failed: %s
+Characteristic value/descriptor read failed: %s
+Characteristic value/descriptor: 
+Read characteristics by UUID failed: %s
+Discover descriptors failed: %s
+Show all Primary Services/Characteristics arguments
+Primary Services/Characteristics arguments
+Show all Characteristics Value/Descriptor Read/Write arguments
+Characteristics Value/Descriptor Read/Write arguments
+Specify the MTU size
+primary
+Primary Service Discovery
+characteristics
+Characteristics Discovery
+Characteristics Value/Descriptor Read
+char-write
+Characteristics Value Write Without Response (Write Command)
+char-write-req
+Characteristics Value Write (Write Request)
+char-desc
+Characteristics Descriptor Discovery
+listen
+Listen for notifications and indications
+setsockopt(BT_RCVMTU): %s (%d)
+getsockopt(BT_RCVMTU): %s (%d)
+getsockopt(BT_SNDMTU): %s (%d)
+[0mExchange MTU Request failed: %s
+MTU was exchanged successfully: %d
+[0mError exchanging MTU
+[0mCharacteristic value/descriptor read failed: %s
+Usage: mtu <value>
+[0mMTU exchange can only occur once per connection.
+[0mInvalid value. Minimum MTU size is %d
+[0mDiscover descriptors failed: %s
+[0mDiscover all characteristics failed: %s
+[0mDiscover primary services by UUID failed: %s
+[0mDiscover all primary services failed: %s
+[0mNo primary service found
+[0mRead characteristics by UUID failed: %s
+Connection successful
+Failed to create signal descriptor
+Characteristics Value/Descriptor Read by handle
+Characteristics Value/Descriptor Read by UUID
+char-write-cmd
+Exchange MTU for GATT/ATT
+=== BLUETOOTHCTL RELEVANT BINARY STRINGS ===
+[1;30mDevice %s %s
+%s%s%sDevice %s %s
+Missing attribute argument
+Attribute %s not available
+attribute/UUID required
+No device connected
+SetDiscoveryFilter failed: %s
+SetDiscoveryFilter success
+Device has been removed
+Failed to %s discovery: %s
+Discovery %s
+[0m] Device %s 
+[0m] Attribute %s 
+Missing device address argument
+Device %s not available
+No attribute selected
+SetDiscoveryFilter
+Failed to set discovery filter
+StartDiscovery
+StopDiscovery
+Failed to %s discovery
+Device %s (%s)
+Device %s
+Set device alias
+Generic Attribute Submenu
+list-attributes
+List attributes
+select-attribute
+<attribute/UUID/local> [attribute/UUID]
+Select attribute
+attribute-info
+[attribute/UUID]
+Read attribute value
+Write attribute value
+acquire-notify
+Notify attribute value
+[dev/attribute/UUID]
+Clone a device or attribute
+Clears discovery filter.
+Advertisement monitor %d lost device %s
+Advertisement monitor %d found device %s
+[0m] Attribute %s (%s) written:
+[0m] %s Notification:
+Attribute %s (%s) indication confirm received
+[0m] Attribute %s (%s) %s:
+[0m] Attribute %s (%s) notifications %s
+Authorize attribute(%s) write (yes/no):
+[0m] Attribute %s (%s) written
+[0m] Attribute %s %s sock acquired
+Authorize attribute(%s) read (yes/no):
+Attribute %s %s sock closed
+[0m] Attribute %s (%s) notifications disabled
+[0m] Attribute %s (%s) notifications enabled
+Unable to find local attribute %s
+Unable to write local attribute %s
+[0m] Attribute %s (%s) written
+Unable to read attribute %s
+Unable to write attribute %s
+Unable to notify attribute %s
+Unable to find attribute %s
+[0;91mSet device flags failed with status 0x%02x (%s)
+[0;91mRemove device failed with status 0x%02x (%s)
+[0;91mAdd device failed with status 0x%02x (%s)
+[0;91mSet Device ID failed with status 0x%02x (%s)
+Device ID successfully set
+[0;91mUnable to send stop_discovery cmd
+[0;91mUnable to send start_discovery cmd
+[0;91mUnable to send unpair_device cmd
+Set device flag of %s (%s)
+[0;91mUnable to send Set Device Flags command
+Get device flag of %s (%s)
+[0;91mUnable to send Get Device Flags command
+Removing device with %s (%s)
+[0;91mUnable to send remove device command
+Adding device with %s (%s)
+[0;91mUnable to send add device command
+[0;91mUnpair device failed. status 0x%02x (%s)
+[0;91mUnable to send unblock_device cmd
+[0;91mUnable to send block_device cmd
+[0;91mUnable to send start_service_discovery cmd
+[0;91mUnable to send cancel_pair_device cmd
+[0;91mUnable to send pair_device cmd
+hci%u class of device changed: 0x%02x%02x%02x
+[0;91mGet device flags failed with status 0x%02x (%s)
+[0;91mStop Discovery failed: status 0x%02x (%s)
+Discovery stopped
+[0;91mStart Service Discovery failed: status 0x%02x (%s)
+Service discovery started
+[0;91mUnable to start discovery. status 0x%02x (%s)
+Discovery started
+LE Device Address: %s (%s)
+Set device major/minor class
+Stop discovery
+Set Device ID
+Get device flags
+Set device flags
+Class of Device Changed
+Device Connected
+Device Disconnected
+Device Found
+Device Blocked
+Device Unblocked
+Device Unpaired
+Device Added
+Device Removed
+Device Flags Changed
+Advertisement Monitor Device Found
+Advertisement Monitor Device Lost
+Start Discovery
+Stop Discovery
+Start Service Discovery
+Start Limited Discovery
+Get Device Flags
+Set Device Flags
+Hardcopy Notification
+Service Discovery Server Service Class
+Human Interface Device Service
+Message Notification Server
+Generic Attribute Profile
+Device Information
+Alert Notification Service
+Transport Discovery
+Device Name
+Alert Notification Control Point
+Gain Settings Attribute
+	Notifications (0x0100)
+.riscv.attributes

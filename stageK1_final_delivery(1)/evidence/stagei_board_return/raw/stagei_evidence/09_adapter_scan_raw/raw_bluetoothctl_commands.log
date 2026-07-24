@@ -1,0 +1,23 @@
+=== COMMAND ===
+["timeout", "8", "bluetoothctl", "scan", "on"]
+EXIT=0
+=== STDOUT ===
+hci0 type 7 discovering on
+SetDiscoveryFilter success
+Discovery started
+=== STDERR ===
+
+=== COMMAND ===
+["bluetoothctl", "scan", "off"]
+EXIT=1
+=== STDOUT ===
+Failed to stop discovery: org.bluez.Error.Failed
+=== STDERR ===
+
+=== COMMAND ===
+["bluetoothctl", "devices"]
+EXIT=0
+=== STDOUT ===
+Device C0:CC:12:0C:5F:4F C0-CC-12-0C-5F-4F
+=== STDERR ===
+

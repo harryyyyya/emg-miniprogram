@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "default": "FULL_CHAIN_SAFE_DEMO",
+  "modes": {
+    "UART_ONLY_TEST": {"formal": true, "ble": false, "recorded_input": false, "inference": false, "uart": true, "network": false, "emg_upload": false},
+    "WIFI_ONLY_TEST": {"formal": true, "ble": false, "recorded_input": false, "inference": false, "uart": false, "network": true, "emg_upload": false},
+    "BLE_INFER_UART_TEST": {"formal": true, "ble": true, "recorded_input": false, "inference": true, "uart": true, "network": false, "emg_upload": false},
+    "FULL_CHAIN_SAFE_DEMO": {"formal": true, "ble": true, "recorded_input": false, "inference": true, "uart": true, "network": true, "emg_upload": false},
+    "FULL_CHAIN_WITH_EMG_UPLOAD": {"formal": true, "ble": true, "recorded_input": false, "inference": true, "uart": true, "network": true, "emg_upload": true},
+    "RECORDED_REPLAY_FULL_CHAIN_TEST": {"formal": false, "development_only": true, "ble": false, "recorded_input": true, "inference": true, "uart": true, "network": true, "emg_upload": false}
+  }
+}

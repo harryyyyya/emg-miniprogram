@@ -1,0 +1,22 @@
+=== INTERACTIVE COMMAND STRINGS ===
+exit
+connect
+primary
+characteristics
+char-write-req
+char-desc
+connect to %s: %s (%d)
+Usage: %s <handle> <new value>
+Usage: mtu <value>
+help
+exit
+quit
+connect
+disconnect
+char-write-cmd
+disconnect_cb
+=== PIPED INTERACTIVE HELP ===
+[                 ][LE]> 
+(gatttool:1222): GLib-CRITICAL **: 00:38:35.597: Source ID 1 was not found when attempting to remove it
+
+GATTTOOL_PIPE_EXIT=124

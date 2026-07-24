@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "frame_size_bytes": 98,
+  "header_hex": "AAAA",
+  "type_or_payload_length_byte": 95,
+  "timestamp": {"offset": 3, "size": 4, "byte_order": "big", "type": "uint32", "unit": "ms"},
+  "imu": {"offset": 7, "size": 9, "type": "int8", "order": ["AX", "AY", "AZ", "GX", "GY", "GZ", "P", "R", "Y"]},
+  "emg": {"offset": 16, "size": 80, "shape": [10, 8], "dtype": "uint8", "order": "sample_major_E1_to_E8"},
+  "battery": {"offset": 96, "size": 1, "type": "uint8"},
+  "tail": {"offset": 97, "hex": "55"},
+  "nominal_packet_interval_ms": 20,
+  "nominal_frame_rate_hz": 50,
+  "sample_rate_hz": 500,
+  "resync": "scan_AAAA_then_validate_byte_2_and_tail"
+}

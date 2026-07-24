@@ -1,0 +1,261 @@
+===== OFFICIAL DUO S IDENTITY =====
+NAME=Buildroot
+VERSION=-g6b03c2762
+ID=buildroot
+VERSION_ID=2025.02
+PRETTY_NAME="Buildroot 2025.02"
+Linux milkv-duo 5.10.4-tag- #1 PREEMPT Fri May 30 14:51:54 CST 2025 riscv64 GNU/Linux
+===== CONSOLE CHECK =====
+root=/dev/mmcblk0p3 rootwait rw console=ttyS0,115200 earlycon=sbi riscv.fwsz=0x80000 loglevel=9
+ttyS0
+===== UART4 CHECK =====
+crw------- 1 root root 4, 68 Jan  1 00:00 [0m[01;33m/dev/ttyS4[0m
+speed 9600 baud; rows 0; columns 0; line = 0;
+intr = ^C; quit = ^\; erase = ^?; kill = ^U; eof = ^D; eol = <undef>;
+eol2 = <undef>; swtch = <undef>; start = ^Q; stop = ^S; susp = ^Z; rprnt = ^R;
+werase = ^W; lnext = ^V; discard = ^O; min = 1; time = 0;
+-parenb -parodd -cmspar cs8 hupcl -cstopb cread clocal -crtscts
+-ignbrk -brkint -ignpar -parmrk -inpck -istrip -inlcr -igncr icrnl ixon -ixoff
+-iuclc -ixany -imaxbel -iutf8
+opost -olcuc -ocrnl onlcr -onocr -onlret -ofill -ofdel nl0 cr0 tab0 bs0 vt0 ff0
+isig icanon iexten echo echoe echok -echonl -noflsh -xcase -tostop -echoprt
+echoctl echoke -flusho -extproc
+===== MODULES =====
+Module                  Size  Used by    Tainted: GF 
+cv181x_pwm              7321  0 
+aic8800_fdrv          551304  0 
+aic8800_bsp           102080  1 aic8800_fdrv
+cv181x_ive            206089  0 
+cvi_vc_driver         728895  0 
+cv181x_jpeg            11827  1 cvi_vc_driver
+cv181x_vcodec          31943  2 cvi_vc_driver,cv181x_jpeg
+cv181x_tpu             31973  0 
+cv181x_clock_cooling     6171  0 
+cv181x_rgn            100476  0 
+cv181x_mipi_tx         20751  0 
+cv181x_vo              99760  0 
+cv181x_dwa             49060  0 
+cv181x_vpss           431578  2 cv181x_mipi_tx,cv181x_vo
+cv181x_vi             385389  0 
+snsr_i2c                9277  0 
+cvi_mipi_rx            61849  0 
+cv181x_fast_image      32955  0 
+cv181x_rtos_cmdqu      25916  1 cv181x_fast_image
+cv181x_base           106868 10 cv181x_ive,cvi_vc_driver,cv181x_rgn,cv181x_vo,cv181x_dwa,cv181x_vpss,cv181x_vi,snsr_i2c,cvi_mipi_rx,cv181x_rtos_cmdqu
+cv181x_sys             64442  9 cv181x_ive,cvi_vc_driver,cv181x_rgn,cv181x_vo,cv181x_dwa,cv181x_vpss,cv181x_vi,cv181x_fast_image,cv181x_base
+-rw-r--r-- 1 root root 195208 May 30  2025 /mnt/system/ko/aic8800_bsp.ko
+6657ade41674c65f6b228ac2de8ace926285a06c6adcd46b9de0cabe38cf5652  /mnt/system/ko/aic8800_bsp.ko
+-rw-r--r-- 1 root root 947736 May 30  2025 /mnt/system/ko/aic8800_fdrv.ko
+1636d9081c362df676dc0f59d0f476bd2941d414f8db01f946060f584531c679  /mnt/system/ko/aic8800_fdrv.ko
+-rw-r--r-- 1 root root 9560 May 30  2025 /mnt/system/ko/aic8800_btlpm.ko
+2ac62708feb1c3d741c16356bae6e361c5118ebfbf46f07e98008d6cf6295976  /mnt/system/ko/aic8800_btlpm.ko
+===== RFKILL / HCI =====
+0: phy0: Wireless LAN
+	Soft blocked: no
+	Hard blocked: no
+total 0
+===== WIFI BASELINE =====
+5: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UNKNOWN qlen 1000
+    link/ether 88:00:33:77:13:d8 brd ff:ff:ff:ff:ff:ff
+===== RECENT LOG =====
+[    5.048878] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_v3_in_fdrv:lvl_11ax_mcs5_5g:16
+[    5.048887] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_v3_in_fdrv:lvl_11ax_mcs6_5g:14
+[    5.048896] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_v3_in_fdrv:lvl_11ax_mcs7_5g:14
+[    5.048905] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_v3_in_fdrv:lvl_11ax_mcs8_5g:13
+[    5.048915] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_v3_in_fdrv:lvl_11ax_mcs9_5g:13
+[    5.048923] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_v3_in_fdrv:lvl_11ax_mcs10_5g:12
+[    5.048933] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_v3_in_fdrv:lvl_11ax_mcs11_5g:12
+[    5.048942] AICWFDBG(LOGINFO)	get_userconfig_txpwr_loss:loss_enable:0
+[    5.048951] AICWFDBG(LOGINFO)	get_userconfig_txpwr_loss:loss_value:2
+[    5.048960] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:enable:1
+[    5.048969] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11b_11ag_1m_2g4:18
+[    5.048978] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11b_11ag_2m_2g4:18
+[    5.048986] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11b_11ag_5m5_2g4:18
+[    5.048995] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11b_11ag_11m_2g4:18
+[    5.049003] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11b_11ag_6m_2g4:18
+[    5.049012] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11b_11ag_9m_2g4:18
+[    5.049020] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11b_11ag_12m_2g4:18
+[    5.049029] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11b_11ag_18m_2g4:18
+[    5.049037] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11b_11ag_24m_2g4:16
+[    5.049045] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11b_11ag_36m_2g4:16
+[    5.049053] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11b_11ag_48m_2g4:15
+[    5.049061] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11b_11ag_54m_2g4:15
+[    5.049070] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs0_2g4:18
+[    5.049078] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs1_2g4:18
+[    5.049086] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs2_2g4:18
+[    5.049095] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs3_2g4:18
+[    5.049103] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs4_2g4:16
+[    5.049111] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs5_2g4:16
+[    5.049120] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs6_2g4:15
+[    5.049128] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs7_2g4:15
+[    5.049137] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs8_2g4:14
+[    5.049144] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs9_2g4:14
+[    5.049153] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs0_2g4:18
+[    5.049162] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs1_2g4:18
+[    5.049170] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs2_2g4:18
+[    5.049177] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs3_2g4:18
+[    5.049186] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs4_2g4:16
+[    5.049194] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs5_2g4:16
+[    5.049202] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs6_2g4:15
+[    5.049210] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs7_2g4:15
+[    5.049218] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs8_2g4:14
+[    5.049226] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs9_2g4:14
+[    5.049235] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs10_2g4:13
+[    5.049243] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs11_2g4:13
+[    5.049251] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11a_1m_5g:-128
+[    5.049259] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11a_2m_5g:-128
+[    5.049267] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11a_5m5_5g:-128
+[    5.049276] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11a_11m_5g:-128
+[    5.049284] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11a_6m_5g:18
+[    5.049294] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11a_9m_5g:18
+[    5.049303] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11a_12m_5g:18
+[    5.049311] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11a_18m_5g:18
+[    5.049321] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11a_24m_5g:16
+[    5.049330] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11a_36m_5g:16
+[    5.049340] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11a_48m_5g:15
+[    5.049349] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11a_54m_5g:15
+[    5.049357] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs0_5g:18
+[    5.049366] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs1_5g:18
+[    5.049374] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs2_5g:18
+[    5.049383] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs3_5g:18
+[    5.049391] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs4_5g:16
+[    5.049400] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs5_5g:16
+[    5.049408] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs6_5g:15
+[    5.049416] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs7_5g:15
+[    5.049424] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs8_5g:14
+[    5.049433] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11n_11ac_mcs9_5g:14
+[    5.049441] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs0_5g:18
+[    5.049449] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs1_5g:18
+[    5.049457] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs2_5g:18
+[    5.049465] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs3_5g:18
+[    5.049473] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs4_5g:16
+[    5.049481] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs5_5g:16
+[    5.049489] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs6_5g:14
+[    5.049497] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs7_5g:14
+[    5.049505] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs8_5g:13
+[    5.049513] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs9_5g:13
+[    5.049522] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs10_5g:12
+[    5.049530] AICWFDBG(LOGINFO)	rwnx_send_txpwr_lvl_v3_req:lvl_11ax_mcs11_5g:12
+[    5.049544] AICWFDBG(LOGTRACE)	rwnx_send_msg (120)MM_SET_TXPWR_IDX_LVL_CFM reqcfm:1 in_irq:0 in_softirq:0 in_atomic:0
+[    5.049556] AICWFDBG(LOGTRACE)	rwnx_cmd_malloc get cmd_array[0]:000000008adb9c86 
+[    5.049902] AICWFDBG(LOGDEBUG)	rwnx_rx_handle_msg msg->id:0x78 
+[    5.052447] AICWFDBG(LOGTRACE)	rwnx_cmd_free cmd_array[0]:000000008adb9c86 
+[    5.052461] AICWFDBG(LOGTRACE)	>>> rwnx_send_txpwr_lvl_adj_req()
+[    5.052474] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_adj_in_fdrv:enable:0
+[    5.052484] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_adj_in_fdrv:lvl_adj_2g4_chan_1_4:0
+[    5.052493] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_adj_in_fdrv:lvl_adj_2g4_chan_5_9:0
+[    5.052503] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_adj_in_fdrv:lvl_adj_2g4_chan_10_13:0
+[    5.052512] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_adj_in_fdrv:lvl_adj_5g_chan_42:0
+[    5.052521] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_adj_in_fdrv:lvl_adj_5g_chan_58:0
+[    5.052531] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_adj_in_fdrv:lvl_adj_5g_chan_106:0
+[    5.052540] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_adj_in_fdrv:lvl_adj_5g_chan_122:0
+[    5.052549] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_adj_in_fdrv:lvl_adj_5g_chan_138:0
+[    5.052558] AICWFDBG(LOGINFO)	get_userconfig_txpwr_lvl_adj_in_fdrv:lvl_adj_5g_chan_155:0
+[    5.052565] AICWFDBG(LOGTRACE)	>>> rwnx_msg_free()
+[    5.052576] AICWFDBG(LOGTRACE)	>>> rwnx_send_txpwr_ofst2x_req()
+[    5.052590] AICWFDBG(LOGINFO)	get_userconfig_txpwr_ofst2x_in_fdrv:enable      :0
+[    5.052599] AICWFDBG(LOGINFO)	pwrofst2x 2.4g: [0]:11b, [1]:ofdm_highrate, [2]:ofdm_lowrate
+[    5.052605] AICWFDBG(LOGINFO)	
+[    5.052612] AICWFDBG(LOGINFO)		0
+[    5.052619] AICWFDBG(LOGINFO)		0
+[    5.052626] AICWFDBG(LOGINFO)		0
+[    5.052633] AICWFDBG(LOGINFO)	
+[    5.052640] AICWFDBG(LOGINFO)		0
+[    5.052646] AICWFDBG(LOGINFO)		0
+[    5.052653] AICWFDBG(LOGINFO)		0
+[    5.052661] AICWFDBG(LOGINFO)	
+[    5.052667] AICWFDBG(LOGINFO)		0
+[    5.052674] AICWFDBG(LOGINFO)		0
+[    5.052681] AICWFDBG(LOGINFO)		0
+[    5.052689] AICWFDBG(LOGINFO)	
+[    5.052696] AICWFDBG(LOGINFO)	
+[    5.052703] AICWFDBG(LOGINFO)		0
+[    5.052709] AICWFDBG(LOGINFO)		0
+[    5.052716] AICWFDBG(LOGINFO)		0
+[    5.052722] AICWFDBG(LOGINFO)		0
+[    5.052728] AICWFDBG(LOGINFO)		0
+[    5.052735] AICWFDBG(LOGINFO)		0
+[    5.052742] AICWFDBG(LOGINFO)	
+[    5.052749] AICWFDBG(LOGINFO)		0
+[    5.052755] AICWFDBG(LOGINFO)		0
+[    5.052761] AICWFDBG(LOGINFO)		0
+[    5.052768] AICWFDBG(LOGINFO)		0
+[    5.052774] AICWFDBG(LOGINFO)		0
+[    5.052781] AICWFDBG(LOGINFO)		0
+[    5.052788] AICWFDBG(LOGINFO)	
+[    5.052795] AICWFDBG(LOGINFO)		0
+[    5.052801] AICWFDBG(LOGINFO)		0
+[    5.052808] AICWFDBG(LOGINFO)		0
+[    5.052814] AICWFDBG(LOGINFO)		0
+[    5.052821] AICWFDBG(LOGINFO)		0
+[    5.052827] AICWFDBG(LOGINFO)		0
+[    5.052833] AICWFDBG(LOGINFO)	
+[    5.052843] AICWFDBG(LOGINFO)	rwnx_send_txpwr_ofst2x_req:Do not use txpwr_ofst2x
+[    5.052850] AICWFDBG(LOGTRACE)	>>> rwnx_msg_free()
+[    5.052861] AICWFDBG(LOGTRACE)	>>> rwnx_send_rf_calib_req()
+[    5.052872] AICWFDBG(LOGINFO)	get_userconfig_xtal_cap:enable       :0
+[    5.052881] AICWFDBG(LOGINFO)	get_userconfig_xtal_cap:xtal_cap     :0
+[    5.052890] AICWFDBG(LOGINFO)	get_userconfig_xtal_cap:xtal_cap_fine:0
+[    5.052905] AICWFDBG(LOGTRACE)	rwnx_send_msg (106)MM_SET_RF_CALIB_CFM reqcfm:1 in_irq:0 in_softirq:0 in_atomic:0
+[    5.052916] AICWFDBG(LOGTRACE)	rwnx_cmd_malloc get cmd_array[0]:000000008adb9c86 
+[    5.063530] aicbsp: sdio_err:<aicwf_sdio_bus_pwrctl,1432>: bus down
+[    5.692588] AICWFDBG(LOGDEBUG)	rwnx_rx_handle_msg msg->id:0x6a 
+[    5.692640] AICWFDBG(LOGTRACE)	rwnx_cmd_free cmd_array[0]:000000008adb9c86 
+[    5.692653] AICWFDBG(LOGTRACE)	>>> rwnx_send_get_macaddr_req()
+[    5.692670] AICWFDBG(LOGTRACE)	rwnx_send_msg (116)MM_GET_MAC_ADDR_CFM reqcfm:1 in_irq:0 in_softirq:0 in_atomic:0
+[    5.692682] AICWFDBG(LOGTRACE)	rwnx_cmd_malloc get cmd_array[0]:000000008adb9c86 
+[    5.693169] AICWFDBG(LOGDEBUG)	rwnx_rx_handle_msg msg->id:0x74 
+[    5.693212] AICWFDBG(LOGTRACE)	rwnx_cmd_free cmd_array[0]:000000008adb9c86 
+[    5.693225] AICWFDBG(LOGINFO)	efuse macaddr: 00:00:00:00:00:00
+[    5.693233] AICWFDBG(LOGTRACE)	>>> rwnx_send_reset()
+[    5.693250] AICWFDBG(LOGTRACE)	rwnx_send_msg (1)MM_RESET_CFM reqcfm:1 in_irq:0 in_softirq:0 in_atomic:0
+[    5.693260] AICWFDBG(LOGTRACE)	rwnx_cmd_malloc get cmd_array[0]:000000008adb9c86 
+[    5.694051] AICWFDBG(LOGDEBUG)	rwnx_rx_handle_msg msg->id:0x1 
+[    5.694094] AICWFDBG(LOGTRACE)	rwnx_cmd_free cmd_array[0]:000000008adb9c86 
+[    5.694104] AICWFDBG(LOGTRACE)	>>> rwnx_send_version_req()
+[    5.694119] AICWFDBG(LOGTRACE)	rwnx_send_msg (5)MM_VERSION_CFM reqcfm:1 in_irq:0 in_softirq:0 in_atomic:0
+[    5.694130] AICWFDBG(LOGTRACE)	rwnx_cmd_malloc get cmd_array[0]:000000008adb9c86 
+[    5.694488] AICWFDBG(LOGDEBUG)	rwnx_rx_handle_msg msg->id:0x5 
+[    5.694535] AICWFDBG(LOGTRACE)	rwnx_cmd_free cmd_array[0]:000000008adb9c86 
+[    5.694545] AICWFDBG(LOGTRACE)	>>> rwnx_set_vers()
+[    5.694585] AICWFDBG(LOGTRACE)	>>> rwnx_send_me_config_req()
+[    5.694624] AICWFDBG(LOGTRACE)	rwnx_send_msg (5121)ME_CONFIG_CFM reqcfm:1 in_irq:0 in_softirq:0 in_atomic:0
+[    5.694635] AICWFDBG(LOGTRACE)	rwnx_cmd_malloc get cmd_array[0]:000000008adb9c86 
+[    5.694970] AICWFDBG(LOGDEBUG)	rwnx_rx_handle_msg msg->id:0x1401 
+[    5.695016] AICWFDBG(LOGTRACE)	rwnx_cmd_free cmd_array[0]:000000008adb9c86 
+[    5.695239] AICWFDBG(LOGTRACE)	>>> rwnx_send_me_chan_config_req()
+[    5.695265] AICWFDBG(LOGTRACE)	rwnx_send_msg (5123)ME_CHAN_CONFIG_CFM reqcfm:1 in_irq:0 in_softirq:0 in_atomic:0
+[    5.695277] AICWFDBG(LOGTRACE)	rwnx_cmd_malloc get cmd_array[0]:000000008adb9c86 
+[    5.698164] AICWFDBG(LOGDEBUG)	rwnx_rx_handle_msg msg->id:0x1403 
+[    5.698233] AICWFDBG(LOGTRACE)	rwnx_cmd_free cmd_array[0]:000000008adb9c86 
+[    5.698697] AICWFDBG(LOGINFO)	getRegdomainFromRwnxDB set ccode:00 
+[    5.698759] AICWFDBG(LOGINFO)	rwnx_get_countrycode_channels support channel:1 2 3 4 5 6 7 8 9 10 11 12 13 14 36 40 44 48 52 56 60 64 100 104 108 112 116 120 124 128 132 136 140 144 149 153 157 161 165 
+[    5.722968] AICWFDBG(LOGTRACE)	>>> rwnx_send_me_chan_config_req()
+[    5.722997] AICWFDBG(LOGTRACE)	rwnx_send_msg (5123)ME_CHAN_CONFIG_CFM reqcfm:1 in_irq:0 in_softirq:0 in_atomic:0
+[    5.723011] AICWFDBG(LOGTRACE)	rwnx_cmd_malloc get cmd_array[0]:000000008adb9c86 
+[    5.723355] AICWFDBG(LOGDEBUG)	rwnx_rx_handle_msg msg->id:0x1403 
+[    5.723409] AICWFDBG(LOGTRACE)	rwnx_cmd_free cmd_array[0]:000000008adb9c86 
+[    5.723420] AICWFDBG(LOGTRACE)	>>> rwnx_dbgfs_register()
+[    5.724340] AICWFDBG(LOGINFO)	fw_log_init: ffffffe002908000, ffffffe00290a800
+[    5.724432] AICWFDBG(LOGINFO)	rwnx_interface_add: wlan%d, 2, 10
+[    5.724629] AICWFDBG(LOGINFO)	interface add:88 0 33 77 13 d8
+[    5.746511] AICWFDBG(LOGINFO)	New interface create wlan0 
+[    5.840646] AICWFDBG(LOGTRACE)	>>> rwnx_open()
+[    5.840661] AICWFDBG(LOGTRACE)	>>> rwnx_send_start()
+[    5.840682] AICWFDBG(LOGTRACE)	rwnx_send_msg (3)MM_START_CFM reqcfm:1 in_irq:0 in_softirq:0 in_atomic:0
+[    5.840697] AICWFDBG(LOGTRACE)	rwnx_cmd_malloc get cmd_array[0]:000000008adb9c86 
+[    5.841528] AICWFDBG(LOGDEBUG)	rwnx_rx_handle_msg msg->id:0x3 
+[    5.841585] AICWFDBG(LOGTRACE)	rwnx_cmd_free cmd_array[0]:000000008adb9c86 
+[    5.841596] AICWFDBG(LOGTRACE)	>>> rwnx_send_coex_req()
+[    5.841613] AICWFDBG(LOGTRACE)	rwnx_send_msg (102)MM_SET_COEX_CFM reqcfm:1 in_irq:0 in_softirq:0 in_atomic:0
+[    5.841624] AICWFDBG(LOGTRACE)	rwnx_cmd_malloc get cmd_array[0]:000000008adb9c86 
+[    5.841920] AICWFDBG(LOGDEBUG)	rwnx_rx_handle_msg msg->id:0x66 
+[    5.841971] AICWFDBG(LOGTRACE)	rwnx_cmd_free cmd_array[0]:000000008adb9c86 
+[    5.841982] AICWFDBG(LOGDEBUG)	rwnx_open rwnx_vif->drv_flags:4
+[    5.841992] AICWFDBG(LOGTRACE)	>>> rwnx_send_add_if()
+[    5.842008] AICWFDBG(LOGTRACE)	rwnx_send_msg (7)MM_ADD_IF_CFM reqcfm:1 in_irq:0 in_softirq:0 in_atomic:0
+[    5.842018] AICWFDBG(LOGTRACE)	rwnx_cmd_malloc get cmd_array[0]:000000008adb9c86 
+[    5.842313] AICWFDBG(LOGDEBUG)	rwnx_rx_handle_msg msg->id:0x7 
+[    5.842365] AICWFDBG(LOGTRACE)	rwnx_cmd_free cmd_array[0]:000000008adb9c86 
+[    5.842377] AICWFDBG(LOGDEBUG)	rwnx_open sta create vif in rwnx_hw->vif_table[0] 
+===== END =====

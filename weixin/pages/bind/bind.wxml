@@ -2,13 +2,13 @@
   <view class="hero-card">
     <text class="eyebrow">设备连接</text>
     <text class="hero-title">连接智能假手</text>
-    <text class="hero-desc">推荐使用云端 Wi-Fi 连接。ESP32 上电后会自动向阿里云后端上报状态，小程序只需要绑定一次。</text>
+    <text class="hero-desc">推荐使用云端 Wi-Fi 连接。ESP32 或 Milk Duo S 上电后会自动向阿里云后端上报状态，小程序只需要绑定一次。</text>
   </view>
 
   <view class="mode-switch">
     <view class="mode-item {{transportMode === 'wifi' ? 'active' : ''}}" bindtap="switchTransport" data-mode="wifi">
       <text class="mode-title">推荐</text>
-      <text class="mode-desc">云端 ESP32</text>
+      <text class="mode-desc">云端板子</text>
     </view>
     <view class="mode-item {{transportMode === 'ble' ? 'active' : ''}}" bindtap="switchTransport" data-mode="ble">
       <text class="mode-title">蓝牙</text>
@@ -23,11 +23,28 @@
   <view class="wifi-section" wx:if="{{step === 'scan' && transportMode === 'wifi'}}">
     <view class="form-card primary-card">
       <view class="form-header">
-        <text class="form-title">一键绑定默认设备</text>
-        <text class="form-subtitle">适用于当前烧录的 ESP32 程序：设备编号 ESP32-HAND-001，密钥 esp32-secret。</text>
+        <text class="form-title">选择 Wi-Fi 主控板</text>
+        <text class="form-subtitle">ESP32 和 Milk Duo S 使用同一套云端接口，绑定后都可以上报状态、接收命令并上传肌电数据。</text>
+      </view>
+
+      <view class="board-preset-list">
+        <view
+          class="board-preset {{wifiBoardType === item.key ? 'active' : ''}}"
+          wx:for="{{wifiPresets}}"
+          wx:key="key"
+          bindtap="selectWifiPreset"
+          data-type="{{item.key}}"
+        >
+          <text class="board-preset-title">{{item.label}}</text>
+          <text class="board-preset-desc">{{item.desc}}</text>
+        </view>
       </view>
 
       <view class="device-summary">
+        <view class="summary-row">
+          <text class="summary-label">板子类型</text>
+          <text class="summary-value">{{wifiBoardType === 'milk_duo_s' ? 'Milk Duo S' : 'ESP32'}}</text>
+        </view>
         <view class="summary-row">
           <text class="summary-label">设备编号</text>
           <text class="summary-value">{{wifiForm.hardwareId}}</text>
@@ -38,19 +55,19 @@
         </view>
       </view>
 
-      <button class="btn-primary" bindtap="quickBindWifiDevice">连接我的 ESP32 假手</button>
+      <button class="btn-primary" bindtap="quickBindWifiDevice">连接当前 Wi-Fi 假手</button>
       <button class="btn-secondary" bindtap="scanWifiQrCode">扫码填入设备信息</button>
       <button class="btn-link" bindtap="toggleWifiAdvanced">{{showWifiAdvanced ? '收起手动设置' : '手动修改设备信息'}}</button>
 
       <view class="advanced-panel" wx:if="{{showWifiAdvanced}}">
         <view class="form-item">
           <text class="form-label">设备编号</text>
-          <input class="form-input" placeholder="例如 ESP32-HAND-001" data-field="hardwareId" value="{{wifiForm.hardwareId}}" bindinput="onWifiInput" />
+          <input class="form-input" placeholder="例如 ESP32-HAND-001 或 DUOS-WIFI-001" data-field="hardwareId" value="{{wifiForm.hardwareId}}" bindinput="onWifiInput" />
         </view>
 
         <view class="form-item">
           <text class="form-label">设备密钥</text>
-          <input class="form-input" placeholder="和 ESP32 代码里的 BOARD_TOKEN 一致" data-field="boardToken" value="{{wifiForm.boardToken}}" bindinput="onWifiInput" />
+          <input class="form-input" placeholder="和设备侧配置的 token 一致" data-field="boardToken" value="{{wifiForm.boardToken}}" bindinput="onWifiInput" />
         </view>
 
         <view class="form-item">
@@ -61,13 +78,6 @@
         <button class="btn-primary compact" bindtap="bindWifiDevice">使用以上信息绑定</button>
         <button class="btn-secondary compact" bindtap="fillDefaultWifiDevice">恢复默认信息</button>
       </view>
-    </view>
-
-    <view class="tips-card">
-      <text class="tips-title">ESP32 需要先完成这些事</text>
-      <text class="tips-line">1. 已连接 Wi-Fi。</text>
-      <text class="tips-line">2. 后端地址已烧录为 api.handemglsh.cloud:443。</text>
-      <text class="tips-line">3. 串口能看到 registerBoard status=200 和 heartbeat status=200。</text>
     </view>
   </view>
 

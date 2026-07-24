@@ -1,0 +1,614 @@
+{
+  "status": "PASS",
+  "scope": "WINDOWS_ONNX_RECORDED_REFERENCE_NOT_TPU_OR_LIVE_BLE",
+  "model_id": "duo_fc_mlp_3session_v1_retry2_risk_accepted",
+  "model_sha256": "3f388f88bf8130fbeb7bc3cd0faba76f129b204db9b70731d197a3d7e3322241",
+  "pipeline_sha256": "836a520473ca4bbe857b17501a349a5ff11f385d8593f66970ee4a83021f5273",
+  "recording_sha256": "eaea36aab467937ed64b93fa2cecfe01854a1eaeb46498bbbac153383131d303",
+  "preprocess_sha256": "4f14eb6af7127306d985263a5614ac58140102000d6396698d6ad942bebbf6b4",
+  "onnxruntime_version": "1.27.0",
+  "frames": 570,
+  "windows": 267,
+  "notify_chunks": 1319,
+  "parse_errors": 0,
+  "queue_overflows": 0,
+  "inference_failures": 0,
+  "golden_top1_matches": 90,
+  "golden_top1_total": 90,
+  "default_margin_threshold": 1.8798933982849122,
+  "state_event_count": 84,
+  "state_events": [
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223109,
+      "gesture_id": 0,
+      "state_seq": 1,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223113,
+      "gesture_id": 0,
+      "state_seq": 2,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223116,
+      "gesture_id": 0,
+      "state_seq": 3,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223118,
+      "gesture_id": 0,
+      "state_seq": 4,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223120,
+      "gesture_id": 0,
+      "state_seq": 5,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223123,
+      "gesture_id": 0,
+      "state_seq": 6,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223124,
+      "gesture_id": 0,
+      "state_seq": 7,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223125,
+      "gesture_id": 0,
+      "state_seq": 8,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223126,
+      "gesture_id": 0,
+      "state_seq": 9,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223127,
+      "gesture_id": 0,
+      "state_seq": 10,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223128,
+      "gesture_id": 0,
+      "state_seq": 11,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223130,
+      "gesture_id": 0,
+      "state_seq": 12,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223132,
+      "gesture_id": 0,
+      "state_seq": 13,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223138,
+      "gesture_id": 0,
+      "state_seq": 14,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223145,
+      "gesture_id": 0,
+      "state_seq": 15,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223159,
+      "gesture_id": 0,
+      "state_seq": 16,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223172,
+      "gesture_id": 0,
+      "state_seq": 17,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223174,
+      "gesture_id": 0,
+      "state_seq": 18,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223179,
+      "gesture_id": 0,
+      "state_seq": 19,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223182,
+      "gesture_id": 0,
+      "state_seq": 20,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223197,
+      "gesture_id": 2,
+      "state_seq": 21,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223209,
+      "gesture_id": 2,
+      "state_seq": 22,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223213,
+      "gesture_id": 2,
+      "state_seq": 23,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223216,
+      "gesture_id": 2,
+      "state_seq": 24,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223218,
+      "gesture_id": 2,
+      "state_seq": 25,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223224,
+      "gesture_id": 2,
+      "state_seq": 26,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223224,
+      "gesture_id": 2,
+      "state_seq": 27,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223225,
+      "gesture_id": 2,
+      "state_seq": 28,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223229,
+      "gesture_id": 2,
+      "state_seq": 29,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223234,
+      "gesture_id": 8,
+      "state_seq": 30,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223234,
+      "gesture_id": 8,
+      "state_seq": 31,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223234,
+      "gesture_id": 8,
+      "state_seq": 32,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223235,
+      "gesture_id": 8,
+      "state_seq": 33,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223237,
+      "gesture_id": 8,
+      "state_seq": 34,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223237,
+      "gesture_id": 8,
+      "state_seq": 35,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223238,
+      "gesture_id": 8,
+      "state_seq": 36,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223239,
+      "gesture_id": 8,
+      "state_seq": 37,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223242,
+      "gesture_id": 0,
+      "state_seq": 38,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223245,
+      "gesture_id": 0,
+      "state_seq": 40,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223248,
+      "gesture_id": 0,
+      "state_seq": 41,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223252,
+      "gesture_id": 0,
+      "state_seq": 42,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223253,
+      "gesture_id": 0,
+      "state_seq": 43,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223253,
+      "gesture_id": 0,
+      "state_seq": 44,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223258,
+      "gesture_id": 0,
+      "state_seq": 45,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223261,
+      "gesture_id": 0,
+      "state_seq": 46,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223261,
+      "gesture_id": 0,
+      "state_seq": 47,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223262,
+      "gesture_id": 0,
+      "state_seq": 48,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223266,
+      "gesture_id": 8,
+      "state_seq": 49,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223270,
+      "gesture_id": 8,
+      "state_seq": 50,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223273,
+      "gesture_id": 8,
+      "state_seq": 51,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223273,
+      "gesture_id": 8,
+      "state_seq": 52,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223274,
+      "gesture_id": 8,
+      "state_seq": 53,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223275,
+      "gesture_id": 8,
+      "state_seq": 54,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223276,
+      "gesture_id": 8,
+      "state_seq": 55,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223276,
+      "gesture_id": 8,
+      "state_seq": 56,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223277,
+      "gesture_id": 8,
+      "state_seq": 57,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223278,
+      "gesture_id": 8,
+      "state_seq": 58,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223279,
+      "gesture_id": 8,
+      "state_seq": 59,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223282,
+      "gesture_id": 8,
+      "state_seq": 60,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223283,
+      "gesture_id": 8,
+      "state_seq": 61,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223285,
+      "gesture_id": 8,
+      "state_seq": 62,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223286,
+      "gesture_id": 8,
+      "state_seq": 63,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223287,
+      "gesture_id": 8,
+      "state_seq": 64,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223287,
+      "gesture_id": 8,
+      "state_seq": 65,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223293,
+      "gesture_id": 7,
+      "state_seq": 66,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223293,
+      "gesture_id": 7,
+      "state_seq": 67,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223296,
+      "gesture_id": 7,
+      "state_seq": 68,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223297,
+      "gesture_id": 7,
+      "state_seq": 69,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223297,
+      "gesture_id": 7,
+      "state_seq": 70,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223305,
+      "gesture_id": 0,
+      "state_seq": 72,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223306,
+      "gesture_id": 0,
+      "state_seq": 73,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223310,
+      "gesture_id": 0,
+      "state_seq": 74,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223332,
+      "gesture_id": 0,
+      "state_seq": 75,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223335,
+      "gesture_id": 0,
+      "state_seq": 76,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223340,
+      "gesture_id": 3,
+      "state_seq": 77,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223344,
+      "gesture_id": 3,
+      "state_seq": 78,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223348,
+      "gesture_id": 0,
+      "state_seq": 79,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223349,
+      "gesture_id": 0,
+      "state_seq": 80,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223353,
+      "gesture_id": 0,
+      "state_seq": 81,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223356,
+      "gesture_id": 0,
+      "state_seq": 82,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223362,
+      "gesture_id": 0,
+      "state_seq": 83,
+      "validity": "LOW_CONFIDENCE"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223368,
+      "gesture_id": 0,
+      "state_seq": 84,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223383,
+      "gesture_id": 3,
+      "state_seq": 85,
+      "validity": "VALID"
+    },
+    {
+      "event": "state_change",
+      "monotonic_ms": 320223387,
+      "gesture_id": 3,
+      "state_seq": 86,
+      "validity": "LOW_CONFIDENCE"
+    }
+  ],
+  "reference_path": "artifacts\\stageh\\reference\\recorded_onnx_reference.json",
+  "reference_sha256": "53a2180d35f31f3b825fc7798223f0e06e1717bc925bd7c0c1163a9f9f9f7fe3",
+  "standardized_features_path": "artifacts\\stageh\\reference\\recorded_standardized_features.npy",
+  "standardized_features_sha256": "c08625c59a3d42fadb03f783d5fc1c49ad60323d152310f9443549c79963c049"
+}

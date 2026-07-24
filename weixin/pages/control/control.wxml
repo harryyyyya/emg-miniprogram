@@ -13,7 +13,7 @@
       <view>
         <text class="device-title">{{deviceName}}</text>
         <text class="device-subtitle">
-          {{deviceTransport === 'wifi' ? 'ESP32 通过后端 Wi-Fi 上报状态与肌电数据' : (deviceTransport === 'esp32_direct' ? '小程序直连 ESP32：HTTP + WebSocket' : 'BLE 本地直连')}}
+          {{deviceTransport === 'wifi' ? boardLabel + ' 通过后端 Wi-Fi 上报状态与肌电数据' : (deviceTransport === 'esp32_direct' ? '小程序直连 ESP32：HTTP + WebSocket' : 'BLE 本地直连')}}
         </text>
       </view>
       <view class="status-pill {{deviceStatus === 'online' ? 'online' : 'offline'}}">
@@ -30,6 +30,7 @@
     </view>
 
     <view class="device-meta" wx:if="{{deviceTransport === 'wifi' || deviceTransport === 'esp32_direct'}}">
+      <text class="device-meta-item">板子: {{boardLabel || '--'}}</text>
       <text class="device-meta-item">IP: {{deviceIp || '--'}}</text>
       <text class="device-meta-item">固件: {{firmwareVersion || '--'}}</text>
     </view>
@@ -78,7 +79,7 @@
 
   <view class="esp32-section" wx:if="{{deviceTransport === 'wifi' || deviceTransport === 'esp32_direct'}}">
     <view class="section-header">
-      <text class="section-title">ESP32 模块状态</text>
+      <text class="section-title">{{boardLabel || 'Wi-Fi 板子'}} 模块状态</text>
     </view>
 
     <view class="module-grid">
@@ -258,7 +259,7 @@
     </view>
 
     <view class="wifi-tip" wx:if="{{deviceTransport === 'wifi'}}">
-      <text class="wifi-tip-text">Wi-Fi 模式下，ESP32 会通过后端上报状态和肌电数据，小程序通过后端查看并下发命令。</text>
+      <text class="wifi-tip-text">Wi-Fi 模式下，{{boardLabel || 'Wi-Fi 板子'}} 会通过后端上报状态和肌电数据，小程序通过后端查看并下发命令。</text>
     </view>
 
     <view class="wifi-tip" wx:if="{{deviceTransport === 'esp32_direct'}}">

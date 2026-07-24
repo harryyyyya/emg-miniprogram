@@ -1,0 +1,25 @@
+handle = 0x%04x, char properties = 0x%02x, char value handle = 0x%04x, uuid = %s
+attr handle = 0x%04x, end grp handle = 0x%04x uuid: %s
+Starting handle: %04x Ending handle: %04x
+Characteristic value was written successfully
+Characteristic value/descriptor read failed: %s
+Characteristic value/descriptor: 
+handle: 0x%04x 	 value: 
+Discover descriptors failed: %s
+Show all Characteristics Value/Descriptor Read/Write arguments
+Characteristics Value/Descriptor Read/Write arguments
+Characteristics Value/Descriptor Read
+Characteristics Descriptor Discovery
+[0mInvalid start handle: %s
+[0mInvalid end handle: %s
+[0mCharacteristic value/descriptor read failed: %s
+[0mDiscover descriptors failed: %s
+handle: 0x%04x, uuid: %s
+handle: 0x%04x, char properties: 0x%02x, char value handle: 0x%04x, uuid: %s
+handle: 0x%04x, start handle: 0x%04x, end handle: 0x%04x uuid: %s
+Starting handle: 0x%04x Ending handle: 0x%04x
+attr handle: 0x%04x, end grp handle: 0x%04x uuid: %s
+[0mInvalid handle: %s
+Failed to create signal descriptor
+Characteristics Value/Descriptor Read by handle
+Characteristics Value/Descriptor Read by UUID

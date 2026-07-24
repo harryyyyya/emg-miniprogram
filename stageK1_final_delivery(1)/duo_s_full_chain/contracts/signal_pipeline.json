@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "input_dtype": "uint8",
+  "channels": 8,
+  "window_samples": 125,
+  "window_ms": 250,
+  "step_samples": 20,
+  "step_ms": 40,
+  "baseline": {"mode": "fixed_subtract", "value": 127.0},
+  "filter": "none",
+  "features": ["mav", "rms", "wl", "var", "zc", "ssc"],
+  "feature_layout": "feature_major_then_E1_to_E8",
+  "feature_count": 48,
+  "variance_ddof": 0,
+  "zc_threshold": 5.0,
+  "ssc_threshold": 5.0,
+  "class_order": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+  "model_input": {"dtype": "float32", "shape": [1, 48]},
+  "model_output": {"dtype": "float32", "shape": [1, 9], "meaning": "logits"},
+  "margin": "largest_logit_minus_second_largest_logit",
+  "margin_threshold_source": "required_model_contract_field",
+  "scheduling": {
+    "formal_modes": "sample_wise_authoritative_ESP32_behavior",
+    "RECORDED_REPLAY_FULL_CHAIN_TEST": "ten_sample_frame_boundary_for_existing_signed_D2_fixture",
+    "replay_difference_scope": "development_mode_only_queue_and_parser_path_remain_identical"
+  },
+  "reset_triggers": ["ble_disconnect", "no_valid_frame_250ms", "timestamp_interval_not_20ms", "queue_overflow", "fatal_inference"]
+}

@@ -1,0 +1,28 @@
+{
+  "delivery_id": "duo_fc_competition_v1_1",
+  "source_delivery_id": "duo_fc_competition_v1",
+  "current_status": "PASS_FOR_STAGEK1_BLE_SCAN_RESILIENCE_AND_PROCESS_SMOKE",
+  "maximum_status": "READY_FOR_3H_PHYSICAL_INTEGRATION_WITH_EXPLICIT_LIVE_GATES",
+  "mode": "FULL_CHAIN_SAFE_DEMO",
+  "model_id": "duo_fc_mlp_3session_v1_retry2_risk_accepted",
+  "quality_gates_passed": false,
+  "risk_acceptance_present": true,
+  "cvimodel_sha256": "184f567ab263efc8349e4ce8ca251262bfcda777eab4afefa7f73b494e41e6fa",
+  "pipeline_sha256": "836a520473ca4bbe857b17501a349a5ff11f385d8593f66970ee4a83021f5273",
+  "recording_sha256": "eaea36aab467937ed64b93fa2cecfe01854a1eaeb46498bbbac153383131d303",
+  "credentials_included": false,
+  "stagek1_ble_scan_resilience": {
+    "host_unittest": "PASS_42_TESTS",
+    "recorded_full_chain_10_cycles": "PASS",
+    "duo_board_unittest": "PASS_42_TESTS",
+    "duo_preflight": "PASS",
+    "five_minute_mock_smoke": "PASS",
+    "log_dir": "logs/stagek1_19700101T013328_3341"
+  },
+  "live_gates": {
+    "BT-11": "NOT_RUN",
+    "J3_to_STM32": "NOT_RUN",
+    "real_backend": "NOT_RUN",
+    "actuator": "NOT_RUN"
+  }
+}

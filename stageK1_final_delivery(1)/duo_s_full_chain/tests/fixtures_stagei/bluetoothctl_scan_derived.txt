@@ -1,0 +1,6 @@
+SetDiscoveryFilter success
+Discovery started
+[NEW] Device AA:BB:CC:DD:EE:FF BT-11(BLE)
+[CHG] Device AA:BB:CC:DD:EE:FF RSSI: -55
+[NEW] Device 10:20:30:40:50:60 OtherDevice
+[CHG] Device 10:20:30:40:50:60 UUIDs: 0000ffe0-0000-1000-8000-00805f9b34fb

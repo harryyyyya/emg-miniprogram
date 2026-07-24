@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "mapping": [
+    {"label": 0, "name": "rest", "uart_mode": 0, "display": "gesture_0"},
+    {"label": 1, "name": "open_hand", "uart_mode": 1, "display": "gesture_1"},
+    {"label": 2, "name": "natural_grasp", "uart_mode": 2, "display": "gesture_2"},
+    {"label": 3, "name": "power_grasp", "uart_mode": 3, "display": "gesture_3"},
+    {"label": 4, "name": "three_finger_pinch", "uart_mode": 4, "display": "gesture_4"},
+    {"label": 5, "name": "tip_pinch", "uart_mode": 5, "display": "gesture_5"},
+    {"label": 6, "name": "index_extension", "uart_mode": 6, "display": "gesture_6"},
+    {"label": 7, "name": "hook_grasp", "uart_mode": 7, "display": "gesture_7"},
+    {"label": 8, "name": "thumbs_up", "uart_mode": 8, "display": "gesture_8"}
+  ],
+  "actuation_enabled_by_default": false
+}

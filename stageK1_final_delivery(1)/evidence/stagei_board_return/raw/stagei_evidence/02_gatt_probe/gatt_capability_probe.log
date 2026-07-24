@@ -1,0 +1,339 @@
+EVIDENCE_DIR=/root/stagei_evidence/02_gatt_probe
+=== identity ===
+Thu Jan  1 00:21:54 UTC 1970
+Linux milkv-duo 5.10.4-tag- #1 PREEMPT Fri May 30 14:51:54 CST 2025 riscv64 GNU/Linux
+NAME=Buildroot
+VERSION=-g6b03c2762
+ID=buildroot
+VERSION_ID=2025.02
+PRETTY_NAME="Buildroot 2025.02"
+=== tools ===
+/usr/bin/bluetoothctl
+/usr/bin/gatttool
+/usr/bin/hcitool
+/usr/bin/hciconfig
+/usr/bin/dbus-send
+bluetoothd=NOT_FOUND
+/usr/bin/python3
+=== bluetoothctl version/help ===
+bluetoothctl: 5.79
+bluetoothctl ver 5.79
+Usage:
+	bluetoothctl [--options] [commands]
+Options:
+	--agent 	Register agent handler: <capability>
+	--endpoints 	Register Media endpoints
+	--monitor 	Enable monitor output
+	--timeout 	Timeout in seconds for non-interactive mode
+	--version 	Display version
+	--init-script 	Init script file
+	--help 		Display help
+Commands:
+	list		List available controllers
+	show		Controller information
+	select		Select default controller
+	devices		List available devices, with an optional property as the filter
+	system-alias	Set controller alias
+	reset-alias	Reset controller alias
+	power		Set controller power
+	pairable	Set controller pairable mode
+	discoverable	Set controller discoverable mode
+	discoverable-timeout	Set discoverable timeout
+	agent		Enable/disable agent with given capability
+	default-agent	Set agent as the default one
+	advertise	Enable/disable advertising with given type
+	set-alias	Set device alias
+	scan		Scan for devices
+	info		Device/Set information
+	pair		Pair with device
+	cancel-pairing	Cancel pairing with device
+	trust		Trust device
+	untrust		Untrust device
+	block		Block device
+	unblock		Unblock device
+	remove		Remove device
+	connect		Connect device
+	disconnect	Disconnect device
+
+	advertise.:
+		uuids		Set/Get advertise uuids
+		service		Set/Get advertise service data
+		manufacturer	Set/Get advertise manufacturer data
+		data		Set/Get advertise data
+		discoverable	Set/Get advertise discoverable
+		discoverable-timeout	Set/Get advertise discoverable timeout
+		tx-power	Show/Enable/Disable TX power to be advertised
+		name		Configure local name to be advertised
+		appearance	Configure custom appearance to be advertised
+		duration	Set/Get advertise duration
+		timeout		Set/Get advertise timeout
+		secondary	Set/Get advertise secondary channel
+		interval	Set/Get advertise interval range
+		rsi		Show/Enable/Disable RSI to be advertised
+		clear		Clear advertise config
+
+	monitor.:
+		set-rssi-threshold	Set RSSI threshold parameter
+		set-rssi-timeout	Set RSSI timeout parameter
+		set-rssi-sampling-period	Set RSSI sampling period parameter
+		add-or-pattern	Register 'or pattern' type monitor with the specified RSSI parameters
+		get-pattern	Get advertisement monitor
+		remove-pattern	Remove advertisement monitor
+		get-supported-info	Get advertisement manager supported features and supported monitor types
+		print-usage	Print the command usage
+
+	scan.:
+		uuids		Set/Get UUIDs filter
+		rssi		Set/Get RSSI filter, and clears pathloss
+		pathloss	Set/Get Pathloss filter, and clears RSSI
+		transport	Set/Get transport filter
+		duplicate-data	Set/Get duplicate data filter
+		discoverable	Set/Get discoverable filter
+		pattern		Set/Get pattern filter
+		clear		Clears discovery filter.
+
+	gatt.:
+		list-attributes	List attributes
+		select-attribute	Select attribute
+		attribute-info	Select attribute
+		read		Read attribute value
+		write		Write attribute value
+		acquire-write	Acquire Write file descriptor
+		release-write	Release Write file descriptor
+		acquire-notify	Acquire Notify file descriptor
+		release-notify	Release Notify file descriptor
+		notify		Notify attribute value
+		clone		Clone a device or attribute
+		register-application	Register profile to connect
+		unregister-application	Unregister profile
+		register-service	Register application service.
+		unregister-service	Unregister application service
+		register-includes	Register as Included service in.
+		unregister-includes	Unregister Included service.
+		register-characteristic	Register application characteristic
+		unregister-characteristic	Unregister application characteristic
+		register-descriptor	Register application descriptor
+		unregister-descriptor	Unregister application descriptor
+
+	admin.:
+		allow		Allow service UUIDs and block rest of them
+
+	player.:
+		list		List available players
+		show		Player information
+		select		Select default player
+		play		Start playback
+		pause		Pause playback
+		stop		Stop playback
+		next		Jump to next item
+		previous	Jump to previous item
+		fast-forward	Fast forward playback
+		rewind		Rewind playback
+		equalizer	Enable/Disable equalizer
+		repeat		Set repeat mode
+		shuffle		Set shuffle mode
+		scan		Set scan mode
+		change-folder	Change current folder
+		list-items	List items of current folder
+		search		Search items containing string
+		queue		Add item to playlist queue
+		show-item	Show item information
+
+	endpoint.:
+		list		List available endpoints
+		show		Endpoint information
+		register	Register Endpoint
+		unregister	Register Endpoint
+		config		Configure Endpoint
+		presets		List or add presets
+
+	transport.:
+		list		List available transports
+		show		Transport information
+		acquire		Acquire Transport
+		release		Release Transport
+		send		Send contents of a file
+		receive		Get/Set file to receive
+		volume		Get/Set transport volume
+		select		Select Transport
+		unselect	Unselect Transport
+
+	mgmt.:
+		select		Select a different index
+		revision	Get the MGMT Revision
+		commands	List supported commands
+		config		Show configuration info
+		info		Show controller info
+		extinfo		Show extended controller info
+		auto-power	Power all available features
+		power		Toggle powered state
+		discov		Toggle discoverable state
+		connectable	Toggle connectable state
+		fast-conn	Toggle fast connectable state
+		bondable	Toggle bondable state
+		pairable	Toggle bondable state
+		linksec		Toggle link level security
+		ssp		Toggle SSP mode
+		sc		Toogle SC support
+		hs		Toggle HS support
+		le		Toggle LE support
+		advertising	Toggle LE advertising
+		bredr		Toggle BR/EDR support
+		privacy		Toggle privacy support
+		class		Set device major/minor class
+		disconnect	Disconnect device
+		con		List connections
+		find		Discover nearby devices
+		find-service	Discover nearby service
+		stop-find	Stop discovery
+		name		Set local name
+		pair		Pair with a remote device
+		cancelpair	Cancel pairing
+		unpair		Unpair device
+		keys		Load Link Keys
+		ltks		Load Long Term Keys
+		irks		Load Identity Resolving Keys
+		block		Block Device
+		unblock		Unblock Device
+		add-uuid	Add UUID
+		rm-uuid		Remove UUID
+		clr-uuids	Clear UUIDs
+		local-oob	Local OOB data
+		remote-oob	Remote OOB data
+		did		Set Device ID
+		static-addr	Set static address
+		public-addr	Set public address
+		ext-config	External configuration
+		debug-keys	Toogle debug keys
+		conn-info	Get connection information
+		io-cap		Set IO Capability
+		scan-params	Set Scan Parameters
+		get-clock	Get Clock Information
+		add-device	Add Device
+		del-device	Remove Device
+		clr-devices	Clear Devices
+		bredr-oob	Local OOB data (BR/EDR)
+		le-oob		Local OOB data (LE)
+		advinfo		Show advertising features
+		advsize		Show advertising size info
+		add-adv		Add advertising instance
+		rm-adv		Remove advertising instance
+		clr-adv		Clear advertising instances
+		add-ext-adv-params	Add extended advertising params
+		add-ext-adv-data	Add extended advertising data
+		appearance	Set appearance
+		phy		Get/Set PHY Configuration
+		wbs		Toggle Wideband-Speech support
+		secinfo		Show security information
+		expinfo		Show experimental features
+		exp-debug	Set debug feature
+		exp-privacy	Set LL privacy feature
+		exp-quality	Set bluetooth quality report feature
+		exp-offload	Toggle codec support
+		read-sysconfig	Read System Configuration
+		set-sysconfig	Set System Configuration
+		get-flags	Get device flags
+		set-flags	Set device flags
+
+	monitor.:
+		features	Show advertisement monitor features
+		remove		Remove advertisement monitor 
+		add-pattern	Add advertisement monitor pattern
+		add-pattern-rssi	Add advertisement monitor pattern with RSSI options
+
+	assistant.:
+		push		Send stream information to peer
+=== gatttool help ===
+Usage:
+  gatttool [OPTION*]
+
+Help Options:
+  -h, --help                                Show help options
+  --help-all                                Show all help options
+  --help-gatt                               Show all GATT commands
+  --help-params                             Show all Primary Services/Characteristics arguments
+  --help-char-read-write                    Show all Characteristics Value/Descriptor Read/Write arguments
+
+Application Options:
+  -i, --adapter=hciX                        Specify local adapter interface
+  -b, --device=MAC                          Specify remote Bluetooth address
+  -t, --addr-type=[public | random]         Set LE address type. Default: public
+  -m, --mtu=MTU                             Specify the MTU size
+  -p, --psm=PSM                             Specify the PSM for GATT/ATT over BR/EDR
+  -l, --sec-level=[low | medium | high]     Set security level. Default: low
+  -I, --interactive                         Use interactive mode
+
+=== hcitool help ===
+hcitool - HCI Tool ver 5.79
+Usage:
+	hcitool [options] <command> [command parameters]
+Options:
+	--help	Display help
+	-i dev	HCI device
+Commands:
+	dev 	Display local devices
+	inq 	Inquire remote devices
+	scan	Scan for remote devices
+	name	Get name from remote device
+	info	Get information from remote device
+	spinq	Start periodic inquiry
+	epinq	Exit periodic inquiry
+	cmd 	Submit arbitrary HCI commands
+	con 	Display active connections
+	cc  	Create connection to remote device
+	dc  	Disconnect from remote device
+	sr  	Switch central/peripheral role
+	cpt 	Change connection packet type
+	rssi	Display connection RSSI
+	lq  	Display link quality
+	tpl 	Display transmit power level
+	afh 	Display AFH channel map
+	lp  	Set/display link policy settings
+	lst 	Set/display link supervision timeout
+	auth	Request authentication
+	enc 	Set connection encryption
+	key 	Change connection link key
+	clkoff	Read clock offset
+	clock	Read local or remote clock
+	lescan	Start LE scan
+	leinfo	Get LE remote information
+	lealadd	Add device to LE Accept List
+	lealrm	Remove device from LE Accept List
+	lealsz	Read size of LE Accept List
+	lealclr	Clear LE Accept List
+	lewladd	Deprecated. Use lealadd instead.
+	lewlrm	Deprecated. Use lealrm instead.
+	lewlsz	Deprecated. Use lealsz instead.
+	lewlclr	Deprecated. Use lealclr instead.
+	lerladd	Add device to LE Resolving List
+	lerlrm	Remove device from LE Resolving List
+	lerlclr	Clear LE Resolving List
+	lerlsz	Read size of LE Resolving List
+	lerlon	Enable LE Address Resolution
+	lerloff	Disable LE Address Resolution
+	lecc	Create a LE Connection
+	ledc	Disconnect a LE Connection
+	lecup	LE Connection Update
+
+For more information on the usage of each command use:
+	hcitool <command> --help
+=== BlueZ and D-Bus processes ===
+  139 dbus     dbus-daemon --system
+  145 root     /usr/libexec/bluetooth/bluetoothd -n
+=== BlueZ registered name ===
+method return time=1314.605617 sender=org.freedesktop.DBus -> destination=:1.6 serial=3 reply_serial=2
+   array [
+      string "org.freedesktop.DBus"
+      string ":1.0"
+      string "org.bluez"
+      string ":1.6"
+   ]
+=== Python modules; no installation ===
+python=3.12.9 (main, May 30 2025, 15:24:41) [GCC 10.2.0]
+bleak=IMPORT_FAIL ModuleNotFoundError: No module named 'bleak'
+dbus_next=IMPORT_FAIL ModuleNotFoundError: No module named 'dbus_next'
+dbus_fast=IMPORT_FAIL ModuleNotFoundError: No module named 'dbus_fast'
+pydbus=IMPORT_FAIL ModuleNotFoundError: No module named 'pydbus'
+dbus=IMPORT_FAIL ModuleNotFoundError: No module named 'dbus'
+serial=IMPORT_FAIL ModuleNotFoundError: No module named 'serial'
+GATT_CAPABILITY_PROBE_COMPLETE

@@ -1,0 +1,78 @@
+Duo S Stage I 结果回传
+
+一、任务身份
+
+任务：Prompt 13 真实 BLE 平台绑定与离线验证
+执行：Duo S 板端命令均由 WYH 手工执行；Codex 负责本地实现、证据复核、回归和打包
+模式：Default，不使用子智能体
+日期：2026-07-23（Asia/Shanghai）；没有独立记录精确起止时间
+工作区：D:\Deep Learning\AAA_Part_two\stageI
+
+二、最终状态
+
+PASS_FOR_DUOS_HCI_AND_BLE_ADAPTER_OFFLINE_NO_BT11_TARGET
+
+中文含义：Duo S 的 HCI 生命周期、现有 BLE 工具适配、离线通知路径和状态机验证通过；现场没有 BT-11 目标设备，因此不能声明真实 BLE 通过。
+
+三、实际完成内容
+
+1. 实现独立的 gatttool PTY BlePlatform 适配模块，覆盖扫描、连接、请求 MTU、服务/特征发现、订阅、通知字节转发、断线处理、有界输出排空、关闭和延时重扫。
+2. 通知读取线程只执行十六进制/文本解码、转为 bytes 并调用 notification callback；解析、特征、TPU、JSON 和 HTTP 不进入通知线程。
+3. 测试覆盖工具输出 parser、通知碎片/粘连/大小写/空白/错误输入、记录帧 callback/queue/parser 路径，以及连接、MTU、发现、进程退出、断线、超时、溢出和恢复状态。
+4. 没有刷写镜像，没有修改 boot、pinmux、GPIO 或自启动，没有安装在线软件包。
+
+四、验证证据
+
+1. Stage G HCI：严格复用 /dev/ttyS4、1500000、RTS/CTS、H4；hci0 为 UP/RUNNING；RX/TX errors 为 0；清理后 hci0 消失；wlan0 仍为 UP/LOWER_UP。
+2. PTY：gatttool 交互 help 和 exit 均实际执行，进程退出码为 0。普通管道方式曾超时，已保留为诊断证据，正式实现不使用该失败路径。
+3. 原始扫描：日志出现 Discovery started；只记录到一个未知设备，没有连接该设备；没有发现 BT-11(BLE)。scan off 返回 org.bluez.Error.Failed，但随后清理日志证明 hci0 已消失，没有把该错误改写成成功。
+4. 记录帧离线路径：570 帧、267 个窗口、0 parser error、0 queue overflow。
+5. Stage H 前置证据：Duo S 板端记录回放 10/10 通过；这只是 recorded replay，不是真实 BLE 证据。
+
+五、32/33 失败与修正记录
+
+1. r2 首次 Duo S 板端回归是 32/33，不是 PASS。
+2. 失败项：test_slow_http_worker_does_not_block_signal_thread。
+3. 旧断言要求总耗时小于 0.18 秒；实际为 0.20893888000000516 秒，因此出现 AssertionError，整套结果为 FAILED (failures=1)。原始失败日志完整保留在 10_board_offline_tests/unittest.log。
+4. 随后进行五组配对诊断：无网络基线平均 0.2101994719999311 秒，模拟慢 HTTP 平均 0.2146072799999274 秒，平均增量 0.004407807999996294 秒，比例 1.0209696435393412。
+5. 诊断证明旧的 0.18 秒绝对门限低于这块 Duo S 的正常基线，不能有效判断慢 HTTP 是否阻塞信号线程。
+6. 修正范围仅限单元测试：改为比较配对中位数，增量达到或超过 50 ms 才失败。产品/运行时代码、40 ms pipeline deadline、BLE 合同和控制合同均未修改。
+7. 修正后 r3 Duo S 板端回归为 33/33，耗时 32.088 秒，结果 OK。
+8. 最终电脑端回归为 33/33，耗时 1.578 秒，退出码为 0。
+9. 完整说明见 NETWORK_TEST_CORRECTION.md，失败、诊断和 r3 原始日志均随包交付。
+
+六、合同与身份
+
+BLE 合同：设备名 BT-11(BLE)，服务 FFE0，通知/指示特征 FFE2，请求 MTU 28。
+模型：duo_fc_mlp_3session_v1_retry2_risk_accepted。
+pipeline SHA256：836a520473ca4bbe857b17501a349a5ff11f385d8593f66970ee4a83021f5273。
+记录帧 SHA256：eaea36aab467937ed64b93fa2cecfe01854a1eaeb46498bbbac153383131d303。
+凭据：未包含。
+
+七、未完成项与证据边界
+
+由于没有 BT-11 目标设备，以下项目没有真实硬件证据：发现 BT-11、连接和地址类型、与 BT-11 协商 MTU 28、发现 FFE0/FFE2、写 CCCD、连续接收真实 98 字节通知、断线以及成功重连。
+
+tests/fixtures_stagei 下的文件是依据真实二进制格式字符串构造的 parser 测试输入，不是硬件日志。已判定无效的 03_target_scan 和重复的 08_adapter_scan 没有进入交付包。
+
+八、交付内容
+
+最终 ZIP：duo_fc_f8_stageh_f2_bound_final.zip。
+最终 SHA256：以 ZIP 同级的 .sha256 sidecar 为准。
+包内清单：FILE_MANIFEST.csv 和 PACKAGE_FILES.sha256。
+
+包内“补传内容”目录包含：
+
+1. 本中文 RESULT_RETURN.txt；
+2. board_replay_10rounds.json；
+3. Stage H 原始板端日志、结果 ZIP 和 sidecar；
+4. Stage G 原始 HCI 审计 ZIP、sidecar、命令日志和 HCI 日志；
+5. 最终 ZIP/sidecar 自引用限制说明。
+
+最终 ZIP 不能包含自身；其最终 sidecar 也不能放入 ZIP 内，否则加入 sidecar 会再次改变 ZIP 哈希。因此最终 ZIP 和有效 sidecar 作为 final_delivery 下的同级文件交付。
+
+ZIP 格式不接受早于 1980 年的文件时间。交付副本中早于该下限的 mtime 被统一设为 2000-01-01；文件内容和清单哈希没有改变，嵌套的原始证据归档保持原内容。
+
+九、下一步
+
+只有在真实 BT-11 到场后，完整保存目标发现、连接、MTU 28、FFE0/FFE2 订阅、连续 98 字节通知、断线和成功重连日志，才可以申请升级到真实 BLE PASS。

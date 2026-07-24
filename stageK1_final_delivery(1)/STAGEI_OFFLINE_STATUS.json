@@ -1,0 +1,40 @@
+{
+  "status": "PASS_FOR_DUOS_HCI_AND_BLE_ADAPTER_OFFLINE_NO_BT11_TARGET",
+  "evidence_boundary": "NO_BT11_TARGET_NO_LIVE_BLE_CLAIM",
+  "tests": {
+    "original_duo_r2_run": {"run": 33, "passed": 32, "failures": 1, "errors": 0, "seconds": 30.232, "failed_test": "test_slow_http_worker_does_not_block_signal_thread"},
+    "final_local_run": {"run": 33, "passed": 33, "failures": 0, "errors": 0, "seconds": 1.578},
+    "duo_r3_run": {"run": 33, "passed": 33, "failures": 0, "errors": 0, "seconds": 32.088}
+  },
+  "recorded_notification_path": {
+    "source": "fixtures/demo_sequence.bin",
+    "source_sha256": "eaea36aab467937ed64b93fa2cecfe01854a1eaeb46498bbbac153383131d303",
+    "frames": 570,
+    "windows": 267,
+    "parser_errors": 0,
+    "queue_overflows": 0
+  },
+  "hardware_evidence": {
+    "hci0_up_running": true,
+    "hci_rx_tx_errors_zero": true,
+    "post_cleanup_hci0_absent": true,
+    "wifi_up_lower_up_after_cleanup": true,
+    "scan_discovery_started": true,
+    "unknown_devices_connected": false,
+    "bt11_target_present": false
+  },
+  "live_ble_checks": {
+    "bt11_connection": false,
+    "mtu_28_with_bt11": false,
+    "ffe0_ffe2_discovery": false,
+    "real_notifications": false,
+    "disconnect_reconnect_with_bt11": false
+  },
+  "fixture_disclosure": "tests/fixtures_stagei are synthetic parser inputs derived from returned board binary format strings; they are not hardware logs",
+  "regression_history": "r2 failed 32/33 on an absolute elapsed<0.18s test; paired Duo diagnostics showed a 0.2101994719999311s baseline and 0.004407807999996294s slow-HTTP increment; a test-only paired-median correction was followed by r3 33/33",
+  "invalidated_evidence_used": false,
+  "credentials_included": false,
+  "pending": [
+    "live BT-11 discovery, connection, MTU 28, FFE0/FFE2 subscription, 98-byte notification stream, and reconnect require the target hardware"
+  ]
+}

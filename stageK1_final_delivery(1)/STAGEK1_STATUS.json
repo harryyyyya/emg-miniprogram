@@ -1,0 +1,26 @@
+{
+  "status": "PASS_FOR_STAGEK1_BLE_SCAN_RESILIENCE_AND_PROCESS_SMOKE",
+  "not_a_pass_claim": true,
+  "scope": "BLE scan resilience only",
+  "source_package": "duo_fc_competition_v1",
+  "host_unittest": {
+    "result": "PASS",
+    "command": "python -m unittest discover -s duo_s_full_chain/tests -v",
+    "tests_run": 42,
+    "raw_log": "NOT_PACKAGED_LOCAL_SHELL_WRITE_DENIED"
+  },
+  "recorded_full_chain_10_cycles": "PASS",
+  "duo_board_unittest": "PASS",
+  "duo_preflight": "PASS",
+  "five_minute_mock_smoke": "PASS",
+  "package_manifest": "REGENERATED",
+  "package_zip_and_sidecar": "GENERATED",
+  "quality_gates_passed": false,
+  "live_gates": {
+    "BT-11": "NOT_RUN",
+    "J3_to_STM32": "NOT_RUN",
+    "real_backend": "NOT_RUN",
+    "actuator": "NOT_RUN"
+  },
+  "log_dir": "logs/stagek1_19700101T013328_3341"
+}

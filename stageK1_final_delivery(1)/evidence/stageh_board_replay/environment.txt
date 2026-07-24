@@ -1,0 +1,12 @@
+utc=1970-01-01T00:36:37Z
+Linux milkv-duo 5.10.4-tag- #1 PREEMPT Fri May 30 14:51:54 CST 2025 riscv64 GNU/Linux
+Python 3.12.9
+numpy=1.25.0
+native_feature=prebuilt_riscv64_no_dynamic_dependencies
+a44ef7bbe2214336dd8dc7e0fc8d64e40d8669eec5f45b21085660e97c2ae1e9  /mnt/system/lib/libcviruntime.so
+d588e762277fdcdaa2ee3cc17c7f086a99be57f0dcb98fea9ab17cc4537c7d99  /mnt/system/usr/bin/tpu/model_runner
+MemTotal:         323180 kB
+MemFree:          256256 kB
+MemAvailable:     287572 kB
+Buffers:            2284 kB
+Cached:            33448 kB

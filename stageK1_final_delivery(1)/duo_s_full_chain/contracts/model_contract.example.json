@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "status": "PLACEHOLDER_REQUIRES_MODEL_OWNER_VALUES",
+  "model_family": "mlp",
+  "target_chip": "cv181x",
+  "quantization": "BF16",
+  "training_lineage": "meng_77_multisession_S1_S2_S3",
+  "model_version": "REPLACE_ME",
+  "model_sha256": "REPLACE_ME",
+  "pipeline_sha256": "REPLACE_ME",
+  "input_shape": [1, 48],
+  "output_shape": [1, 9],
+  "class_order": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+  "margin_threshold": null,
+  "preprocess_path": "REPLACE_WITH_UNCOMMITTED_LOCAL_PATH",
+  "cvimodel_path": "REPLACE_WITH_UNCOMMITTED_LOCAL_PATH"
+}

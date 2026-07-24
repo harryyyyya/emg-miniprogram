@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "authority": [
+    "AGENT.md",
+    "experiments/stage6_full_chain_meng77_3session_v1/esp32_full_chain/src/ble_transport_probe.cpp",
+    "experiments/stage6_full_chain_meng77_3session_v1/esp32_full_chain/src/live_ble_inference.cpp"
+  ],
+  "formal_input": "duo_s_onboard_ble",
+  "device_name": "BT-11(BLE)",
+  "service_uuid": "0000ffe0-0000-1000-8000-00805f9b34fb",
+  "notify_characteristic_uuid": "0000ffe2-0000-1000-8000-00805f9b34fb",
+  "requested_mtu": 28,
+  "queue_capacity_bytes": 4096,
+  "scan_window_seconds": 5,
+  "rescan_delay_ms": 500,
+  "no_valid_frame_timeout_ms": 250,
+  "selection": "advertised_name_or_service_uuid",
+  "subscription_preference": ["notify", "indicate"],
+  "notify_callback_allowed_work": ["bounded_queue_write", "lightweight_counters"],
+  "main_loop_work": ["queue_drain", "stream_parse", "continuity", "features", "model", "controller", "uart"],
+  "disconnect_detection": ["callback", "poll"],
+  "disconnect_action": ["reset_signal_path", "immediate_no_stable", "delay", "rescan"],
+  "windows_test_source": "recorded_bytes_through_same_notify_queue_parser_path",
+  "forbidden_formal_input": "pc_ch340_receiver",
+  "hardware_reference": {
+    "url": "https://milkv.io/docs/duo/getting-started/duos",
+    "claims_used": ["Wi-Fi 6", "Bluetooth 5", "USB 2.0 Host", "J3 UART"],
+    "gatt_client_api_claimed": false,
+    "platform_api_selection": "gatttool_interactive_over_python_stdlib_pty_grounded_in_WYH_board_probes"
+  }
+}

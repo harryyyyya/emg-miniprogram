@@ -1,0 +1,26 @@
+{
+  "package": "duo_fc_competition_v1_1",
+  "current_status": "PASS_FOR_STAGEK1_BLE_SCAN_RESILIENCE_AND_PROCESS_SMOKE",
+  "maximum_allowed_status_after_recorded_acceptance": "READY_FOR_3H_PHYSICAL_INTEGRATION_WITH_EXPLICIT_LIVE_GATES",
+  "model_id": "duo_fc_mlp_3session_v1_retry2_risk_accepted",
+  "quality_gates_passed": false,
+  "risk_acceptance_present": true,
+  "evidence_inherited": {
+    "prompt10": "PASS_FOR_DUO_S_TPU_RECORDED_FULL_CHAIN_REPLAY",
+    "prompt13": "PASS_FOR_DUOS_HCI_AND_BLE_ADAPTER_OFFLINE_NO_BT11_TARGET"
+  },
+  "this_package_board_acceptance": "NOT_RUN",
+  "stagek1_host_unittest": "PASS_42_TESTS",
+  "stagek1_recorded_full_chain_10_cycles": "PASS",
+  "stagek1_five_minute_mock_smoke": "PASS",
+  "live_gates": {
+    "BT-11": "NOT_RUN",
+    "J3_to_STM32": "NOT_RUN",
+    "real_backend": "NOT_RUN",
+    "actuator": "NOT_RUN"
+  },
+  "credentials_included": false,
+  "stagek1_duo_board_unittest": "PASS_42_TESTS",
+  "stagek1_duo_preflight": "PASS",
+  "stagek1_log_dir": "logs/stagek1_19700101T013328_3341"
+}

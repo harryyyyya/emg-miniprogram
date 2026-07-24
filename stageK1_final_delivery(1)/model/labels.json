@@ -1,0 +1,26 @@
+{
+  "model_id": "duo_fc_mlp_3session_v1_retry2_risk_accepted",
+  "labels": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "label_names": {
+    "0": "rest",
+    "1": "open_hand",
+    "2": "natural_grasp",
+    "3": "power_grasp",
+    "4": "three_finger_pinch",
+    "5": "tip_pinch",
+    "6": "index_extension",
+    "7": "hook_grasp",
+    "8": "thumbs_up"
+  },
+  "rest_label": 0
+}
