@@ -1,229 +1,99 @@
 <template>
   <div class="login-wrapper">
-    <div class="login-bg">
-      <div class="glow glow-1"></div>
-      <div class="glow glow-2"></div>
-      <div class="glow glow-3"></div>
-    </div>
-
     <div class="login-card glass-card">
       <div class="login-header">
-        <div class="login-logo">
-          <el-icon :size="40"><Cpu /></el-icon>
-        </div>
+        <el-icon class="login-logo" :size="40"><Cpu /></el-icon>
         <h1 class="gradient-text">NeuroHand</h1>
-        <p class="login-subtitle">肌电假手智能管理系统</p>
+        <p>肌电假手智能管理系统</p>
       </div>
 
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        label-position="top"
-        class="login-form"
-        @keyup.enter="handleLogin"
-      >
-        <el-form-item label="账号" prop="username">
-          <el-input
-            v-model="form.username"
-            placeholder="请输入管理员账号"
-            prefix-icon="User"
-            size="large"
-          />
-        </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <el-input
-            v-model="form.password"
-            type="password"
-            placeholder="请输入密码"
-            prefix-icon="Lock"
-            size="large"
-            show-password
-          />
-        </el-form-item>
-        <el-button
-          type="primary"
-          size="large"
-          :loading="loading"
-          class="login-btn"
-          @click="handleLogin"
-        >
-          {{ loading ? '登录中...' : '登 录' }}
-        </el-button>
+      <el-tabs v-model="loginMode" stretch class="login-tabs">
+        <el-tab-pane label="管理员登录" name="admin" />
+        <el-tab-pane label="用户登录" name="user" />
+      </el-tabs>
+
+      <el-form v-if="loginMode === 'admin'" ref="adminFormRef" :model="adminForm" :rules="loginRules" label-position="top" @keyup.enter="handleAdminLogin">
+        <el-form-item label="账号" prop="username"><el-input v-model="adminForm.username" prefix-icon="User" placeholder="请输入管理员账号" size="large" /></el-form-item>
+        <el-form-item label="密码" prop="password"><el-input v-model="adminForm.password" prefix-icon="Lock" type="password" show-password placeholder="请输入密码" size="large" /></el-form-item>
+        <el-button class="submit-btn" type="primary" :loading="loading" @click="handleAdminLogin">登录管理后台</el-button>
       </el-form>
 
-      <div class="login-footer">
-        <span>© 2026 NeuroHand · 肌电假手智能管理平台</span>
-      </div>
+      <template v-else>
+        <el-segmented v-model="userMode" :options="userModeOptions" block class="user-mode" />
+        <el-form ref="userFormRef" :model="userForm" :rules="userRules" label-position="top" @keyup.enter="handleUserSubmit">
+          <el-form-item label="账号" prop="username"><el-input v-model="userForm.username" prefix-icon="User" placeholder="请输入用户账号" size="large" /></el-form-item>
+          <el-form-item label="密码" prop="password"><el-input v-model="userForm.password" prefix-icon="Lock" type="password" show-password placeholder="请输入密码" size="large" /></el-form-item>
+          <template v-if="userMode === 'register'">
+            <el-form-item label="确认密码" prop="confirmPassword"><el-input v-model="userForm.confirmPassword" prefix-icon="Lock" type="password" show-password placeholder="请再次输入密码" size="large" /></el-form-item>
+            <el-form-item label="姓名" prop="name"><el-input v-model="userForm.name" placeholder="请输入患者姓名" size="large" /></el-form-item>
+            <el-form-item label="截肢部位" prop="amputationPart"><el-input v-model="userForm.amputationPart" placeholder="请输入截肢部位" size="large" /></el-form-item>
+            <el-form-item label="病程（月）"><el-input-number v-model="userForm.illnessDurationMonths" :min="0" :max="1200" controls-position="right" /></el-form-item>
+          </template>
+          <el-button class="submit-btn" type="primary" :loading="loading" @click="handleUserSubmit">{{ userMode === 'login' ? '登录用户端' : '注册并登录' }}</el-button>
+        </el-form>
+      </template>
+
+      <div class="login-footer">© 2026 NeuroHand</div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
-import { ElMessage, type FormInstance } from 'element-plus'
-import { login as apiLogin, type LoginResponse } from '@/api/auth'
+import { login, register, type LoginResponse } from '@/api/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const formRef = ref<FormInstance>()
 const loading = ref(false)
-
-const form = reactive({
-  username: '',
-  password: '',
-})
-
-const rules = {
+const loginMode = ref<'admin' | 'user'>('admin')
+const userMode = ref<'login' | 'register'>('login')
+const userModeOptions = [{ label: '账号登录', value: 'login' }, { label: '注册账号', value: 'register' }]
+const adminFormRef = ref<FormInstance>()
+const userFormRef = ref<FormInstance>()
+const adminForm = reactive({ username: '', password: '' })
+const userForm = reactive({ username: '', password: '', confirmPassword: '', name: '', amputationPart: '', illnessDurationMonths: 0 })
+const loginRules: FormRules = {
   username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
 }
+const userRules: FormRules = {
+  username: [{ required: true, min: 3, message: '账号至少需要 3 个字符', trigger: 'blur' }],
+  password: [{ required: true, min: 6, message: '密码至少需要 6 个字符', trigger: 'blur' }],
+  confirmPassword: [{ validator: (_rule, value, callback) => userMode.value !== 'register' || value === userForm.password ? callback() : callback(new Error('两次输入的密码不一致')), trigger: 'blur' }],
+  name: [{ validator: (_rule, value, callback) => userMode.value !== 'register' || value?.trim() ? callback() : callback(new Error('请输入姓名')), trigger: 'blur' }],
+  amputationPart: [{ validator: (_rule, value, callback) => userMode.value !== 'register' || value?.trim() ? callback() : callback(new Error('请输入截肢部位')), trigger: 'blur' }],
+}
 
-async function handleLogin() {
-  const valid = await formRef.value?.validate().catch(() => false)
-  if (!valid) return
-
+function finishLogin(res: LoginResponse) {
+  const user: any = res.user || res
+  authStore.setAuth(res.token, { id: user.id || res.user_id, name: user.name || res.name, role: user.role || res.role, user_id: res.user_id, username: user.username || res.username, avatar_url: user.avatar_url })
+  ElMessage.success('登录成功')
+  router.push((user.role || res.role) === 'admin' ? '/admin/dashboard' : '/user/device')
+}
+async function handleAdminLogin() {
+  if (!await adminFormRef.value?.validate().catch(() => false)) return
+  loading.value = true
+  try { const res = await login(adminForm.username, adminForm.password); if ((res.user?.role || res.role) !== 'admin') throw new Error('该账号不是管理员账号'); finishLogin(res) }
+  catch (error: any) { if (!error?.response) ElMessage.error(error.message) }
+  finally { loading.value = false }
+}
+async function handleUserSubmit() {
+  if (!await userFormRef.value?.validate().catch(() => false)) return
   loading.value = true
   try {
-    let res: LoginResponse
-    try {
-      res = await apiLogin(form.username, form.password)
-    } catch {
-      // 后端未就绪时走本地 Mock：admin/admin → Admin，user/user → User
-      const mockMap: Record<string, typeof res> = {
-        'admin:admin': { token: 'mock-token-admin', role: 'admin', username: 'admin', name: '管理员', user_id: 1 },
-        'user:user':   { token: 'mock-token-user',  role: 'user',  username: 'user',  name: '普通用户', user_id: 2 },
-      }
-      const key = `${form.username}:${form.password}`
-      if (!mockMap[key]) throw new Error('账号或密码错误')
-      res = mockMap[key]
-    }
-    // 将后端返回的 JWT Token 和用户信息存入 Pinia + localStorage
-    authStore.setAuth(res.token, {
-      id: res.user?.id || res.user_id || 0,
-      name: res.user?.name || res.name,
-      role: res.user?.role || res.role,
-      user_id: res.user_id,
-      username: res.username,
-      avatar_url: res.user?.avatar_url,
-    })
-    ElMessage.success('登录成功')
-    router.push(res.role === 'admin' ? '/admin/dashboard' : '/user/device')
-  } catch {
-    // 全局拦截器已弹出 "账号或密码错误" 错误信息
-  } finally {
-    loading.value = false
-  }
+    const res = userMode.value === 'login'
+      ? await login(userForm.username, userForm.password)
+      : await register({ username: userForm.username, password: userForm.password, name: userForm.name.trim(), amputation_part: userForm.amputationPart.trim(), illness_duration_months: userForm.illnessDurationMonths })
+    if ((res.user?.role || res.role) === 'admin') throw new Error('管理员账号请使用管理员登录')
+    finishLogin(res)
+  } catch (error: any) { if (!error?.response) ElMessage.error(error.message) }
+  finally { loading.value = false }
 }
 </script>
 
 <style scoped>
-.login-wrapper {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  background: #060918;
-}
-
-.login-bg {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.4;
-}
-.glow-1 {
-  width: 400px;
-  height: 400px;
-  background: #6366f1;
-  top: -10%;
-  left: -5%;
-  animation: float 8s ease-in-out infinite;
-}
-.glow-2 {
-  width: 300px;
-  height: 300px;
-  background: #06b6d4;
-  bottom: -5%;
-  right: -5%;
-  animation: float 10s ease-in-out infinite reverse;
-}
-.glow-3 {
-  width: 250px;
-  height: 250px;
-  background: #8b5cf6;
-  top: 40%;
-  right: 20%;
-  animation: float 12s ease-in-out infinite;
-}
-@keyframes float {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(30px, -30px); }
-}
-
-.login-card {
-  width: 420px;
-  padding: 40px 36px;
-  z-index: 10;
-}
-
-.login-header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-.login-logo {
-  color: var(--color-primary-light);
-  margin-bottom: 12px;
-}
-.login-header h1 {
-  font-size: 32px;
-  font-weight: 800;
-  margin-bottom: 8px;
-}
-.login-subtitle {
-  color: var(--color-text-muted);
-  font-size: 14px;
-}
-
-.login-form :deep(.el-input__wrapper) {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  border-radius: 10px;
-  box-shadow: none !important;
-}
-.login-form :deep(.el-form-item__label) {
-  color: var(--color-text-muted);
-}
-
-.login-btn {
-  width: 100%;
-  height: 44px;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: 600;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  border: none;
-  margin-top: 8px;
-  transition: all 0.3s;
-}
-.login-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
-}
-
-.login-footer {
-  text-align: center;
-  margin-top: 24px;
-  color: var(--color-text-muted);
-  font-size: 12px;
-}
+.login-wrapper{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#060918;padding:24px}.login-card{width:420px;padding:36px}.login-header{text-align:center;margin-bottom:20px}.login-logo{color:var(--color-primary-light)}.login-header h1{font-size:32px;margin:8px 0}.login-header p,.login-footer{color:var(--color-text-muted);font-size:14px}.login-tabs,.user-mode{margin-bottom:20px}.submit-btn{width:100%;height:44px;margin-top:8px}.login-footer{text-align:center;margin-top:24px;font-size:12px}:deep(.el-input-number){width:100%}@media(max-width:480px){.login-card{width:100%;padding:28px 20px}}
 </style>

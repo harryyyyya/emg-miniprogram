@@ -86,6 +86,43 @@ class PasswordLoginIn(BaseModel):
     password: str = Field(min_length=1, max_length=128)
 
 
+class RegisterIn(BaseModel):
+    username: str = Field(min_length=3, max_length=64)
+    password: str = Field(min_length=6, max_length=128)
+    name: str = Field(min_length=1, max_length=32)
+    amputation_part: str = Field(min_length=1, max_length=128)
+    illness_duration_months: int = Field(default=0, ge=0, le=1200)
+
+
+@router.post("/register", status_code=201)
+def register(body: RegisterIn, db: Session = Depends(get_db)):
+    username = body.username.strip()
+    if len(username) < 3:
+        raise HTTPException(status_code=400, detail="账号至少需要 3 个字符")
+    if db.query(User).filter(User.username == username).first():
+        raise HTTPException(status_code=409, detail="该账号已被注册")
+
+    user = User(
+        username=username,
+        password_hash=_hash_password(body.password),
+        name=body.name.strip(),
+        role="user",
+        amputation_part=body.amputation_part.strip(),
+        illness_duration_months=body.illness_duration_months,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return {
+        "token": _make_token(user.id),
+        "role": "user",
+        "username": user.username,
+        "name": user.name,
+        "user_id": user.id,
+        "user": _user_dict(user),
+    }
+
+
 @router.post("/login")
 def password_login(body: PasswordLoginIn, db: Session = Depends(get_db)):
     _ensure_default_web_accounts(db)

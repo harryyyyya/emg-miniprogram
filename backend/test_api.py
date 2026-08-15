@@ -70,6 +70,35 @@ class TestHealthCheck:
 
 
 class TestAuth:
+    def test_password_register_and_login(self):
+        payload = {
+            "username": "web_patient_01",
+            "password": "patient123",
+            "name": "网页用户",
+            "amputation_part": "右前臂",
+            "illness_duration_months": 12,
+        }
+        registered = client.post("/auth/register", json=payload)
+        assert registered.status_code == 201
+        assert registered.json()["user"]["role"] == "user"
+
+        logged_in = client.post(
+            "/auth/login",
+            json={"username": payload["username"], "password": payload["password"]},
+        )
+        assert logged_in.status_code == 200
+        assert logged_in.json()["user"]["name"] == payload["name"]
+
+    def test_register_rejects_duplicate_username(self):
+        payload = {
+            "username": "web_patient_duplicate",
+            "password": "patient123",
+            "name": "网页用户",
+            "amputation_part": "左前臂",
+        }
+        assert client.post("/auth/register", json=payload).status_code == 201
+        assert client.post("/auth/register", json=payload).status_code == 409
+
     def test_wechat_login(self):
         response = client.post("/auth/wechat", json={"code": "wx_code_001"})
         assert response.status_code == 200
