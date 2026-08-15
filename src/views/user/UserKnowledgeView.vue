@@ -87,11 +87,11 @@ const articles = ref<Article[]>([
     id: 2,
     type: 'guide',
     title: '新用户穿戴入门指南',
-    excerpt: '欢迎使用 NeuroHand 肌电假手系统！本指南将帮助您了解设备的基本穿戴步骤、传感器安放位置以及初次校准流程...',
+    excerpt: '欢迎使用 掌控未来 肌电假手系统！本指南将帮助您了解设备的基本穿戴步骤、传感器安放位置以及初次校准流程...',
     date: '2026-03-20',
     fullContent: `
       <h3>设备组成</h3>
-      <p>NeuroHand 假手系统由以下部分组成：</p>
+      <p>掌控未来假手系统由以下部分组成：</p>
       <ul>
         <li><strong>肌电传感器臂环</strong>：配备 8 个 EMG 采集通道，采样率 500Hz，通过 SPI + DMA 与主控芯片通信。</li>
         <li><strong>ESP32-S3 主控模块</strong>：负责实时信号处理、特征提取、LDA 推理和蓝牙通信。</li>
@@ -129,7 +129,7 @@ const articles = ref<Article[]>([
     date: '2026-03-18',
     fullContent: `
       <h3>训练原理</h3>
-      <p>NeuroHand 使用 LDA（线性判别分析）算法对肌电信号进行分类。系统从 8 个通道提取 4 种特征（MAV、WL、MSV、ZC），形成 32 维特征向量。通过 Z-score 标准化后送入 LDA 分类器，输出动作类别。</p>
+      <p>掌控未来使用 LDA（线性判别分析）算法对肌电信号进行分类。系统从 8 个通道提取 4 种特征（MAV、WL、MSV、ZC），形成 32 维特征向量。通过 Z-score 标准化后送入 LDA 分类器，输出动作类别。</p>
       <p>训练的核心目标是让系统学会您的个人肌电模式。每个人的肌肉分布、发力习惯都不同，因此个性化训练非常重要。</p>
       <h3>推荐训练计划</h3>
       <table style="width:100%;border-collapse:collapse;margin:12px 0">

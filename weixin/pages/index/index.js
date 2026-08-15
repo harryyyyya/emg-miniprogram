@@ -109,7 +109,7 @@ Page({
         this.setData({
           deviceName: name,
           deviceOnline: status,
-          deviceStatusText: status ? 'Wi-Fi 在线 · 后端已收到心跳' : 'Wi-Fi 离线 · 等待 ESP32 回连',
+          deviceStatusText: status ? 'Wi-Fi 在线 · 后端已收到心跳' : 'Wi-Fi 离线 · 等待回连',
         });
       } catch (e) {
         this.setData({

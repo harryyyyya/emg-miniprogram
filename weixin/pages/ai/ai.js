@@ -1,4 +1,4 @@
-const { request, getBaseUrl } = require('../../utils/request');
+const { request, getBaseUrl, normalizeErrorMessage } = require('../../utils/request');
 
 let msgId = 0;
 
@@ -74,7 +74,12 @@ Page({
   },
 
   _addAIReply(content, meta = '') {
-    const aiMsg = { id: ++msgId, role: 'ai', content, meta };
+    const aiMsg = {
+      id: ++msgId,
+      role: 'ai',
+      content: normalizeErrorMessage(content, '后端没有返回内容'),
+      meta: typeof meta === 'string' ? meta : normalizeErrorMessage(meta, ''),
+    };
     this.setData({
       messages: [...this.data.messages, aiMsg],
       isTyping: false,
@@ -105,8 +110,9 @@ Page({
 
   _getErrorMessage(err) {
     if (err && typeof err === 'object') {
-      if (err.detail) return err.detail;
-      if (err.message) return err.message;
+      if (err.detail || err.message || err.msg || err.error) {
+        return normalizeErrorMessage(err, '连接后端失败');
+      }
     }
     const baseUrl = getBaseUrl();
     if (baseUrl.includes('127.0.0.1') || baseUrl.includes('localhost')) {

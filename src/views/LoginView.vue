@@ -11,7 +11,7 @@
         <div class="login-logo">
           <el-icon :size="40"><Cpu /></el-icon>
         </div>
-        <h1 class="gradient-text">NeuroHand</h1>
+        <h1 class="gradient-text">掌控未来</h1>
         <p class="login-subtitle">肌电假手智能管理系统</p>
       </div>
 
@@ -53,7 +53,7 @@
       </el-form>
 
       <div class="login-footer">
-        <span>© 2026 NeuroHand · 肌电假手智能管理平台</span>
+        <span>© 2026 掌控未来 · 肌电假手智能管理平台</span>
       </div>
     </div>
   </div>

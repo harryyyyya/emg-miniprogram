@@ -1,0 +1,25 @@
+{
+  "status": "STAGEK1_HOST_TESTED_AWAITING_DUO_VERIFICATION",
+  "not_a_pass_claim": true,
+  "scope": "BLE scan resilience only",
+  "source_package": "duo_fc_competition_v1",
+  "host_unittest": {
+    "result": "PASS",
+    "command": "python -m unittest discover -s duo_s_full_chain/tests -v",
+    "tests_run": 42,
+    "raw_log": "NOT_PACKAGED_LOCAL_SHELL_WRITE_DENIED"
+  },
+  "recorded_full_chain_10_cycles": "NOT_RUN",
+  "duo_board_unittest": "NOT_RUN",
+  "duo_preflight": "NOT_RUN",
+  "five_minute_mock_smoke": "NOT_RUN",
+  "package_manifest": "NOT_REGENERATED",
+  "package_zip_and_sidecar": "NOT_GENERATED",
+  "quality_gates_passed": false,
+  "live_gates": {
+    "BT-11": "NOT_RUN",
+    "J3_to_STM32": "NOT_RUN",
+    "real_backend": "NOT_RUN",
+    "actuator": "NOT_RUN"
+  }
+}

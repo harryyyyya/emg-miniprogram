@@ -1,5 +1,5 @@
 const ble = require('../../utils/ble_manager');
-const { request, uploadImage } = require('../../utils/request');
+const { request, uploadImage, normalizeErrorMessage } = require('../../utils/request');
 
 Page({
   data: {
@@ -109,7 +109,7 @@ Page({
     } catch (err) {
       if (err && err.errMsg && err.errMsg.includes('cancel')) return;
       wx.showToast({
-        title: (err && (err.detail || err.message)) || '头像更新失败',
+        title: normalizeErrorMessage(err, '头像更新失败'),
         icon: 'none',
       });
     }
@@ -145,7 +145,7 @@ Page({
           wx.showToast({ title: '修改成功', icon: 'success' });
         } catch (err) {
           wx.showToast({
-            title: (err && (err.detail || err.message)) || '修改失败',
+            title: normalizeErrorMessage(err, '修改失败'),
             icon: 'none',
           });
         }

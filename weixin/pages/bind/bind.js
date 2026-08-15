@@ -5,7 +5,7 @@ const esp32Link = require('../../utils/esp32_link');
 const WIFI_DEVICE_PRESETS = [
   {
     key: 'milk_duo_s',
-    label: 'Milk Duo S',
+    label: 'Milk Duo S（云端）',
     hardwareId: 'DUOS-WIFI-001',
     boardToken: 'duos-secret',
     deviceName: '我的 Milk Duo S 智能假手',

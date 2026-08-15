@@ -13,7 +13,7 @@
               <line x1="9" y1="21" x2="15" y2="21" />
             </svg>
           </div>
-          <h3 class="welcome-title">NeuroHand 智能助手</h3>
+          <h3 class="welcome-title">掌控未来智能助手</h3>
           <p class="welcome-desc">我可以帮您查看设备状态、分析训练数据、提供康复建议</p>
           <div class="quick-questions">
             <button v-for="q in quickQuestions" :key="q" class="quick-btn glass-card" @click="quickAsk(q)">

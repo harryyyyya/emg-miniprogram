@@ -8,7 +8,7 @@
             <el-icon :size="28"><Cpu /></el-icon>
           </div>
           <transition name="fade-slide">
-            <span v-if="!isCollapsed" class="logo-text gradient-text">NeuroHand</span>
+            <span v-if="!isCollapsed" class="logo-text gradient-text">掌控未来</span>
           </transition>
         </div>
       </div>

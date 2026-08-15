@@ -1,0 +1,15 @@
+{
+  "status": "STAGEK1_HOST_TESTED_AWAITING_DUO_VERIFICATION",
+  "not_a_pass_claim": true,
+  "inherited_prompt10": "PASS_FOR_DUO_S_TPU_RECORDED_FULL_CHAIN_REPLAY",
+  "inherited_prompt13": "PASS_FOR_DUOS_HCI_AND_BLE_ADAPTER_OFFLINE_NO_BT11_TARGET",
+  "this_package_duo_acceptance": "NOT_RUN",
+  "stagek1_host_unittest": "PASS_42_TESTS",
+  "stagek1_recorded_full_chain_10_cycles": "NOT_RUN",
+  "stagek1_five_minute_mock_smoke": "NOT_RUN",
+  "credentials_included": false,
+  "live_ble_pass": false,
+  "live_uart_stm32_pass": false,
+  "real_backend_pass": false,
+  "actuator_pass": false
+}

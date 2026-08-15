@@ -3,7 +3,7 @@
     <div class="login-card glass-card">
       <div class="login-header">
         <el-icon class="login-logo" :size="40"><Cpu /></el-icon>
-        <h1 class="gradient-text">NeuroHand</h1>
+        <h1 class="gradient-text">掌控未来</h1>
         <p>肌电假手智能管理系统</p>
       </div>
 
@@ -33,7 +33,7 @@
         </el-form>
       </template>
 
-      <div class="login-footer">© 2026 NeuroHand</div>
+      <div class="login-footer">© 2026 掌控未来</div>
     </div>
   </div>
 </template>

@@ -11,6 +11,48 @@ let baseUrlProbePromise = null;
 
 const normalizeBaseUrl = (url) => String(url || '').trim().replace(/\/+$/, '');
 
+// Mini Program UI APIs (for example wx.showToast) only accept strings. FastAPI
+// validation errors use `detail: [{ loc, msg, type }]`, so passing `detail`
+// through directly makes DevTools print "[object Object]" instead of the real
+// error. Keep all response/error shapes safe at the request boundary.
+const normalizeErrorMessage = (value, fallback = '请求异常') => {
+  if (value === null || value === undefined || value === '') return fallback;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+
+  if (Array.isArray(value)) {
+    const messages = value
+      .map((item) => normalizeErrorMessage(item, ''))
+      .filter(Boolean);
+    return messages.length ? messages.join('；') : fallback;
+  }
+
+  if (typeof value === 'object') {
+    const nested = value.detail ?? value.message ?? value.msg ?? value.error;
+    if (nested !== undefined && nested !== value) {
+      return normalizeErrorMessage(nested, fallback);
+    }
+
+    // FastAPI/Pydantic validation error item.
+    if (value.loc && value.msg) {
+      const location = Array.isArray(value.loc)
+        ? value.loc.filter((part) => part !== 'body').join('.')
+        : String(value.loc);
+      const message = normalizeErrorMessage(value.msg, fallback);
+      return location ? `${location}: ${message}` : message;
+    }
+
+    try {
+      const serialized = JSON.stringify(value);
+      return serialized && serialized !== '{}' ? serialized : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  return fallback;
+};
+
 const buildBaseUrl = (host, port, protocol = DEFAULT_PROTOCOL) => {
   return `${protocol}://${host}:${port}`;
 };
@@ -198,7 +240,7 @@ const request = (options) => {
 
         if (!silent) {
           wx.showToast({
-            title: res.data.detail || res.data.message || '请求异常',
+            title: normalizeErrorMessage(res.data, '请求异常'),
             icon: 'none',
           });
         }
@@ -371,5 +413,6 @@ module.exports = {
   BASE_URL,
   getBaseUrl,
   normalizeMediaUrl,
+  normalizeErrorMessage,
   Forum,
 };
