@@ -1028,7 +1028,13 @@ Page({
     });
 
     if (hasLocalData) {
-      this.saveToTempFile();
+      try {
+        this.saveToTempFile();
+        // BLE 数据采集完成后立即上传，避免只停留在小程序临时文件中。
+        await this.startUpload();
+      } catch (err) {
+        wx.showToast({ title: '采集文件保存失败，请重试', icon: 'none' });
+      }
     }
   },
 
@@ -1075,7 +1081,8 @@ Page({
       for (let i = 0; i < totalChunks; i += 1) {
         const start = i * chunkSize;
         const end = Math.min(start + chunkSize, fileInfo.size);
-        const chunkData = fs.readFileSync(this._tempFilePath, 'binary', start, end);
+        // readFileSync 的第四个参数是 length，不是绝对结束位置。
+        const chunkData = fs.readFileSync(this._tempFilePath, 'binary', start, end - start);
         const chunkPath = `${TEMP_DIR}/${this._sessionId}_chunk_${i}.dat`;
         fs.writeFileSync(chunkPath, chunkData, 'binary');
 
@@ -1109,7 +1116,8 @@ Page({
       this.setData({ hasCollectedData: false });
       this.loadStoredSessions(true);
     } catch (err) {
-      wx.showToast({ title: '上传失败，请重试', icon: 'none' });
+      const message = err && (err.detail || err.message || err.msg);
+      wx.showToast({ title: typeof message === 'string' ? message.slice(0, 28) : '上传失败，请重试', icon: 'none' });
     } finally {
       this.setData({ isUploading: false });
     }

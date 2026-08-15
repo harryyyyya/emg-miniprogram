@@ -7,7 +7,7 @@ const FALLBACK_ARTICLES = {
     summary: '如果小程序绑定成功但设备仍然显示离线，可以按这份清单逐项检查。',
     sections: [
       {
-        heading: '1. 先检查 ESP32 程序配置',
+        heading: '1. 先检查 Milk Duo S 程序配置',
         items: [
           'BACKEND_HOST 应该是 api.handemglsh.cloud。',
           'BACKEND_PORT 应该是 443。',
@@ -19,7 +19,7 @@ const FALLBACK_ARTICLES = {
         heading: '2. 再看串口监视器',
         items: [
           '串口波特率选择 115200。',
-          '看到 WiFi connected, IP=... 说明 ESP32 已连上 Wi-Fi。',
+          '看到 WiFi connected, IP=... 说明 Milk Duo S 已连上 Wi-Fi。',
           '看到 registerBoard status=200 说明设备已注册到后端。',
           '看到 heartbeat status=200 说明后端已收到设备心跳。',
         ],
@@ -34,7 +34,7 @@ const FALLBACK_ARTICLES = {
       },
     ],
     tips: [
-      '绑定成功只代表后端保存了设备信息，真正在线要看 ESP32 是否持续上报心跳。',
+      '绑定成功只代表后端保存了设备信息，真正在线要看 Milk Duo S 是否持续上报心跳。',
       '换新板子也可以继续使用，只要烧录同一份程序，并保持设备编号和密钥一致。',
     ],
   },
@@ -47,7 +47,7 @@ const FALLBACK_ARTICLES = {
         heading: '1. 录入前准备',
         items: [
           '固定臂环位置，避免每次佩戴位置差异过大。',
-          '确认蓝牙臂环或 ESP32 状态在线。',
+          '确认蓝牙臂环或 Milk Duo S 状态在线。',
           '开始前让手臂放松几秒，减少无关肌肉紧张。',
         ],
       },
