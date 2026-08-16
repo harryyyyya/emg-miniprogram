@@ -491,6 +491,38 @@ class TestEsp32CollectionChain:
             headers=admin_headers,
         ).status_code == 404
 
+        empty_session_id = f"esp32_empty_{uuid.uuid4().hex}"
+        empty_final = client.post(
+            "/devices/wifi/emg",
+            json={
+                "hardware_id": "ESP32-HAND-001",
+                "board_token": "esp32-secret",
+                "session_id": empty_session_id,
+                "gesture_name": "fist",
+                "sample_rate_hz": 500,
+                "sequence_no": 0,
+                "samples": [],
+                "is_final": True,
+            },
+        )
+        assert empty_final.status_code == 200
+        empty_rows = client.get("/training/sessions", headers=admin_headers).json()
+        empty_row = next(item for item in empty_rows if item["session_id"] == empty_session_id)
+        assert empty_row["total_samples"] == 0
+        assert empty_row["status"] == "empty"
+        assert empty_row["downloadable"] is False
+        assert empty_row["raw_data_path"] == ""
+        empty_download = client.get(
+            f"/admin/training/sessions/{empty_session_id}/download",
+            headers=admin_headers,
+        )
+        assert empty_download.status_code == 409
+        assert "没有收到任何肌电样本" in empty_download.json()["detail"]
+        assert client.delete(
+            f"/admin/training/sessions/{empty_session_id}",
+            headers=admin_headers,
+        ).status_code == 200
+
 
 class TestHealth:
     report = None

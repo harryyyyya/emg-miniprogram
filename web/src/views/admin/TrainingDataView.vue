@@ -6,7 +6,7 @@
     </div>
     <div class="filters">
       <el-input v-model="keyword" clearable placeholder="搜索用户、动作、设备或会话 ID" prefix-icon="Search" />
-      <el-select v-model="status" clearable placeholder="全部状态"><el-option label="已完成" value="completed" /><el-option label="采集中" value="collecting" /></el-select>
+      <el-select v-model="status" clearable placeholder="全部状态"><el-option label="已完成" value="completed" /><el-option label="采集中" value="collecting" /><el-option label="无有效数据" value="empty" /></el-select>
     </div>
     <div class="glass-card table-wrap">
       <el-table :data="filteredRows" v-loading="loading" style="width:100%">
@@ -15,10 +15,10 @@
         <el-table-column prop="hardware_id" label="设备" min-width="150"><template #default="{ row }">{{ row.hardware_id || 'BLE' }}</template></el-table-column>
         <el-table-column prop="total_samples" label="样本数" width="100" />
         <el-table-column prop="rms_value" label="RMS" width="100"><template #default="{ row }">{{ Number(row.rms_value || 0).toFixed(2) }}</template></el-table-column>
-        <el-table-column prop="status" label="状态" width="100"><template #default="{ row }"><el-tag :type="row.status === 'completed' ? 'success' : 'warning'">{{ row.status === 'completed' ? '已完成' : '采集中' }}</el-tag></template></el-table-column>
+        <el-table-column prop="status" label="状态" width="110"><template #default="{ row }"><el-tag :type="statusTagType(row)">{{ statusLabel(row) }}</el-tag></template></el-table-column>
         <el-table-column prop="created_at" label="采集时间" min-width="170"><template #default="{ row }">{{ formatTime(row.created_at) }}</template></el-table-column>
         <el-table-column prop="session_id" label="会话 ID" min-width="190" show-overflow-tooltip />
-        <el-table-column label="操作" width="190" fixed="right"><template #default="{ row }"><el-button type="primary" size="small" :disabled="!row.raw_data_path" :loading="downloading === row.session_id" @click="download(row)"><el-icon><Download /></el-icon>下载</el-button><el-button type="danger" size="small" :loading="deleting === row.session_id" @click="remove(row)"><el-icon><Delete /></el-icon>删除</el-button></template></el-table-column>
+        <el-table-column label="操作" width="190" fixed="right"><template #default="{ row }"><el-button type="primary" size="small" :disabled="row.downloadable === false || !row.raw_data_path" :loading="downloading === row.session_id" @click="download(row)"><el-icon><Download /></el-icon>下载</el-button><el-button type="danger" size="small" :loading="deleting === row.session_id" @click="remove(row)"><el-icon><Delete /></el-icon>删除</el-button></template></el-table-column>
       </el-table>
       <el-empty v-if="!loading && !filteredRows.length" description="暂无采集数据" />
     </div>
@@ -42,6 +42,17 @@ const filteredRows = computed(() => rows.value.filter((row) => {
   return (!keyword.value || text.includes(keyword.value.toLowerCase())) && (!status.value || row.status === status.value)
 }))
 function formatTime(value: string) { return value ? new Date(value).toLocaleString('zh-CN') : '-' }
+function statusLabel(row: TrainingSession) {
+  if (row.status === 'empty') return '无有效数据'
+  if (row.status === 'completed') return '已完成'
+  if (row.status === 'collecting') return '采集中'
+  return row.status === 'training' ? '训练中' : '等待处理'
+}
+function statusTagType(row: TrainingSession) {
+  if (row.status === 'empty') return 'danger'
+  if (row.status === 'completed') return 'success'
+  return 'warning'
+}
 async function loadData() { loading.value = true; try { rows.value = await fetchTrainingSessions() } finally { loading.value = false } }
 async function download(row: TrainingSession) {
   downloading.value = row.session_id

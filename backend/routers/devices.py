@@ -748,6 +748,7 @@ def wifi_emg_upload(
     gesture_name = body.gesture_name or meta.get("gesture_name", "")
     effective_channel_count = channel_count or int(meta.get("channel_count", 0) or 0)
     effective_rms = batch_rms if sample_count > 0 else float(meta.get("rms_value", 0) or 0)
+    effective_file_path = str(data_path) if total_samples > 0 and data_path.is_file() else ""
     preview_samples = _trim_preview_samples(body.samples)
     meta.update({
         "session_id": body.session_id,
@@ -759,7 +760,7 @@ def wifi_emg_upload(
         "channel_count": effective_channel_count,
         "sample_rate_hz": body.sample_rate_hz or meta.get("sample_rate_hz"),
         "rms_value": effective_rms,
-        "file_path": str(data_path),
+        "file_path": effective_file_path,
         "updated_at": _now().isoformat(),
         "completed": bool(body.is_final),
     })
@@ -809,11 +810,11 @@ def wifi_emg_upload(
         total_samples=total_samples,
         batch_rms=effective_rms,
         completed=bool(body.is_final),
-        file_path=str(data_path),
+        file_path=effective_file_path,
         preview_samples=preview_samples,
     )
 
-    if body.is_final:
+    if body.is_final and total_samples > 0:
         _finalize_training_session(
             db,
             device=device,

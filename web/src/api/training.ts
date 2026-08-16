@@ -6,7 +6,8 @@ export interface TrainingSession {
   user_name?: string
   user_username?: string
   raw_data_path: string
-  status: 'collecting' | 'training' | 'completed' | 'queued'
+  downloadable?: boolean
+  status: 'collecting' | 'training' | 'completed' | 'queued' | 'empty'
   created_at: string
   updated_at?: string
   hardware_id?: string

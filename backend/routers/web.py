@@ -634,6 +634,8 @@ def list_devices(
 
 
 def _training_row_from_emg(session: EmgCollectionSession) -> dict[str, Any]:
+    total_samples = session.total_samples or 0
+    is_empty = bool(session.is_completed) and total_samples == 0
     return {
         "session_id": session.session_id,
         "user_id": session.user_id,
@@ -641,11 +643,12 @@ def _training_row_from_emg(session: EmgCollectionSession) -> dict[str, Any]:
         "user_username": session.user.username if session.user else "",
         "hardware_id": session.hardware_id or "",
         "gesture_name": session.gesture_name or "",
-        "raw_data_path": session.file_path or "",
-        "status": "completed" if session.is_completed else "collecting",
+        "raw_data_path": (session.file_path or "") if total_samples > 0 else "",
+        "downloadable": total_samples > 0,
+        "status": "empty" if is_empty else ("completed" if session.is_completed else "collecting"),
         "created_at": _dt(session.created_at),
         "updated_at": _dt(session.updated_at),
-        "total_samples": session.total_samples or 0,
+        "total_samples": total_samples,
         "batch_count": session.batch_count or 0,
         "rms_value": session.rms_value or 0,
     }
@@ -660,6 +663,7 @@ def _training_row_from_legacy(session: TrainingSession) -> dict[str, Any]:
         "hardware_id": "",
         "gesture_name": session.gesture_name or "",
         "raw_data_path": session.file_path or "",
+        "downloadable": bool(session.file_path),
         "status": "completed" if session.file_path else "queued",
         "created_at": _dt(session.created_at),
         "updated_at": _dt(session.created_at),
@@ -794,10 +798,12 @@ def download_training_session(
     if not emg and not legacy:
         raise HTTPException(status_code=404, detail="采集记录不存在")
     file_path = (emg.file_path if emg else "") or (legacy.file_path if legacy else "")
-    path = _resolve_training_file(file_path, session_id)
+    path = None if emg and (emg.total_samples or 0) == 0 else _resolve_training_file(file_path, session_id)
     if path is None:
         path = _rebuild_training_file(db, session_id=session_id, emg=emg, legacy=legacy)
     if path is None:
+        if emg and (emg.total_samples or 0) == 0:
+            raise HTTPException(status_code=409, detail="该会话没有收到任何肌电样本，无法下载；请确认设备在线后重新采集")
         raise HTTPException(status_code=404, detail="采集数据文件不存在，且数据库中没有可用于恢复的原始采样批次")
     session = emg or legacy
     owner = session.user if session else None
