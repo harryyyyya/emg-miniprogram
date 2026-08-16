@@ -253,9 +253,10 @@
     </view>
 
     <view class="collect-actions">
-      <button class="btn-collect {{isCollecting ? 'collecting' : ''}}" bindtap="toggleCollect" disabled="{{isUploading}}">
-        {{isCollecting ? '停止采集' : '开始采集'}}
+      <button class="btn-collect {{isCollecting || isStopping ? 'collecting' : ''}}" bindtap="toggleCollect" disabled="{{isUploading || isStopping}}">
+        {{isStopping ? '正在结束并保存...' : (isCollecting ? '立即结束并保存' : '开始采集')}}
       </button>
+      <text class="collect-stop-hint" wx:if="{{isCollecting}}">无需等待一分钟，点击即可结束本次采集</text>
     </view>
 
     <view class="wifi-tip" wx:if="{{deviceTransport === 'wifi'}}">

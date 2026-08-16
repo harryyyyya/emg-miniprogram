@@ -87,10 +87,11 @@ Page({
     emgLiveMax: '--',
 
     isCollecting: false,
+    isStopping: false,
     gestureEmoji: '🌿',
     gestureName: '等待开始',
     collectGuide: '点击开始后，按 3 秒放松、3 秒目标动作循环采集。',
-    collectElapsedText: '最长 1 分钟，可随时停止',
+    collectElapsedText: '采集时长自定，最长 1 分钟',
     collectPhase: 'idle',
     countdown: 0,
     hasCollectedData: false,
@@ -830,8 +831,9 @@ Page({
   },
 
   async toggleCollect() {
+    if (this.data.isStopping) return;
     if (this.data.isCollecting) {
-      await this.stopCollect();
+      await this.stopCollect('manual');
     } else {
       await this.startCollect();
     }
@@ -893,6 +895,7 @@ Page({
 
     this.setData({
       isCollecting: true,
+      isStopping: false,
       hasCollectedData: false,
       lastCommandMessage: '',
       recordingSessionId: this._sessionId,
@@ -903,7 +906,7 @@ Page({
       gestureEmoji: '🌿',
       gestureName: '放松准备',
       collectGuide: '先放松 3 秒，听从提示切换到目标动作。',
-      collectElapsedText: `00:00 / 01:00`,
+      collectElapsedText: '已采集 00:00',
       collectPhase: 'relax',
       countdown: RELAX_SECONDS,
     });
@@ -973,7 +976,7 @@ Page({
     const elapsed = Math.floor((Date.now() - this._collectStartedAt) / 1000);
     if (elapsed >= MAX_COLLECT_SECONDS) {
       wx.showToast({ title: '已达到 1 分钟，自动停止采集', icon: 'none' });
-      this.stopCollect();
+      this.stopCollect('timeout');
       return;
     }
 
@@ -984,7 +987,7 @@ Page({
       ? RELAX_SECONDS - cycleOffset
       : cycle - cycleOffset;
     const actionGesture = this._activeGestures[1] || DEFAULT_GESTURES[0];
-    const elapsedText = `00:${String(Math.min(elapsed, MAX_COLLECT_SECONDS)).padStart(2, '0')} / 01:00`;
+    const elapsedText = `已采集 00:${String(Math.min(elapsed, MAX_COLLECT_SECONDS)).padStart(2, '0')}`;
 
     this.setData({
       gestureEmoji: isRelaxPhase ? '🌿' : '🖐️',
@@ -998,12 +1001,27 @@ Page({
     });
   },
 
-  async stopCollect() {
+  async stopCollect(reason = 'manual') {
+    if (this.data.isStopping || !this.data.isCollecting) return;
+
     if (this._collectTimer) {
       clearInterval(this._collectTimer);
       this._collectTimer = null;
     }
+    const elapsedSeconds = this._collectStartedAt
+      ? Math.max(0, Math.floor((Date.now() - this._collectStartedAt) / 1000))
+      : 0;
     this._collectStartedAt = 0;
+    this.setData({
+      isCollecting: false,
+      isStopping: true,
+      recordingActive: false,
+      gestureName: '正在结束采集',
+      collectGuide: '正在停止设备并保存已经采集的数据...',
+      collectElapsedText: `本次已采集 ${elapsedSeconds} 秒`,
+      collectPhase: 'idle',
+      countdown: 0,
+    });
 
     if (this.data.deviceTransport === 'wifi') {
       try {
@@ -1038,11 +1056,13 @@ Page({
     }
     const hasLocalData = (this.data.deviceTransport !== 'wifi' || needsWifiFallback) && this._collectBuffer.length > 0;
     this.setData({
-      isCollecting: false,
+      isStopping: false,
       gestureEmoji: '🌿',
       gestureName: hasLocalData ? '采集完成' : '等待设备返回结果',
-      collectGuide: '一次采集已结束，可以查看波形和存储记录。',
-      collectElapsedText: '最长 1 分钟，可随时停止',
+      collectGuide: reason === 'manual'
+        ? '已提前结束采集，可以查看波形和存储记录。'
+        : '一次采集已结束，可以查看波形和存储记录。',
+      collectElapsedText: '采集时长自定，最长 1 分钟',
       collectPhase: 'idle',
       countdown: 0,
       hasCollectedData: hasLocalData,

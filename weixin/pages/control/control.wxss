@@ -687,8 +687,17 @@
 
 .collect-actions {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   margin-top: 24rpx;
+}
+
+.collect-stop-hint {
+  margin-top: 14rpx;
+  color: #68768a;
+  font-size: 22rpx;
+  line-height: 1.5;
 }
 
 .collect-flow {
