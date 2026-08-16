@@ -10,6 +10,7 @@ import io
 import os
 import struct
 import uuid
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -470,6 +471,14 @@ class TestEsp32CollectionChain:
         assert download.status_code == 200
         assert download.content == b"".join(struct.pack("<8h", *sample) for sample in samples)
         assert f"user-{owner_id}" in download.headers["content-disposition"]
+
+        Path(saved["file_path"]).unlink()
+        rebuilt_download = client.get(
+            f"/admin/training/sessions/{session_id}/download",
+            headers=admin_headers,
+        )
+        assert rebuilt_download.status_code == 200
+        assert rebuilt_download.content == download.content
 
         deleted = client.delete(
             f"/admin/training/sessions/{session_id}",

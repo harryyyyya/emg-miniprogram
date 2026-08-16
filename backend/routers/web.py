@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import re
+import struct
 from collections import Counter
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -38,6 +39,8 @@ from models import (
 router = APIRouter(tags=["web"])
 
 DEVICE_OFFLINE_SECONDS = 15
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+UPLOAD_ROOT = BACKEND_ROOT / "uploads"
 
 
 def _require_admin(user: User) -> None:
@@ -666,6 +669,94 @@ def _training_row_from_legacy(session: TrainingSession) -> dict[str, Any]:
     }
 
 
+def _resolve_training_file(file_path: str, session_id: str) -> Path | None:
+    candidates: list[Path] = []
+    if file_path:
+        # Historical records may contain Windows separators even after migration to Linux.
+        stored_path = Path(file_path.replace("\\", "/"))
+        if stored_path.is_absolute():
+            candidates.append(stored_path)
+        else:
+            candidates.extend((Path.cwd() / stored_path, BACKEND_ROOT / stored_path))
+            if BACKEND_ROOT.name == "backend":
+                candidates.append(BACKEND_ROOT.parent / stored_path)
+
+    candidates.extend((
+        UPLOAD_ROOT / "esp32_emg" / f"{session_id}.dat",
+        UPLOAD_ROOT / "emg" / f"{session_id}.dat",
+    ))
+    if BACKEND_ROOT.name == "backend":
+        candidates.extend((
+            BACKEND_ROOT.parent / "uploads" / "esp32_emg" / f"{session_id}.dat",
+            BACKEND_ROOT.parent / "uploads" / "emg" / f"{session_id}.dat",
+        ))
+    seen: set[Path] = set()
+    for candidate in candidates:
+        resolved = candidate.resolve()
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        if resolved.is_file():
+            return resolved
+    return None
+
+
+def _rebuild_training_file(
+    db: Session,
+    *,
+    session_id: str,
+    emg: EmgCollectionSession | None,
+    legacy: TrainingSession | None,
+) -> Path | None:
+    batches = (
+        db.query(EmgCollectionBatch)
+        .filter(EmgCollectionBatch.session_id == session_id)
+        .order_by(EmgCollectionBatch.sequence_no.asc(), EmgCollectionBatch.id.asc())
+        .all()
+    )
+    if not batches:
+        return None
+
+    safe_session_id = re.sub(r"[^A-Za-z0-9_.-]+", "_", session_id).strip(".") or "session"
+    output_dir = UPLOAD_ROOT / "esp32_emg"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / f"{safe_session_id}.dat"
+    temp_path = output_path.with_suffix(".dat.tmp")
+    written_samples = 0
+
+    try:
+        with temp_path.open("wb") as output:
+            for batch in batches:
+                samples = _parse_json(batch.samples_json, [])
+                if not isinstance(samples, list):
+                    continue
+                for row in samples:
+                    if not isinstance(row, list) or not row:
+                        continue
+                    try:
+                        values = [int(value) for value in row]
+                        output.write(struct.pack(f"<{len(values)}h", *values))
+                    except (OverflowError, TypeError, ValueError, struct.error):
+                        temp_path.unlink(missing_ok=True)
+                        return None
+                    written_samples += 1
+        if written_samples == 0:
+            temp_path.unlink(missing_ok=True)
+            return None
+        temp_path.replace(output_path)
+    except OSError:
+        temp_path.unlink(missing_ok=True)
+        return None
+
+    stored_path = str(output_path)
+    if emg:
+        emg.file_path = stored_path
+    if legacy:
+        legacy.file_path = stored_path
+    db.commit()
+    return output_path.resolve()
+
+
 @router.get("/training/sessions")
 def list_training_sessions(
     db: Session = Depends(get_db),
@@ -700,12 +791,14 @@ def download_training_session(
     _require_admin(current_user)
     emg = db.query(EmgCollectionSession).filter(EmgCollectionSession.session_id == session_id).first()
     legacy = db.query(TrainingSession).filter(TrainingSession.session_id == session_id).first()
+    if not emg and not legacy:
+        raise HTTPException(status_code=404, detail="采集记录不存在")
     file_path = (emg.file_path if emg else "") or (legacy.file_path if legacy else "")
-    if not file_path:
-        raise HTTPException(status_code=404, detail="该采集记录没有可下载的数据文件")
-    path = Path(file_path).resolve()
-    if not path.is_file():
-        raise HTTPException(status_code=404, detail="采集数据文件不存在")
+    path = _resolve_training_file(file_path, session_id)
+    if path is None:
+        path = _rebuild_training_file(db, session_id=session_id, emg=emg, legacy=legacy)
+    if path is None:
+        raise HTTPException(status_code=404, detail="采集数据文件不存在，且数据库中没有可用于恢复的原始采样批次")
     session = emg or legacy
     owner = session.user if session else None
     owner_label = (owner.username or owner.name) if owner else f"user-{session.user_id}"
