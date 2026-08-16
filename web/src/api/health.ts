@@ -29,12 +29,19 @@ export interface HealthUser {
 }
 
 export interface ReportResponse {
+  report_id?: number
+  user_id?: number
+  hardware_id?: string
+  device_name?: string
   msg?: string
   report_url?: string
   diagnostics: string
   rms_value?: number
+  side_pressure?: number
   side_presure?: number
   muscle_status?: string
+  data_source?: 'simulated' | string
+  generated_at?: string
 }
 
 export function fetchHealthUsers() {

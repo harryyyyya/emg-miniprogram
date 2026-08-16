@@ -56,6 +56,15 @@
           <span class="risk-value">{{ pressureAvg.toFixed(1) }}</span>
         </div>
       </div>
+      <div class="glass-card risk-card">
+        <div class="risk-indicator low">
+          <el-icon :size="28"><CircleCheck /></el-icon>
+        </div>
+        <div>
+          <span class="risk-title">最新肌肉状态</span>
+          <span class="risk-value">{{ muscleStatus }}</span>
+        </div>
+      </div>
     </div>
 
     <div class="glass-card" style="margin-top: 20px">
@@ -96,14 +105,14 @@ import {
 } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import { graphic } from 'echarts/core'
-import { Histogram, Loading, TrendCharts, Warning } from '@element-plus/icons-vue'
+import { CircleCheck, Histogram, Loading, TrendCharts, Warning } from '@element-plus/icons-vue'
 import { fetchHealthLogs, fetchHealthUsers } from '@/api/health'
 import type { HealthLog, HealthUser } from '@/api/health'
 import { normalizeStrength } from '@/utils/math.js'
 
 echarts.use([LineChart, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent, CanvasRenderer])
 
-type HealthPoint = { time: string; rms: number; pressure: number; strength: number }
+type HealthPoint = { time: string; rms: number; pressure: number; strength: number; status: string; diagnostics: string }
 
 const healthChartRef = ref<HTMLElement>()
 let chart: echarts.ECharts | null = null
@@ -121,6 +130,7 @@ const rmsAvg = ref(0)
 const pressureAvg = ref(0)
 const riskLevel = ref('low')
 const riskText = ref('暂无数据')
+const muscleStatus = ref('暂无数据')
 const diagnosticText = ref('请选择用户查看肌肉健康数据。')
 
 function userLabel(user: HealthUser) {
@@ -132,7 +142,7 @@ function userLabel(user: HealthUser) {
 async function loadUsers() {
   loadingUsers.value = true
   try {
-    users.value = await fetchHealthUsers()
+    users.value = (await fetchHealthUsers()).filter((user) => user.device_count > 0)
     if (!selectedUser.value && users.value.length) {
       selectedUser.value = users.value[0].id
     }
@@ -161,6 +171,8 @@ async function loadData() {
       rms: Number(log.rms_value || 0),
       pressure: Number(log.side_pressure ?? log.side_presure ?? 0),
       strength: normalizeStrength(Number(log.rms_value || 0)),
+      status: log.muscle_status || log.muscle_status_label || '正常',
+      diagnostics: log.diagnostics || '',
     }))
     rawHealthData.value = mapped
     healthData.value = mapped.length > 5000 ? lttbDownsample(mapped, 5000) : mapped
@@ -181,6 +193,7 @@ function computeMetrics() {
     pressureAvg.value = 0
     riskLevel.value = 'low'
     riskText.value = '暂无数据'
+    muscleStatus.value = '暂无数据'
     diagnosticText.value = selectedUser.value
       ? '该用户暂无健康记录。请先在小程序端完成健康报告生成或肌电数据采集。'
       : '暂无可查看用户。请先使用小程序登录，或由管理员创建用户。'
@@ -190,8 +203,14 @@ function computeMetrics() {
   rmsAvg.value = d.reduce((sum, item) => sum + item.rms, 0) / d.length
   pressureAvg.value = d.reduce((sum, item) => sum + item.pressure, 0) / d.length
   const strengthAvg = d.reduce((sum, item) => sum + item.strength, 0) / d.length
+  const latest = d[d.length - 1]
+  muscleStatus.value = latest.status || '正常'
 
-  if (rmsAvg.value < 80) {
+  if (muscleStatus.value === '正常') {
+    riskLevel.value = 'low'
+    riskText.value = '低风险'
+    diagnosticText.value = latest.diagnostics || `该用户 RMS 肌电均值为 ${rmsAvg.value.toFixed(1)}，侧边压力均值为 ${pressureAvg.value.toFixed(1)}，最新肌肉状态正常。`
+  } else if (rmsAvg.value < 80) {
     riskLevel.value = 'high'
     riskText.value = '高风险'
     diagnosticText.value = `该用户 RMS 肌电均值为 ${rmsAvg.value.toFixed(1)}，归一化强度均值为 ${strengthAvg.toFixed(1)}。结合侧边压力均值 ${pressureAvg.value.toFixed(1)}，存在较高肌肉萎缩风险，建议增加康复训练频率并咨询专业医生。`
@@ -350,7 +369,7 @@ onBeforeUnmount(() => {
 .page-subtitle { margin: 8px 0 0; color: var(--color-text-muted); font-size: 14px; }
 .header-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 
-.risk-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.risk-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
 .risk-card { display: flex; align-items: center; gap: 16px; padding: 20px; }
 .risk-indicator {
   width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0;

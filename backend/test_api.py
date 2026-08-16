@@ -484,14 +484,65 @@ class TestEsp32CollectionChain:
 
 
 class TestHealth:
+    report = None
+
+    def test_generate_report_requires_bound_device(self):
+        registered = client.post(
+            "/auth/register",
+            json={
+                "username": f"health_unbound_{uuid.uuid4().hex[:10]}",
+                "password": "patient123",
+                "name": "Unbound Health User",
+                "amputation_part": "right forearm",
+            },
+        )
+        assert registered.status_code == 201
+        headers = {"Authorization": f"Bearer {registered.json()['token']}"}
+        response = client.post("/health/report/generate", json={}, headers=headers)
+        assert response.status_code == 400
+
     def test_generate_report(self, auth_headers):
+        bound = client.post(
+            "/devices/bind",
+            json={
+                "hardware_id": "HEALTH-DEVICE-001",
+                "transport": "ble",
+                "device_name": "Health Report Device",
+            },
+            headers=auth_headers,
+        )
+        assert bound.status_code == 200
+
         response = client.post("/health/report/generate", json={}, headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
-        assert "rms_value" in data
-        assert "side_presure" in data
-        assert "muscle_status" in data
-        assert "generated_at" in data
+        assert 155 <= data["rms_value"] <= 175
+        assert 35 <= data["side_presure"] <= 58
+        assert data["side_pressure"] == data["side_presure"]
+        assert data["muscle_status"] == "正常"
+        assert data["hardware_id"]
+        assert data["data_source"] == "simulated"
+        assert data["generated_at"]
+        TestHealth.report = data
+
+    def test_admin_can_view_generated_health_report(self):
+        admin_login = client.post(
+            "/auth/login",
+            json={"username": "admin", "password": os.getenv("ADMIN_PASSWORD", "admin")},
+        )
+        assert admin_login.status_code == 200
+        admin_headers = {"Authorization": f"Bearer {admin_login.json()['token']}"}
+
+        response = client.get(
+            f"/health/logs/{TestHealth.report['user_id']}",
+            params={"range": "24h"},
+            headers=admin_headers,
+        )
+        assert response.status_code == 200
+        latest = response.json()[-1]
+        assert latest["muscle_status"] == "正常"
+        assert latest["rms_value"] == TestHealth.report["rms_value"]
+        assert latest["side_pressure"] == TestHealth.report["side_pressure"]
 
     def test_get_records(self, auth_headers):
         response = client.get("/health/records", headers=auth_headers)

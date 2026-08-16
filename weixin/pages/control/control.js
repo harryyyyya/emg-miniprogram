@@ -123,10 +123,6 @@ Page({
   _lastBufferedPreviewAt: '',
 
   onLoad(options) {
-    if (options && options.tab === 'health') {
-      this.generateReport();
-    }
-
     try {
       fs.mkdirSync(TEMP_DIR, true);
     } catch (e) {}
@@ -137,6 +133,9 @@ Page({
     }
 
     this.loadBoundDevice();
+    if (options && options.tab === 'health') {
+      this.generateReport();
+    }
     this.loadStoredSessions(true);
   },
 
@@ -1149,6 +1148,15 @@ Page({
   },
 
   generateReport() {
+    if (!this._boundDevice || !this._boundDevice.hardware_id) {
+      wx.showModal({
+        title: '请先绑定设备',
+        content: '肌肉健康报告只为已绑定设备的用户生成。',
+        showCancel: false,
+      });
+      return;
+    }
+
     wx.showLoading({ title: '生成报告中...' });
     request({
       url: '/health/report/generate',
@@ -1163,10 +1171,12 @@ Page({
           muscleStatus: res.muscle_status || this.data.muscleStatus,
           healthAlert: res.diagnostics || '',
         });
+        wx.showToast({ title: '报告已保存', icon: 'success' });
       })
-      .catch(() => {
+      .catch((err) => {
         wx.hideLoading();
-        wx.showToast({ title: '报告生成失败', icon: 'none' });
+        const message = err && (err.detail || err.message || err.msg);
+        wx.showToast({ title: typeof message === 'string' ? message.slice(0, 28) : '报告生成失败', icon: 'none' });
       });
   },
 

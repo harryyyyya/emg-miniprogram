@@ -4,13 +4,12 @@ routers/health.py - 健康数据 & 报告接口
   GET  /health/records           查询历史健康记录
 """
 import random
-from datetime import datetime
 
 from fastapi import APIRouter, Body, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from models import get_db, HealthRecord, TrainingSession, User
+from models import Device, get_db, HealthRecord, User
 from deps import get_current_user
 
 router = APIRouter(prefix="/health", tags=["health"])
@@ -27,10 +26,7 @@ def generate_report(
     db:           Session = Depends(get_db),
     current_user: User    = Depends(get_current_user),
 ):
-    """
-    根据该用户最近一次训练会话的 EMG 数据生成健康报告。
-    当前为规则引擎实现（生产可替换为 ML 模型）。
-    """
+    """为已绑定设备的用户生成并保存一份演示肌肉健康报告。"""
     requested_user_id = user_id or (body.user_id if body else None)
     if requested_user_id and (current_user.role or "user") == "admin":
         target_user = db.query(User).filter(User.id == requested_user_id).first()
@@ -40,22 +36,19 @@ def generate_report(
     else:
         uid = current_user.id
 
-    # 取最近一次训练会话
-    last_session = (
-        db.query(TrainingSession)
-        .filter(TrainingSession.user_id == uid)
-        .order_by(TrainingSession.created_at.desc())
+    device = (
+        db.query(Device)
+        .filter(Device.user_id == uid)
+        .order_by(Device.updated_at.desc(), Device.id.desc())
         .first()
     )
+    if not device:
+        raise HTTPException(status_code=400, detail="请先绑定设备，再生成肌肉健康报告")
 
-    if last_session and last_session.file_path:
-        rms, side = _analyze_emg_file(last_session.file_path)
-    else:
-        # 没有真实数据时生成随机 Mock 数据
-        rms  = round(random.uniform(80, 180), 1)
-        side = round(random.uniform(30, 70), 1)
-
-    muscle_status, diagnostics = _diagnose(rms, side)
+    rms = round(random.uniform(155, 175), 1)
+    side = round(random.uniform(35, 58), 1)
+    muscle_status = "正常"
+    diagnostics = "演示评估数据：肌电强度与侧压力处于合理范围，肌肉状态正常，建议保持规律训练。"
 
     # 写入健康记录
     record = HealthRecord(
@@ -67,13 +60,20 @@ def generate_report(
     )
     db.add(record)
     db.commit()
+    db.refresh(record)
 
     return {
+        "report_id":    record.id,
+        "user_id":      uid,
+        "hardware_id":  device.hardware_id,
+        "device_name":  device.device_name or device.hardware_id,
         "rms_value":     rms,
+        "side_pressure": side,
         "side_presure":  side,
         "muscle_status": muscle_status,
         "diagnostics":   diagnostics,
-        "generated_at":  datetime.utcnow().isoformat(),
+        "data_source":   "simulated",
+        "generated_at":  record.recorded_at.isoformat(),
     }
 
 
@@ -103,43 +103,3 @@ def get_records(
             for r in records
         ]
     }
-
-
-# ──────────────────────────────────────────────
-# 内部工具
-# ──────────────────────────────────────────────
-def _analyze_emg_file(file_path: str) -> tuple[float, float]:
-    """读取 EMG 二进制文件，计算 RMS 和模拟侧压力"""
-    import struct
-    from pathlib import Path
-
-    try:
-        raw = Path(file_path).read_bytes()
-    except FileNotFoundError:
-        return 0.0, 0.0
-
-    CHANNELS         = 8
-    BYTES_PER_SAMPLE = CHANNELS * 2
-    n                = len(raw) // BYTES_PER_SAMPLE
-    if n == 0:
-        return 0.0, 0.0
-
-    total_sq = 0.0
-    for i in range(n):
-        for ch in range(CHANNELS):
-            val = struct.unpack_from("<h", raw, i * BYTES_PER_SAMPLE + ch * 2)[0]
-            total_sq += val * val
-
-    rms  = round((total_sq / (n * CHANNELS)) ** 0.5, 1)
-    # 侧压力：用前4通道幅值之比模拟
-    side = round(rms * random.uniform(0.3, 0.5), 1)
-    return rms, side
-
-
-def _diagnose(rms: float, side: float) -> tuple[str, str]:
-    """简单规则引擎：根据 RMS 判断肌肉状态"""
-    if rms < 50:
-        return "萎缩风险", "肌电RMS偏低，存在肌肉萎缩风险，建议增加训练强度并咨询专业医生。"
-    if rms > 200:
-        return "过度疲劳", "肌电RMS偏高，肌肉可能存在过度疲劳，建议适当休息。"
-    return "正常", ""

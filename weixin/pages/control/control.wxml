@@ -280,7 +280,7 @@
 
   <view class="health-section">
     <view class="section-header">
-      <text class="section-title">健康状态</text>
+      <text class="section-title">肌肉健康报告</text>
       <text class="section-action" bindtap="generateReport">生成报告</text>
     </view>
     <view class="health-grid">
@@ -294,7 +294,7 @@
       </view>
       <view class="health-item">
         <text class="health-label">肌肉状态</text>
-        <text class="health-val {{muscleStatus === '钙缩风险' ? 'text-danger' : ''}}">{{muscleStatus || '正常'}}</text>
+        <text class="health-val {{muscleStatus !== '正常' ? 'text-danger' : ''}}">{{muscleStatus || '正常'}}</text>
       </view>
     </view>
   </view>
