@@ -191,7 +191,7 @@ Page({
       boardType: inferBoardType(this._boundDevice || {}),
       boardLabel: boardLabel(inferBoardType(this._boundDevice || {})),
       deviceIp: (this._boundDevice && this._boundDevice.ip) || '',
-      canUpload: transport === 'ble',
+      canUpload: transport === 'ble' || transport === 'esp32_direct',
       deviceStatus: transport === 'wifi' || transport === 'esp32_direct'
         ? 'offline'
         : (ble.isConnected() ? 'online' : 'offline'),
@@ -435,6 +435,9 @@ Page({
 
     if (data.emg_preview && data.emg_preview.length) {
       this.applyRealtimeEmgPreview(data.emg_preview, data.emg_preview_updated_at || '');
+      if (this.data.isCollecting) {
+        this._collectBuffer.push(...data.emg_preview);
+      }
     }
   },
 
@@ -1014,11 +1017,11 @@ Page({
       ble.sendCommand(0x0B).catch(() => {});
     }
 
-    const hasLocalData = this.data.deviceTransport === 'ble' && this._collectBuffer.length > 0;
+    const hasLocalData = this.data.deviceTransport !== 'wifi' && this._collectBuffer.length > 0;
     this.setData({
       isCollecting: false,
       gestureEmoji: '🌿',
-      gestureName: this.data.deviceTransport === 'ble' ? '采集完成' : '等待设备返回结果',
+      gestureName: hasLocalData ? '采集完成' : '等待设备返回结果',
       collectGuide: '一次采集已结束，可以查看波形和存储记录。',
       collectElapsedText: '最长 1 分钟，可随时停止',
       collectPhase: 'idle',
@@ -1109,6 +1112,8 @@ Page({
           session_id: this._sessionId,
           total_chunks: totalChunks,
           gesture_name: this.data.gestureName,
+          transport: this.data.deviceTransport,
+          hardware_id: (this._boundDevice && this._boundDevice.hardware_id) || '',
         },
       });
 

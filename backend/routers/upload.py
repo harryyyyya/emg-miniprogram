@@ -62,6 +62,8 @@ class MergeBody(BaseModel):
     session_id:   str
     total_chunks: int
     gesture_name: str = ""
+    transport: str = "ble"
+    hardware_id: str = ""
 
 
 @router.post("/merge")
@@ -120,6 +122,8 @@ def merge_chunks(
         batch_count=body.total_chunks,
         rms_value=stats["rms"],
         preview_json=json.dumps(preview, ensure_ascii=False),
+        transport=body.transport,
+        hardware_id=body.hardware_id,
     )
     db.commit()
 
@@ -172,21 +176,23 @@ def _upsert_emg_collection_session(
     batch_count: int,
     rms_value: float,
     preview_json: str = "[]",
+    transport: str = "ble",
+    hardware_id: str = "",
 ) -> EmgCollectionSession:
     record = db.query(EmgCollectionSession).filter(EmgCollectionSession.session_id == session_id).first()
     if not record:
         record = EmgCollectionSession(
             session_id=session_id,
             user_id=user_id,
-            transport="ble",
-            source="ble",
+            transport=transport,
+            source=transport,
         )
         db.add(record)
 
     record.user_id = user_id
-    record.transport = "ble"
-    record.source = "ble"
-    record.hardware_id = ""
+    record.transport = transport
+    record.source = transport
+    record.hardware_id = hardware_id
     record.gesture_name = gesture_name
     record.sample_rate_hz = 0
     record.channel_count = 8

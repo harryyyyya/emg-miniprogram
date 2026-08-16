@@ -615,6 +615,27 @@ def push_device_command(
     command = _build_pending_command(body.action, body.payload)
     device.pending_command_json = json.dumps(command, ensure_ascii=False)
     device.updated_at = _now()
+
+    if body.action == "start_collect":
+        session_id = str(body.payload.get("session_id") or "").strip()
+        if session_id:
+            record = db.query(EmgCollectionSession).filter(
+                EmgCollectionSession.session_id == session_id,
+            ).first()
+            if not record:
+                record = EmgCollectionSession(
+                    session_id=session_id,
+                    user_id=current_user.id,
+                    hardware_id=device.hardware_id,
+                    transport="wifi",
+                    source="device_command",
+                )
+                db.add(record)
+            record.user_id = current_user.id
+            record.hardware_id = device.hardware_id
+            record.gesture_name = str(body.payload.get("gesture_name") or "")
+            record.is_completed = False
+            record.updated_at = _now()
     db.commit()
     return {"message": "command queued", "command": command}
 
