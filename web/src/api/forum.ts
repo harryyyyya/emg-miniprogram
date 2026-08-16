@@ -11,6 +11,7 @@ export interface ForumPost {
   author_name?: string
   pinned?: boolean
   hidden?: boolean
+  image_urls?: string[]
 }
 
 export interface TreePost extends ForumPost {

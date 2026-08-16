@@ -68,6 +68,19 @@
         <template v-if="!post.hidden">
           <h3 class="post-title">{{ post.title }}</h3>
           <p class="post-content">{{ post.content }}</p>
+          <div v-if="post.image_urls?.length" class="post-images">
+            <el-image
+              v-for="(image, index) in post.image_urls"
+              :key="`${post.id}-${index}`"
+              :src="image"
+              :preview-src-list="post.image_urls"
+              :initial-index="index"
+              fit="cover"
+              class="post-image"
+              preview-teleported
+              lazy
+            />
+          </div>
         </template>
         <div v-else class="hidden-placeholder">
           <el-icon :size="16"><Warning /></el-icon>
@@ -118,6 +131,11 @@ const searchText = ref('')
 const loading = ref(false)
 const rootPosts = ref<TreePostEx[]>([])
 
+function forumImageUrl(url: string) {
+  if (!url || /^(https?:|data:|blob:)/i.test(url)) return url
+  return url.startsWith('/') ? url : `/${url}`
+}
+
 function displayName(post: TreePost) {
   return post.author_name || `用户 #${post.user_id}`
 }
@@ -130,7 +148,11 @@ function countReplies(post: TreePost): number {
 async function loadPosts(search?: string) {
   loading.value = true
   try {
-    const flat = await fetchPosts(search ? { search } : undefined)
+    const responsePosts = await fetchPosts(search ? { search } : undefined)
+    const flat = responsePosts.map((post) => ({
+      ...post,
+      image_urls: (post.image_urls || []).filter(Boolean).map(forumImageUrl),
+    }))
 
     // 标记孤儿节点（parent_id 非空但父节点不在结果集中）
     const idSet = new Set(flat.map((p) => p.id))
@@ -234,6 +256,19 @@ function removeNodeFromTree(nodes: TreePostEx[], id: number): TreePostEx | null 
 
 .post-title { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
 .post-content { font-size: 14px; color: var(--color-text-muted); line-height: 1.7; }
+.post-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 160px));
+  gap: 8px;
+  margin-top: 12px;
+}
+.post-image {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background: rgba(148, 163, 184, 0.12);
+  cursor: zoom-in;
+}
 
 /* 隐藏帖子的内联占位（不用绝对遮罩，保留操作按钮可见） */
 .hidden-placeholder {
