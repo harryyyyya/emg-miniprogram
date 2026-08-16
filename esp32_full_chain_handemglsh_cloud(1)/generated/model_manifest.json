@@ -1,0 +1,168 @@
+{
+  "classes": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "generated_files": {
+    "controller_config.h": {
+      "sha256": "a9dad82455196903dec284e294b1f255a8d31d4a821e5c9ea480eef991e27123",
+      "size_bytes": 733
+    },
+    "lda_model.h": {
+      "sha256": "5eb9fc251ebae200e275bbaa4055acef13ac699653e4286deedee2876ffbc30c",
+      "size_bytes": 9774
+    }
+  },
+  "hashes": {
+    "feature_schema_file_sha256": "d663afdf546d16e1e042d08d0ebf846befc73c290e9b66c8bcdaaf186e784d72",
+    "feature_schema_sha256": "a0ce4924d4a1a4bddd59b25f1485a1c3cdf79232e0a3e6278974a26f128bf86b",
+    "model_parameters_sha256": "c91c2ca4753ae065886439b24aa9e30bfd42a34645c422e45742b84c03ab70bc",
+    "pipeline_file_sha256": "ac52a1d20f248101591b8510066a2a73e70b223bc9b818e2f567d4297648ffbf",
+    "pipeline_sha256": "aa84efaaea80af2e0272d728435d91134bb81761512ed075e176026a16d51abc",
+    "training_data_manifest_sha256": "266811f3fbc4d0ea5ca80bd3c06829d7e3e9718356c29c39747786c7201f64d1"
+  },
+  "label_names": [
+    "rest",
+    "open_hand",
+    "natural_grasp",
+    "power_grasp",
+    "three_finger_pinch",
+    "tip_pinch",
+    "index_extension",
+    "hook_grasp",
+    "thumbs_up"
+  ],
+  "manifest_self_hash": "excluded_to_avoid_recursive_self_hash",
+  "model_family": "shrinkage_lda",
+  "model_version": "stage6_1c-aa84efaaea80",
+  "parameter_layout": {
+    "classes": [
+      9
+    ],
+    "coefficient_order": "class_major_row_major",
+    "coefficients": [
+      9,
+      48
+    ],
+    "intercept": [
+      9
+    ],
+    "scaler_mean": [
+      48
+    ],
+    "scaler_scale": [
+      48
+    ]
+  },
+  "parameter_precision": "float32",
+  "pipeline": {
+    "baseline_mode": "fixed_127",
+    "channel_count": 8,
+    "channel_order": [
+      "E1",
+      "E2",
+      "E3",
+      "E4",
+      "E5",
+      "E6",
+      "E7",
+      "E8"
+    ],
+    "feature_count": 48,
+    "feature_layout": "feature_major_8x6",
+    "feature_names": [
+      "emg_1_mav",
+      "emg_2_mav",
+      "emg_3_mav",
+      "emg_4_mav",
+      "emg_5_mav",
+      "emg_6_mav",
+      "emg_7_mav",
+      "emg_8_mav",
+      "emg_1_rms",
+      "emg_2_rms",
+      "emg_3_rms",
+      "emg_4_rms",
+      "emg_5_rms",
+      "emg_6_rms",
+      "emg_7_rms",
+      "emg_8_rms",
+      "emg_1_wl",
+      "emg_2_wl",
+      "emg_3_wl",
+      "emg_4_wl",
+      "emg_5_wl",
+      "emg_6_wl",
+      "emg_7_wl",
+      "emg_8_wl",
+      "emg_1_var",
+      "emg_2_var",
+      "emg_3_var",
+      "emg_4_var",
+      "emg_5_var",
+      "emg_6_var",
+      "emg_7_var",
+      "emg_8_var",
+      "emg_1_zc",
+      "emg_2_zc",
+      "emg_3_zc",
+      "emg_4_zc",
+      "emg_5_zc",
+      "emg_6_zc",
+      "emg_7_zc",
+      "emg_8_zc",
+      "emg_1_ssc",
+      "emg_2_ssc",
+      "emg_3_ssc",
+      "emg_4_ssc",
+      "emg_5_ssc",
+      "emg_6_ssc",
+      "emg_7_ssc",
+      "emg_8_ssc"
+    ],
+    "filter_mode": "none",
+    "fixed_baseline": 127.0,
+    "sample_rate_hz": 500,
+    "ssc_threshold": 5.0,
+    "step_ms": 40,
+    "step_samples": 20,
+    "variance_ddof": 0,
+    "window_ms": 250,
+    "window_samples": 125,
+    "zc_threshold": 5.0
+  },
+  "refit_performed": false,
+  "schema_version": 1,
+  "source_files": {
+    "data_manifest.json": {
+      "sha256": "266811f3fbc4d0ea5ca80bd3c06829d7e3e9718356c29c39747786c7201f64d1"
+    },
+    "feature_schema.json": {
+      "sha256": "d663afdf546d16e1e042d08d0ebf846befc73c290e9b66c8bcdaaf186e784d72"
+    },
+    "frozen_pipeline.json": {
+      "sha256": "ac52a1d20f248101591b8510066a2a73e70b223bc9b818e2f567d4297648ffbf"
+    },
+    "label_map.json": {
+      "sha256": "2c1a8944175f0e9500cf3d8d255a51e96118287b7e33eb667765537b998a4d92"
+    },
+    "model_parameters.npz": {
+      "sha256": "c91c2ca4753ae065886439b24aa9e30bfd42a34645c422e45742b84c03ab70bc"
+    },
+    "preprocessing.json": {
+      "sha256": "277901c5ad32f72b9da4f22d60381f41b117dee7816dfe5f88c8062f3a5889e6"
+    },
+    "training_manifest.json": {
+      "sha256": "1b5a25e829809df3677a92d845a92ca2087850f44a51202feb2db00350fd770b"
+    }
+  },
+  "stage": "stage6_1c",
+  "status": "CANDIDATE_EXPORTED_FROM_FROZEN_MODEL"
+}

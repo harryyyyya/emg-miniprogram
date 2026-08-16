@@ -1,0 +1,7 @@
+#ifndef STAGE6_BLE_MODES_H
+#define STAGE6_BLE_MODES_H
+
+#define BLE_TRANSPORT_PROBE 1
+#define LIVE_BLE_INFERENCE 2
+
+#endif

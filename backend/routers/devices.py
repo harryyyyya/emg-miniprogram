@@ -416,7 +416,8 @@ def _upsert_emg_collection_session(
     record.total_samples = total_samples
     record.rms_value = batch_rms
     record.file_path = file_path
-    record.preview_json = _samples_to_json(_trim_preview_samples(preview_samples))
+    if preview_samples:
+        record.preview_json = _samples_to_json(_trim_preview_samples(preview_samples))
     record.is_completed = completed
     return record
 
@@ -704,6 +705,30 @@ def wifi_emg_upload(
     db: Session = Depends(get_db),
 ):
     device = _get_board_device(db, body.hardware_id, body.board_token)
+    existing_session = db.query(EmgCollectionSession).filter(
+        EmgCollectionSession.session_id == body.session_id,
+    ).first()
+    if existing_session and (
+        existing_session.user_id != device.user_id
+        or existing_session.hardware_id != body.hardware_id
+    ):
+        raise HTTPException(status_code=409, detail="session belongs to another device or user")
+
+    existing_batch = db.query(EmgCollectionBatch).filter(
+        EmgCollectionBatch.session_id == body.session_id,
+        EmgCollectionBatch.sequence_no == body.sequence_no,
+    ).first()
+    if existing_batch:
+        return {
+            "message": "emg batch already received",
+            "session_id": body.session_id,
+            "sample_count": existing_batch.sample_count or 0,
+            "total_samples": existing_session.total_samples if existing_session else 0,
+            "channel_count": existing_session.channel_count if existing_session else 0,
+            "batch_rms": existing_session.rms_value if existing_session else 0,
+            "completed": bool(existing_session and existing_session.is_completed),
+            "duplicate": True,
+        }
     _update_wifi_presence(device, BoardRegisterIn(
         hardware_id=body.hardware_id,
         board_token=body.board_token,
@@ -721,6 +746,8 @@ def wifi_emg_upload(
     batch_count = int(meta.get("batch_count", 0)) + (1 if sample_count > 0 else 0)
     total_samples = int(meta.get("total_samples", 0)) + sample_count
     gesture_name = body.gesture_name or meta.get("gesture_name", "")
+    effective_channel_count = channel_count or int(meta.get("channel_count", 0) or 0)
+    effective_rms = batch_rms if sample_count > 0 else float(meta.get("rms_value", 0) or 0)
     preview_samples = _trim_preview_samples(body.samples)
     meta.update({
         "session_id": body.session_id,
@@ -729,8 +756,9 @@ def wifi_emg_upload(
         "gesture_name": gesture_name,
         "batch_count": batch_count,
         "total_samples": total_samples,
-        "channel_count": channel_count or int(meta.get("channel_count", 0) or 0),
+        "channel_count": effective_channel_count,
         "sample_rate_hz": body.sample_rate_hz or meta.get("sample_rate_hz"),
+        "rms_value": effective_rms,
         "file_path": str(data_path),
         "updated_at": _now().isoformat(),
         "completed": bool(body.is_final),
@@ -740,8 +768,9 @@ def wifi_emg_upload(
     _save_session_meta(body.session_id, meta)
 
     telemetry = _normalize_telemetry({}, _parse_json_blob(device.telemetry_json, {}))
-    telemetry["rms_value"] = batch_rms
-    telemetry["emg_preview"] = preview_samples
+    telemetry["rms_value"] = effective_rms
+    if preview_samples:
+        telemetry["emg_preview"] = preview_samples
     telemetry["emg_preview_sequence_no"] = body.sequence_no
     telemetry["emg_preview_sample_rate_hz"] = body.sample_rate_hz or telemetry.get("emg_preview_sample_rate_hz")
     telemetry["emg_preview_updated_at"] = _now().isoformat()
@@ -751,7 +780,7 @@ def wifi_emg_upload(
         "batch_count": batch_count,
         "sample_count": total_samples,
         "channel_count": meta["channel_count"],
-        "last_batch_rms": batch_rms,
+        "last_batch_rms": effective_rms,
         "recording": not body.is_final,
         "updated_at": _now().isoformat(),
     }
@@ -766,8 +795,8 @@ def wifi_emg_upload(
         device=device,
         body=body,
         sample_count=sample_count,
-        channel_count=channel_count,
-        batch_rms=batch_rms,
+        channel_count=effective_channel_count,
+        batch_rms=effective_rms,
     )
     _upsert_emg_collection_session(
         db,
@@ -775,10 +804,10 @@ def wifi_emg_upload(
         session_id=body.session_id,
         gesture_name=gesture_name,
         sample_rate_hz=body.sample_rate_hz,
-        channel_count=channel_count,
+        channel_count=effective_channel_count,
         batch_count=batch_count,
         total_samples=total_samples,
-        batch_rms=batch_rms,
+        batch_rms=effective_rms,
         completed=bool(body.is_final),
         file_path=str(data_path),
         preview_samples=preview_samples,
@@ -799,8 +828,8 @@ def wifi_emg_upload(
         "session_id": body.session_id,
         "sample_count": sample_count,
         "total_samples": total_samples,
-        "channel_count": channel_count,
-        "batch_rms": batch_rms,
+        "channel_count": effective_channel_count,
+        "batch_rms": effective_rms,
         "completed": body.is_final,
     }
 

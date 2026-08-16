@@ -19,7 +19,7 @@ const WIFI_DEVICE_PRESETS = [
   },
 ];
 
-const DEFAULT_WIFI_DEVICE = WIFI_DEVICE_PRESETS[0];
+const DEFAULT_WIFI_DEVICE = WIFI_DEVICE_PRESETS.find((item) => item.key === 'esp32') || WIFI_DEVICE_PRESETS[0];
 
 function getWifiPreset(key) {
   return WIFI_DEVICE_PRESETS.find((item) => item.key === key) || DEFAULT_WIFI_DEVICE;

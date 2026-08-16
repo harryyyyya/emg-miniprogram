@@ -9,6 +9,7 @@ from __future__ import annotations
 import io
 import os
 import struct
+import uuid
 
 import pytest
 from fastapi.testclient import TestClient
@@ -358,6 +359,7 @@ class TestEsp32Telemetry:
                 "samples": [
                     [120, 121, 122, 123, 124, 125, 126, 127],
                 ],
+                "sequence_no": 1,
                 "is_final": True,
             },
         )
@@ -377,6 +379,108 @@ class TestEsp32Telemetry:
 
         get_response = client.get("/devices/emg/sessions/esp32_session_001", headers=auth_headers)
         assert get_response.status_code == 404
+
+
+class TestEsp32CollectionChain:
+    def test_real_samples_reach_admin_download(self, auth_headers):
+        session_id = f"esp32_e2e_{uuid.uuid4().hex}"
+        samples = [
+            [100, 101, 102, 103, 104, 105, 106, 107],
+            [110, 111, 112, 113, 114, 115, 116, 117],
+            [120, 121, 122, 123, 124, 125, 126, 127],
+        ]
+
+        command = client.post(
+            "/devices/ESP32-HAND-001/command",
+            json={
+                "action": "start_collect",
+                "payload": {"session_id": session_id, "gesture_name": "fist"},
+            },
+            headers=auth_headers,
+        )
+        assert command.status_code == 200
+
+        batch_payload = {
+            "hardware_id": "ESP32-HAND-001",
+            "board_token": "esp32-secret",
+            "session_id": session_id,
+            "gesture_name": "fist",
+            "sample_rate_hz": 500,
+            "sequence_no": 0,
+            "samples": samples,
+        }
+        first_batch = client.post("/devices/wifi/emg", json=batch_payload)
+        assert first_batch.status_code == 200
+        assert first_batch.json()["total_samples"] == 3
+
+        duplicate = client.post("/devices/wifi/emg", json=batch_payload)
+        assert duplicate.status_code == 200
+        assert duplicate.json()["duplicate"] is True
+        assert duplicate.json()["total_samples"] == 3
+
+        final_payload = {
+            **batch_payload,
+            "sequence_no": 1,
+            "samples": [],
+            "is_final": True,
+        }
+        final_batch = client.post("/devices/wifi/emg", json=final_payload)
+        assert final_batch.status_code == 200
+        assert final_batch.json()["completed"] is True
+        assert final_batch.json()["total_samples"] == 3
+        assert final_batch.json()["channel_count"] == 8
+        assert final_batch.json()["batch_rms"] > 0
+
+        final_retry = client.post("/devices/wifi/emg", json=final_payload)
+        assert final_retry.status_code == 200
+        assert final_retry.json()["duplicate"] is True
+        assert final_retry.json()["completed"] is True
+
+        user_sessions = client.get("/devices/emg/sessions", headers=auth_headers)
+        assert user_sessions.status_code == 200
+        saved = next(item for item in user_sessions.json()["sessions"] if item["session_id"] == session_id)
+        owner_id = saved["user_id"]
+        assert saved["hardware_id"] == "ESP32-HAND-001"
+        assert saved["gesture_name"] == "fist"
+        assert saved["total_samples"] == 3
+        assert saved["channel_count"] == 8
+        assert saved["is_completed"] is True
+        assert saved["preview"] == samples
+        assert saved["file_path"]
+
+        admin_login = client.post(
+            "/auth/login",
+            json={"username": "admin", "password": os.getenv("ADMIN_PASSWORD", "admin")},
+        )
+        assert admin_login.status_code == 200
+        admin_headers = {"Authorization": f"Bearer {admin_login.json()['token']}"}
+
+        rows_response = client.get("/training/sessions", headers=admin_headers)
+        assert rows_response.status_code == 200
+        row = next(item for item in rows_response.json() if item["session_id"] == session_id)
+        assert row["user_id"] == owner_id
+        assert row["user_name"]
+        assert row["gesture_name"] == "fist"
+        assert row["status"] == "completed"
+
+        download = client.get(
+            f"/admin/training/sessions/{session_id}/download",
+            headers=admin_headers,
+        )
+        assert download.status_code == 200
+        assert download.content == b"".join(struct.pack("<8h", *sample) for sample in samples)
+        assert f"user-{owner_id}" in download.headers["content-disposition"]
+
+        deleted = client.delete(
+            f"/admin/training/sessions/{session_id}",
+            headers=admin_headers,
+        )
+        assert deleted.status_code == 200
+        assert client.get(f"/devices/emg/sessions/{session_id}", headers=auth_headers).status_code == 404
+        assert client.get(
+            f"/admin/training/sessions/{session_id}/download",
+            headers=admin_headers,
+        ).status_code == 404
 
 
 class TestHealth:

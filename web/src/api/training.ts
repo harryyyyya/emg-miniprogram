@@ -22,6 +22,10 @@ export async function downloadTrainingSession(sessionId: string) {
   }) as unknown as Blob
 }
 
+export async function deleteTrainingSession(sessionId: string) {
+  return await request.delete(`/admin/training/sessions/${encodeURIComponent(sessionId)}`)
+}
+
 export async function fetchTrainingSessions() {
   try {
     return await request.get<any, TrainingSession[]>('/training/sessions')

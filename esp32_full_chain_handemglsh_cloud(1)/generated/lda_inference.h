@@ -1,0 +1,6 @@
+#ifndef STAGE6_1C_GENERATED_LDA_INFERENCE_FORWARD_H
+#define STAGE6_1C_GENERATED_LDA_INFERENCE_FORWARD_H
+
+#include "../src/lda_inference.h"
+
+#endif

@@ -716,6 +716,39 @@ def download_training_session(
     return FileResponse(path, media_type="application/octet-stream", filename=filename)
 
 
+@router.delete("/admin/training/sessions/{session_id}")
+def delete_training_session_admin(
+    session_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    _require_admin(current_user)
+    emg = db.query(EmgCollectionSession).filter(EmgCollectionSession.session_id == session_id).first()
+    legacy = db.query(TrainingSession).filter(TrainingSession.session_id == session_id).first()
+    if not emg and not legacy:
+        raise HTTPException(status_code=404, detail="采集记录不存在")
+
+    file_paths = {item for item in [emg.file_path if emg else "", legacy.file_path if legacy else ""] if item}
+    db.query(EmgCollectionBatch).filter(EmgCollectionBatch.session_id == session_id).delete(synchronize_session=False)
+    if legacy:
+        db.delete(legacy)
+    if emg:
+        db.delete(emg)
+    db.commit()
+
+    for file_path in file_paths:
+        try:
+            Path(file_path).unlink(missing_ok=True)
+        except OSError:
+            pass
+    for path in [Path("uploads/esp32_emg") / f"{session_id}.json", Path("uploads/esp32_emg") / f"{session_id}.dat"]:
+        try:
+            path.unlink(missing_ok=True)
+        except OSError:
+            pass
+    return {"message": "采集数据已删除", "session_id": session_id}
+
+
 @router.get("/health/logs/{user_id}")
 def list_health_logs(
     user_id: int,

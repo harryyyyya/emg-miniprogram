@@ -18,7 +18,7 @@
         <el-table-column prop="status" label="状态" width="100"><template #default="{ row }"><el-tag :type="row.status === 'completed' ? 'success' : 'warning'">{{ row.status === 'completed' ? '已完成' : '采集中' }}</el-tag></template></el-table-column>
         <el-table-column prop="created_at" label="采集时间" min-width="170"><template #default="{ row }">{{ formatTime(row.created_at) }}</template></el-table-column>
         <el-table-column prop="session_id" label="会话 ID" min-width="190" show-overflow-tooltip />
-        <el-table-column label="操作" width="120" fixed="right"><template #default="{ row }"><el-button type="primary" size="small" :disabled="!row.raw_data_path" :loading="downloading === row.session_id" @click="download(row)"><el-icon><Download /></el-icon>下载</el-button></template></el-table-column>
+        <el-table-column label="操作" width="190" fixed="right"><template #default="{ row }"><el-button type="primary" size="small" :disabled="!row.raw_data_path" :loading="downloading === row.session_id" @click="download(row)"><el-icon><Download /></el-icon>下载</el-button><el-button type="danger" size="small" :loading="deleting === row.session_id" @click="remove(row)"><el-icon><Delete /></el-icon>删除</el-button></template></el-table-column>
       </el-table>
       <el-empty v-if="!loading && !filteredRows.length" description="暂无采集数据" />
     </div>
@@ -27,13 +27,14 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Download, Refresh } from '@element-plus/icons-vue'
-import { downloadTrainingSession, fetchTrainingSessions, type TrainingSession } from '@/api/training'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Delete, Download, Refresh } from '@element-plus/icons-vue'
+import { deleteTrainingSession, downloadTrainingSession, fetchTrainingSessions, type TrainingSession } from '@/api/training'
 
 const rows = ref<TrainingSession[]>([])
 const loading = ref(false)
 const downloading = ref('')
+const deleting = ref('')
 const keyword = ref('')
 const status = ref('')
 const filteredRows = computed(() => rows.value.filter((row) => {
@@ -54,6 +55,12 @@ async function download(row: TrainingSession) {
     URL.revokeObjectURL(url)
     ElMessage.success('下载已开始')
   } finally { downloading.value = '' }
+}
+async function remove(row: TrainingSession) {
+  await ElMessageBox.confirm(`确定删除用户“${row.user_name || row.user_id}”的采集数据吗？原始文件也会一并删除。`, '删除采集数据', { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' })
+  deleting.value = row.session_id
+  try { await deleteTrainingSession(row.session_id); ElMessage.success('采集数据已删除'); await loadData() }
+  finally { deleting.value = '' }
 }
 onMounted(loadData)
 </script>
