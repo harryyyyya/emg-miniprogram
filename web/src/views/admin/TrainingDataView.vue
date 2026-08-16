@@ -10,7 +10,7 @@
     </div>
     <div class="glass-card table-wrap">
       <el-table :data="filteredRows" v-loading="loading" style="width:100%">
-        <el-table-column prop="user_name" label="用户" min-width="120" />
+        <el-table-column label="采集用户" min-width="180"><template #default="{ row }"><div class="user-cell"><strong>{{ row.user_name || '未知用户' }}</strong><span>ID {{ row.user_id }}<template v-if="row.user_username"> · {{ row.user_username }}</template></span></div></template></el-table-column>
         <el-table-column prop="gesture_name" label="动作" min-width="120"><template #default="{ row }">{{ row.gesture_name || '-' }}</template></el-table-column>
         <el-table-column prop="hardware_id" label="设备" min-width="150"><template #default="{ row }">{{ row.hardware_id || 'BLE' }}</template></el-table-column>
         <el-table-column prop="total_samples" label="样本数" width="100" />
@@ -37,7 +37,7 @@ const downloading = ref('')
 const keyword = ref('')
 const status = ref('')
 const filteredRows = computed(() => rows.value.filter((row) => {
-  const text = `${row.user_name || ''} ${row.gesture_name || ''} ${row.hardware_id || ''} ${row.session_id}`.toLowerCase()
+  const text = `${row.user_name || ''} ${row.user_username || ''} ${row.user_id} ${row.gesture_name || ''} ${row.hardware_id || ''} ${row.session_id}`.toLowerCase()
   return (!keyword.value || text.includes(keyword.value.toLowerCase())) && (!status.value || row.status === status.value)
 }))
 function formatTime(value: string) { return value ? new Date(value).toLocaleString('zh-CN') : '-' }
@@ -48,7 +48,9 @@ async function download(row: TrainingSession) {
     const blob = await downloadTrainingSession(row.session_id)
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
-    link.href = url; link.download = `${row.session_id}.dat`; link.click()
+    const userLabel = (row.user_username || row.user_name || `user-${row.user_id}`).replace(/[^\w\u4e00-\u9fa5.-]+/g, '_')
+    const gesture = (row.gesture_name || 'unlabeled').replace(/[^\w\u4e00-\u9fa5.-]+/g, '_')
+    link.href = url; link.download = `user-${row.user_id}_${userLabel}_${gesture}_${row.session_id}.dat`; link.click()
     URL.revokeObjectURL(url)
     ElMessage.success('下载已开始')
   } finally { downloading.value = '' }
@@ -57,5 +59,5 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}.page-header p{color:var(--color-text-muted);margin-top:6px}.filters{display:grid;grid-template-columns:minmax(260px,420px) 180px;gap:12px;margin-bottom:16px}.table-wrap{padding:16px}@media(max-width:700px){.filters{grid-template-columns:1fr}.page-header{gap:16px}}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}.page-header p{color:var(--color-text-muted);margin-top:6px}.filters{display:grid;grid-template-columns:minmax(260px,420px) 180px;gap:12px;margin-bottom:16px}.table-wrap{padding:16px}.user-cell{display:flex;flex-direction:column;gap:3px}.user-cell span{color:var(--color-text-muted);font-size:12px}@media(max-width:700px){.filters{grid-template-columns:1fr}.page-header{gap:16px}}
 </style>

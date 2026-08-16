@@ -120,6 +120,7 @@ Page({
   _collectBuffer: [],
   _tempFilePath: '',
   _emgSamples: [],
+  _lastBufferedPreviewAt: '',
 
   onLoad(options) {
     if (options && options.tab === 'health') {
@@ -538,6 +539,10 @@ Page({
 
       if (emgPreview.length) {
         this.applyRealtimeEmgPreview(emgPreview, emgPreviewUpdatedAt);
+        if (this.data.isCollecting && emgPreviewUpdatedAt !== this._lastBufferedPreviewAt) {
+          this._collectBuffer.push(...emgPreview);
+          this._lastBufferedPreviewAt = emgPreviewUpdatedAt;
+        }
       }
     } catch (err) {
       if (!silent) {
@@ -883,6 +888,7 @@ Page({
     this._sessionId = `session_${Date.now()}`;
     this._gestureIndex = 0;
     this._collectBuffer = [];
+    this._lastBufferedPreviewAt = '';
     this._activeGestures = this.buildGestureSequence();
     this._collectStartedAt = Date.now();
 
@@ -1017,7 +1023,21 @@ Page({
       ble.sendCommand(0x0B).catch(() => {});
     }
 
-    const hasLocalData = this.data.deviceTransport !== 'wifi' && this._collectBuffer.length > 0;
+    let needsWifiFallback = false;
+    if (this.data.deviceTransport === 'wifi' && this._collectBuffer.length > 0) {
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+      try {
+        const result = await request({
+          url: `/devices/emg/sessions/${encodeURIComponent(this._sessionId)}`,
+          method: 'GET',
+          silent: true,
+        });
+        needsWifiFallback = Number(result.session && result.session.total_samples || 0) === 0;
+      } catch (e) {
+        needsWifiFallback = true;
+      }
+    }
+    const hasLocalData = (this.data.deviceTransport !== 'wifi' || needsWifiFallback) && this._collectBuffer.length > 0;
     this.setData({
       isCollecting: false,
       gestureEmoji: '🌿',
@@ -1034,7 +1054,7 @@ Page({
       try {
         this.saveToTempFile();
         // BLE 数据采集完成后立即上传，避免只停留在小程序临时文件中。
-        await this.startUpload();
+        await this.startUpload(needsWifiFallback);
       } catch (err) {
         wx.showToast({ title: '采集文件保存失败，请重试', icon: 'none' });
       }
@@ -1062,8 +1082,8 @@ Page({
     });
   },
 
-  async startUpload() {
-    if (!this.data.canUpload) {
+  async startUpload(force = false) {
+    if (!this.data.canUpload && !force) {
       wx.showToast({ title: '当前模式不需要本地上传', icon: 'none' });
       return;
     }
@@ -1112,7 +1132,7 @@ Page({
           session_id: this._sessionId,
           total_chunks: totalChunks,
           gesture_name: this.data.gestureName,
-          transport: this.data.deviceTransport,
+          transport: force ? 'wifi_fallback' : this.data.deviceTransport,
           hardware_id: (this._boundDevice && this._boundDevice.hardware_id) || '',
         },
       });

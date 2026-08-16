@@ -7,6 +7,7 @@ frontend, so the mini program, ESP32 bridge, and web dashboard share one DB.
 from __future__ import annotations
 
 import json
+import re
 from collections import Counter
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -634,6 +635,7 @@ def _training_row_from_emg(session: EmgCollectionSession) -> dict[str, Any]:
         "session_id": session.session_id,
         "user_id": session.user_id,
         "user_name": session.user.name if session.user else f"用户#{session.user_id}",
+        "user_username": session.user.username if session.user else "",
         "hardware_id": session.hardware_id or "",
         "gesture_name": session.gesture_name or "",
         "raw_data_path": session.file_path or "",
@@ -651,6 +653,7 @@ def _training_row_from_legacy(session: TrainingSession) -> dict[str, Any]:
         "session_id": session.session_id,
         "user_id": session.user_id,
         "user_name": session.user.name if getattr(session, "user", None) else f"用户#{session.user_id}",
+        "user_username": session.user.username if getattr(session, "user", None) else "",
         "hardware_id": "",
         "gesture_name": session.gesture_name or "",
         "raw_data_path": session.file_path or "",
@@ -703,7 +706,14 @@ def download_training_session(
     path = Path(file_path).resolve()
     if not path.is_file():
         raise HTTPException(status_code=404, detail="采集数据文件不存在")
-    return FileResponse(path, media_type="application/octet-stream", filename=f"{session_id}.dat")
+    session = emg or legacy
+    owner = session.user if session else None
+    owner_label = (owner.username or owner.name) if owner else f"user-{session.user_id}"
+    gesture = session.gesture_name or "unlabeled"
+    safe_label = re.sub(r"[^\w.-]+", "_", owner_label, flags=re.UNICODE).strip("_") or "user"
+    safe_gesture = re.sub(r"[^\w.-]+", "_", gesture, flags=re.UNICODE).strip("_") or "unlabeled"
+    filename = f"user-{session.user_id}_{safe_label}_{safe_gesture}_{session_id}.dat"
+    return FileResponse(path, media_type="application/octet-stream", filename=filename)
 
 
 @router.get("/health/logs/{user_id}")
