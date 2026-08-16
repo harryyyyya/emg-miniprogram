@@ -7,6 +7,18 @@ export interface TrainingSession {
   raw_data_path: string
   status: 'collecting' | 'training' | 'completed' | 'queued'
   created_at: string
+  updated_at?: string
+  hardware_id?: string
+  gesture_name?: string
+  total_samples?: number
+  batch_count?: number
+  rms_value?: number
+}
+
+export async function downloadTrainingSession(sessionId: string) {
+  return await request.get(`/admin/training/sessions/${encodeURIComponent(sessionId)}/download`, {
+    responseType: 'blob',
+  }) as unknown as Blob
 }
 
 export async function fetchTrainingSessions() {

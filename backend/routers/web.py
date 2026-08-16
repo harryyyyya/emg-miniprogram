@@ -9,9 +9,11 @@ from __future__ import annotations
 import json
 from collections import Counter
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -684,6 +686,24 @@ def list_training_sessions(
         key=lambda row: row.get("updated_at") or row.get("created_at") or "",
         reverse=True,
     )
+
+
+@router.get("/admin/training/sessions/{session_id}/download")
+def download_training_session(
+    session_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    _require_admin(current_user)
+    emg = db.query(EmgCollectionSession).filter(EmgCollectionSession.session_id == session_id).first()
+    legacy = db.query(TrainingSession).filter(TrainingSession.session_id == session_id).first()
+    file_path = (emg.file_path if emg else "") or (legacy.file_path if legacy else "")
+    if not file_path:
+        raise HTTPException(status_code=404, detail="该采集记录没有可下载的数据文件")
+    path = Path(file_path).resolve()
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="采集数据文件不存在")
+    return FileResponse(path, media_type="application/octet-stream", filename=f"{session_id}.dat")
 
 
 @router.get("/health/logs/{user_id}")

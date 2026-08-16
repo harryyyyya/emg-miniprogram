@@ -135,6 +135,11 @@ const posts = ref<Post[]>([])
 const page = ref(1)
 const noMore = ref(false)
 
+function forumImageUrl(url: string) {
+  if (!url || /^(https?:|data:|blob:)/i.test(url)) return url
+  return url.startsWith('/') ? url : `/${url}`
+}
+
 // ── 加载帖子 ──
 async function loadPosts(reset = false) {
   if (reset) { page.value = 1; noMore.value = false }
@@ -146,7 +151,7 @@ async function loadPosts(reset = false) {
     const res = await Forum.getPosts(params)
     const list: Post[] = (res.posts || res || []).map((p: any) => ({
       ...p,
-      image_urls: p.image_urls || [],
+      image_urls: (p.image_urls || []).map(forumImageUrl),
       like_count: p.like_count || 0,
       comment_count: p.comment_count || 0,
       liked: p.liked || false,

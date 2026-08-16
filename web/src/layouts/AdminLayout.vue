@@ -95,6 +95,7 @@ const isCollapsed = ref(false)
 const currentRoute = computed(() => route)
 
 const allMenu = [
+  { path: 'training-data', title: '采集数据', icon: 'Download' },
   { path: 'dashboard', title: '仪表盘', icon: 'Odometer' },
   { path: 'devices', title: '设备管理', icon: 'Cpu' },
   { path: 'health', title: '肌肉健康', icon: 'TrendCharts' },

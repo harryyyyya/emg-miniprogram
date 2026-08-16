@@ -17,6 +17,12 @@ const routes: RouteRecordRaw[] = [
     redirect: '/admin/dashboard',
     children: [
       {
+        path: 'training-data',
+        name: 'TrainingData',
+        component: () => import('@/views/admin/TrainingDataView.vue'),
+        meta: { title: '采集数据', icon: 'Download' },
+      },
+      {
         path: 'dashboard',
         name: 'Dashboard',
         component: () => import('@/views/DashboardView.vue'),
