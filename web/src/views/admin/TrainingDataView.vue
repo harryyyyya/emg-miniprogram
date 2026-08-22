@@ -29,7 +29,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete, Download, Refresh } from '@element-plus/icons-vue'
-import { deleteTrainingSession, downloadTrainingSession, fetchTrainingSessions, type TrainingSession } from '@/api/training'
+import { deleteTrainingSession, downloadTrainingSession, fetchTrainingSessions, normalizeTrainingDownload, type TrainingSession } from '@/api/training'
 
 const rows = ref<TrainingSession[]>([])
 const loading = ref(false)
@@ -57,7 +57,8 @@ async function loadData() { loading.value = true; try { rows.value = await fetch
 async function download(row: TrainingSession) {
   downloading.value = row.session_id
   try {
-    const blob = await downloadTrainingSession(row.session_id)
+    const responseBlob = await downloadTrainingSession(row.session_id)
+    const blob = await normalizeTrainingDownload(responseBlob, row)
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     const userLabel = (row.user_username || row.user_name || `user-${row.user_id}`).replace(/[^\w\u4e00-\u9fa5.-]+/g, '_')
@@ -65,6 +66,8 @@ async function download(row: TrainingSession) {
     link.href = url; link.download = `user-${row.user_id}_${userLabel}_${gesture}_${row.session_id}.csv`; link.click()
     URL.revokeObjectURL(url)
     ElMessage.success('下载已开始')
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '下载失败')
   } finally { downloading.value = '' }
 }
 async function remove(row: TrainingSession) {

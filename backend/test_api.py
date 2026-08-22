@@ -478,9 +478,15 @@ class TestEsp32CollectionChain:
         )
         assert csv_download.status_code == 200
         csv_text = csv_download.content.decode("utf-8-sig")
-        assert csv_text.splitlines()[0].startswith(
-            "SampleIndex,PacketIndex,PacketTimestamp,E1,E2,E3,E4,E5,E6,E7,E8"
-        )
+        assert csv_download.content.startswith(b"\xef\xbb\xbfSampleIndex,")
+        assert b"\r\n" in csv_download.content
+        header = csv_text.splitlines()[0].split(",")
+        assert header[:25] == [
+            "SampleIndex", "PacketIndex", "PacketTimestamp",
+            "E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8",
+            "AX", "AY", "AZ", "GX", "GY", "GZ", "P", "R", "Y",
+            "Label", "Session", "ActionBlock", "Repetition", "Phase",
+        ]
         assert ",LabelName," in csv_text.splitlines()[0]
         assert ",fist," in csv_text
 

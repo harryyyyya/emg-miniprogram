@@ -829,7 +829,8 @@ def _build_emg_csv(
     transport = getattr(session, "transport", "") or ""
 
     output = io.StringIO(newline="")
-    writer = csv.writer(output, lineterminator="\n")
+    # Match the reference capture files: UTF-8 BOM is added by the response and rows use CRLF.
+    writer = csv.writer(output, lineterminator="\r\n")
     writer.writerow(CSV_DOWNLOAD_COLUMNS)
     for sample_index, raw_row in enumerate(samples):
         values = [int(value) for value in raw_row[: len(CSV_EMG_COLUMNS)]]
