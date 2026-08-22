@@ -2,6 +2,18 @@ const ble = require('../../utils/ble_manager');
 const esp32Link = require('../../utils/esp32_link');
 const { request } = require('../../utils/request');
 
+function formatBeijingTime(value = new Date()) {
+  const source = value instanceof Date
+    ? value
+    : new Date(/(?:Z|[+-]\d{2}:\d{2})$/.test(String(value)) ? value : `${value}Z`);
+  if (Number.isNaN(source.getTime())) return '';
+  // Format from the epoch with UTC getters so the phone's local timezone cannot
+  // change the displayed collection/report time.
+  const bj = new Date(source.getTime() + 8 * 60 * 60 * 1000);
+  const pad = (number) => String(number).padStart(2, '0');
+  return `${bj.getUTCFullYear()}-${pad(bj.getUTCMonth() + 1)}-${pad(bj.getUTCDate())} ${pad(bj.getUTCHours())}:${pad(bj.getUTCMinutes())}:${pad(bj.getUTCSeconds())}`;
+}
+
 Page({
   data: {
     deviceName: '未绑定设备',
@@ -211,7 +223,7 @@ Page({
       healthLiveRms: stats.rms.toFixed(2),
       healthLiveMav: stats.mav.toFixed(2),
       healthLivePeak: String(Math.round(stats.peak)),
-      healthUpdatedAt: new Date().toLocaleTimeString(),
+      healthUpdatedAt: formatBeijingTime(),
     });
     this.drawHealthChart(this._healthWindow);
 
@@ -242,6 +254,7 @@ Page({
 
   applyReport(res, fromHistory = false) {
     const metrics = res.metrics || res.analysis || {};
+    const reportAt = res.generated_at || (fromHistory ? res.recorded_at || '' : '');
     const aiSource = res.ai_source === 'deepseek'
       ? 'DeepSeek 建议'
       : (res.ai_source === 'deepseek_unavailable'
@@ -270,7 +283,7 @@ Page({
       healthFrequencyScore: metrics.frequency_score !== undefined ? String(metrics.frequency_score) : this.data.healthFrequencyScore,
       healthAdvice: res.ai_advice || res.diagnostics || this.data.healthAdvice,
       healthAiSource: aiSource,
-      healthReportAt: res.generated_at || (fromHistory ? res.recorded_at || '' : this.data.healthReportAt),
+      healthReportAt: reportAt ? formatBeijingTime(reportAt) : this.data.healthReportAt,
       healthHasReport: true,
     });
   },

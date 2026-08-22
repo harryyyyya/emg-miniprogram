@@ -101,37 +101,39 @@
         </div>
         <el-tag type="info" size="small">{{ rawHealthData.length }} 份报告</el-tag>
       </div>
-      <el-table
-        :data="rawHealthData"
-        stripe
-        border
-        height="360"
-        empty-text="该用户暂无健康报告"
-      >
-        <el-table-column prop="time" label="时间" width="160" />
-        <el-table-column prop="score" label="健康评分" width="110">
-          <template #default="scope">
-            <el-tag :type="scoreTagType(scope.row.score)" size="small">
-              {{ scope.row.score > 0 ? scope.row.score.toFixed(1) : '--' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="status" label="等级/状态" width="120" />
-        <el-table-column label="建议来源" width="170">
-          <template #default="scope">
-            <el-tag :type="scope.row.aiSource === 'deepseek' ? 'success' : 'info'" size="small">
-              {{ sourceLabel(scope.row.aiSource) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="rms" label="RMS" width="100" />
-        <el-table-column prop="fatigue" label="疲劳指数" width="110" />
-        <el-table-column label="AI 建议" min-width="320">
-          <template #default="scope">
-            <span class="report-advice">{{ scope.row.aiAdvice || '暂无 AI 建议' }}</span>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div class="report-table-wrap">
+        <el-table
+          :data="rawHealthData"
+          stripe
+          border
+          height="360"
+          empty-text="该用户暂无健康报告"
+        >
+          <el-table-column prop="time" label="时间" width="176" />
+          <el-table-column prop="score" label="健康评分" width="110">
+            <template #default="scope">
+              <el-tag :type="scoreTagType(scope.row.score)" size="small">
+                {{ scope.row.score > 0 ? scope.row.score.toFixed(1) : '--' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="status" label="等级/状态" width="120" />
+          <el-table-column label="建议来源" width="170">
+            <template #default="scope">
+              <el-tag :type="scope.row.aiSource === 'deepseek' ? 'success' : 'info'" size="small">
+                {{ sourceLabel(scope.row.aiSource) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="rms" label="RMS" width="100" />
+          <el-table-column prop="fatigue" label="疲劳指数" width="110" />
+          <el-table-column label="AI 建议" min-width="280">
+            <template #default="scope">
+              <span class="report-advice">{{ scope.row.aiAdvice || '暂无 AI 建议' }}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
     </div>
   </div>
 </template>
@@ -188,6 +190,24 @@ const riskText = ref('暂无数据')
 const muscleStatus = ref('暂无数据')
 const diagnosticText = ref('请选择用户查看肌肉健康数据。')
 
+function formatBeijingTime(value: string) {
+  if (!value) return '--'
+  const raw = value.trim()
+  const normalized = /(?:Z|[+-]\d{2}:\d{2})$/.test(raw) ? raw : `${raw}Z`
+  const date = new Date(normalized)
+  if (Number.isNaN(date.getTime())) return '--'
+  return new Intl.DateTimeFormat('zh-CN', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).format(date).replace(/\//g, '-')
+}
+
 function userLabel(user: HealthUser) {
   const name = user.name || user.username || user.phone || `用户#${user.id}`
   const suffix = user.health_log_count ? `${user.health_log_count}条健康记录` : '暂无健康记录'
@@ -223,7 +243,7 @@ async function loadData() {
     const logs: HealthLog[] = await fetchHealthLogs(selectedUser.value, { range: timeRange.value })
     const mapped = logs.map((log) => ({
       id: log.id,
-      time: (log.created_at || '').slice(5, 16).replace('T', ' '),
+      time: formatBeijingTime(log.created_at),
       rms: Number(log.rms_value || 0),
       pressure: Number(log.side_pressure ?? log.side_presure ?? 0),
       strength: normalizeStrength(Number(log.rms_value || 0)),
@@ -443,13 +463,34 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  width: 100%;
   margin-bottom: 24px;
   flex-wrap: wrap;
   gap: 12px;
 }
+.page-header > div:first-child {
+  flex: 1 1 420px;
+  min-width: 0;
+}
 .page-title { font-size: 28px; font-weight: 700; margin: 0; }
-.page-subtitle { margin: 8px 0 0; color: var(--color-text-muted); font-size: 14px; }
-.header-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.page-subtitle {
+  max-width: 760px;
+  margin: 8px 0 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+.header-actions {
+  display: flex;
+  flex: 0 1 auto;
+  min-width: 0;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
 
 .risk-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
 .risk-card { display: flex; align-items: center; gap: 16px; padding: 20px; }
@@ -477,12 +518,22 @@ onBeforeUnmount(() => {
   pointer-events: none;
 }
 .diag-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.diag-header > div:first-child { flex: 1 1 auto; min-width: 0; }
 .diag-content { color: var(--color-text-muted); line-height: 1.8; font-size: 14px; padding: 16px; background: rgba(15,23,42,0.5); border-radius: 10px; border: 1px solid rgba(99,102,241,0.1); }
-.report-table-card { margin-top: 20px; }
+.report-table-card { margin-top: 20px; min-width: 0; overflow: hidden; }
+.report-table-wrap { width: 100%; min-width: 0; overflow-x: auto; }
+.report-table-wrap :deep(.el-table) { min-width: 1066px; }
 .table-caption { margin: 6px 0 0; color: var(--color-text-muted); font-size: 13px; }
 .report-advice { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.55; color: var(--color-text-muted); white-space: normal; }
 
 @media (max-width: 900px) {
   .risk-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 1100px) {
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 </style>

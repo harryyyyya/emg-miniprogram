@@ -12,9 +12,10 @@ import json
 import re
 import struct
 from collections import Counter
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.responses import FileResponse, Response
@@ -41,6 +42,7 @@ from models import (
 router = APIRouter(tags=["web"])
 
 DEVICE_OFFLINE_SECONDS = 15
+BEIJING_TZ = ZoneInfo("Asia/Shanghai")
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 UPLOAD_ROOT = BACKEND_ROOT / "uploads"
 CSV_EMG_COLUMNS = [f"E{index}" for index in range(1, 9)]
@@ -83,7 +85,14 @@ def _require_admin(user: User) -> None:
 
 
 def _dt(value: datetime | None) -> str:
-    return value.isoformat() if value else ""
+    """Serialize database UTC timestamps as explicit Beijing time."""
+    if not value:
+        return ""
+    # SQLAlchemy DateTime columns are naive but store UTC values throughout the
+    # project. Mark them as UTC before converting so clients never guess a zone.
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(BEIJING_TZ).isoformat(timespec="seconds")
 
 
 def _parse_json(raw: str | None, default: Any):

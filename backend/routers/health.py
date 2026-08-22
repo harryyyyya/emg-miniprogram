@@ -3,7 +3,9 @@ import json
 import math
 import os
 import random
+from datetime import datetime, timezone
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Body, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -20,6 +22,7 @@ except ImportError:  # pragma: no cover - exercised only when dependencies are m
     signal = None
 
 router = APIRouter(prefix="/health", tags=["health"])
+BEIJING_TZ = ZoneInfo("Asia/Shanghai")
 
 
 class ReportIn(BaseModel):
@@ -38,6 +41,14 @@ class AnalyzeIn(BaseModel):
 def _finite(value: float, default: float = 0.0) -> float:
     value = float(value)
     return value if math.isfinite(value) else default
+
+
+def _format_beijing_time(value: datetime | None) -> str:
+    if not value:
+        return ""
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(BEIJING_TZ).isoformat(timespec="seconds")
 
 
 def _validate_samples(samples: list[list[float]]):
@@ -253,6 +264,7 @@ async def analyze_report(
         ai_advice, ai_source = await _ai_advice(metrics, current_user, device, db)
 
     report_id = None
+    recorded_at: datetime | None = None
     if body.persist:
         if not device and body.hardware_id:
             raise HTTPException(status_code=404, detail="找不到当前用户绑定的设备")
@@ -272,6 +284,7 @@ async def analyze_report(
         db.commit()
         db.refresh(record)
         report_id = record.id
+        recorded_at = record.recorded_at
 
     return {
         "report_id": report_id,
@@ -285,6 +298,7 @@ async def analyze_report(
         "diagnostics": metrics["level_description"],
         "ai_advice": ai_advice,
         "ai_source": ai_source,
+        "generated_at": _format_beijing_time(recorded_at),
         "data_source": "realtime_emg",
     }
 
@@ -343,7 +357,7 @@ def generate_report(
         "muscle_status": muscle_status,
         "diagnostics":   diagnostics,
         "data_source":   "simulated",
-        "generated_at":  record.recorded_at.isoformat(),
+        "generated_at":  _format_beijing_time(record.recorded_at),
     }
 
 
@@ -373,7 +387,7 @@ def get_records(
                 "ai_advice":     r.ai_advice or "",
                 "ai_source":     r.ai_source or "",
                 "analysis":      _parse_analysis(r.analysis_json),
-                "recorded_at":   r.recorded_at.isoformat(),
+                "recorded_at":   _format_beijing_time(r.recorded_at),
             }
             for r in records
         ]

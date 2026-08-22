@@ -191,6 +191,7 @@ function handleCommand(cmd: string) {
 .main-area {
   margin-left: var(--sidebar-width);
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -250,6 +251,7 @@ function handleCommand(cmd: string) {
 
 .content-area {
   flex: 1;
+  min-width: 0;
   padding: 24px;
   overflow-y: auto;
 }
