@@ -19,34 +19,6 @@
     <text class="device-arrow">›</text>
   </view>
 
-  <view class="health-card">
-    <view class="health-card-head">
-      <view>
-        <text class="health-card-title">实时肌肉健康</text>
-        <text class="health-card-subtitle">{{healthSignalStatus}} · {{healthWindowSamples}} 点窗口</text>
-      </view>
-      <view class="health-level {{healthMuscleStatus === '正常' ? 'normal' : 'attention'}}">
-        <text>{{healthLevel}}</text>
-      </view>
-    </view>
-    <canvas canvas-id="healthCanvas" class="health-canvas"></canvas>
-    <view class="health-metrics">
-      <view class="health-metric"><text class="health-metric-label">实时 RMS</text><text class="health-metric-value">{{healthLiveRms}}</text></view>
-      <view class="health-metric"><text class="health-metric-label">健康评分</text><text class="health-metric-value">{{healthScore}}</text></view>
-      <view class="health-metric"><text class="health-metric-label">疲劳指数</text><text class="health-metric-value">{{healthFatigueIndex}}</text></view>
-      <view class="health-metric"><text class="health-metric-label">信号质量</text><text class="health-metric-value">{{healthQualityScore}}</text></view>
-    </view>
-    <view class="health-advice">
-      <text class="health-advice-label">{{healthAiSource || '分析建议'}}</text>
-      <text class="health-advice-text">{{healthAdvice}}</text>
-    </view>
-    <view class="health-actions">
-      <button class="health-action-secondary" bindtap="openHealthReport">查看/保存报告</button>
-      <button class="health-action-primary" bindtap="requestHealthAi" loading="{{healthAnalyzing}}" disabled="{{healthAnalyzing || healthWindowSamples < 32}}">AI 分析建议</button>
-    </view>
-    <text class="health-disclaimer">分析基于当前肌电信号，仅用于训练参考，不替代医生诊断。</text>
-  </view>
-
   <view class="feature-grid">
     <view class="feature-item" bindtap="goTo" data-url="/pages/control/control">
       <view class="feature-icon bg-blue">手</view>
@@ -56,7 +28,7 @@
       <view class="feature-icon bg-green">训</view>
       <text class="feature-label">数据训练</text>
     </view>
-    <view class="feature-item" bindtap="goTo" data-url="/pages/control/control?tab=health">
+    <view class="feature-item" bindtap="goTo" data-url="/pages/health-report/health-report">
       <view class="feature-icon bg-orange">康</view>
       <text class="feature-label">健康报告</text>
     </view>

@@ -1,0 +1,112 @@
+.health-page {
+  min-height: 100vh;
+  padding: 24rpx 30rpx 80rpx;
+  box-sizing: border-box;
+  background: #f4f7fb;
+}
+
+.report-hero,
+.signal-panel,
+.metrics-panel,
+.score-panel,
+.advice-panel {
+  margin-bottom: 22rpx;
+  padding: 28rpx;
+  border-radius: 20rpx;
+  background: #ffffff;
+  box-shadow: 0 6rpx 22rpx rgba(17, 56, 110, 0.07);
+}
+
+.report-hero {
+  color: #ffffff;
+  background: linear-gradient(135deg, #0b59d6, #1693ff);
+}
+
+.hero-top,
+.panel-head,
+.advice-head,
+.score-row,
+.actions-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hero-title,
+.hero-subtitle,
+.panel-title,
+.panel-caption,
+.score-level,
+.score-status,
+.score-time,
+.advice-text,
+.live-item,
+.metric-row,
+.subscore {
+  display: block;
+}
+
+.hero-title {
+  font-size: 38rpx;
+  font-weight: 700;
+}
+
+.hero-subtitle {
+  margin-top: 8rpx;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 22rpx;
+}
+
+.status-pill {
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.status-pill.online { color: #166534; background: #dcfce7; }
+.status-pill.offline { color: #9a3412; background: #ffedd5; }
+
+.score-row {
+  justify-content: flex-start;
+  gap: 28rpx;
+  margin-top: 34rpx;
+}
+
+.score-main { display: flex; align-items: baseline; }
+.score-value { font-size: 88rpx; line-height: 1; font-weight: 800; }
+.score-unit { margin-left: 6rpx; color: rgba(255,255,255,.72); font-size: 22rpx; }
+.score-level { font-size: 34rpx; font-weight: 700; }
+.score-status { margin-top: 10rpx; font-size: 24rpx; color: rgba(255,255,255,.9); }
+.score-time { margin-top: 8rpx; color: rgba(255,255,255,.68); font-size: 20rpx; }
+
+.panel-title { color: #20304a; font-size: 30rpx; font-weight: 700; }
+.panel-caption { color: #7a8799; font-size: 21rpx; }
+.health-canvas { display: block; width: 690rpx; height: 320rpx; margin: 22rpx auto 18rpx; border-radius: 14rpx; }
+
+.live-grid,
+.subscore-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12rpx; }
+.live-item,
+.subscore { padding: 16rpx 8rpx; border-radius: 12rpx; background: #f5f8fc; text-align: center; color: #7a8799; font-size: 20rpx; }
+.live-value,
+.subscore text:last-child { display: block; margin-top: 8rpx; color: #22324a; font-size: 28rpx; font-weight: 700; }
+
+.metric-list { margin-top: 18rpx; }
+.metric-row { display: flex; justify-content: space-between; padding: 18rpx 0; border-bottom: 1rpx solid #edf1f6; color: #64748b; font-size: 24rpx; }
+.metric-row:last-child { border-bottom: none; }
+.metric-value { color: #22324a; font-weight: 700; }
+
+.advice-head { align-items: baseline; }
+.advice-text { margin-top: 16rpx; padding: 18rpx; border-left: 6rpx solid #0b59d6; background: #f7faff; color: #44546a; font-size: 24rpx; line-height: 1.65; }
+
+.actions-panel { gap: 14rpx; flex-wrap: wrap; }
+.actions-panel button { width: 100%; height: 82rpx; margin: 0; border-radius: 41rpx; font-size: 28rpx; line-height: 82rpx; }
+.actions-panel button::after { border: none; }
+.primary-btn { color: #ffffff; background: linear-gradient(135deg, #0b59d6, #1693ff); }
+.secondary-btn { color: #0b59d6; background: #eaf2ff; }
+.disclaimer { display: block; padding: 4rpx 10rpx; color: #9aa7b8; font-size: 20rpx; line-height: 1.55; }
+
+@media (max-width: 360px) {
+  .live-grid, .subscore-grid { grid-template-columns: repeat(2, 1fr); }
+  .score-value { font-size: 72rpx; }
+}

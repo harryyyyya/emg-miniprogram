@@ -1,13 +1,4 @@
 <view class="control-page">
-  <view class="alert-banner" wx:if="{{healthAlert}}" bindtap="dismissAlert">
-    <text class="alert-icon">!</text>
-    <view class="alert-content">
-      <text class="alert-text">{{healthAlert}}</text>
-      <text class="alert-disclaimer">仅供参考，如有不适请咨询专业医生。</text>
-    </view>
-    <text class="alert-close">x</text>
-  </view>
-
   <view class="device-card">
     <view class="device-card-top">
       <view>
@@ -285,30 +276,4 @@
     </button>
   </view>
 
-  <view class="health-section">
-    <view class="section-header">
-      <text class="section-title">肌肉健康报告</text>
-      <text class="section-action" bindtap="generateReport">生成报告</text>
-    </view>
-    <view class="health-grid">
-      <view class="health-item">
-        <text class="health-label">肌电 RMS</text>
-        <text class="health-val">{{rmsValue || '--'}}</text>
-      </view>
-      <view class="health-item">
-        <text class="health-label">侧压力</text>
-        <text class="health-val">{{sidePresure || '--'}}</text>
-      </view>
-      <view class="health-item">
-        <text class="health-label">肌肉状态</text>
-        <text class="health-val {{muscleStatus !== '正常' ? 'text-danger' : ''}}">{{muscleStatus || '正常'}}</text>
-      </view>
-      <view class="health-item">
-        <text class="health-label">健康评分</text>
-        <text class="health-val">{{healthScore}}</text>
-      </view>
-    </view>
-    <text class="health-report-level">等级：{{healthLevel}} · 疲劳指数：{{healthFatigueIndex}}</text>
-    <text class="health-report-advice" wx:if="{{healthAdvice}}">{{healthAdvice}}</text>
-  </view>
 </view>

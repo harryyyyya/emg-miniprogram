@@ -5,6 +5,7 @@
     "pages/article/article",
     "pages/bind/bind",
     "pages/control/control",
+    "pages/health-report/health-report",
     "pages/ai/ai",
     "pages/forum/forum",
     "pages/profile/profile",

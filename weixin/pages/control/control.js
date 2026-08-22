@@ -62,11 +62,6 @@ Page({
     rmsValue: '',
     sidePresure: '',
     muscleStatus: '正常',
-    healthAlert: '',
-    healthScore: '--',
-    healthLevel: '等待分析',
-    healthAdvice: '',
-    healthFatigueIndex: '--',
     lastCommandMessage: '',
 
     predictionResult: '',
@@ -143,9 +138,6 @@ Page({
     }
 
     this.loadBoundDevice();
-    if (options && options.tab === 'health') {
-      this.generateReport();
-    }
     this.loadStoredSessions(true);
   },
 
@@ -519,7 +511,6 @@ Page({
         rmsValue: rmsValue !== undefined && rmsValue !== null ? Number(rmsValue).toFixed(1) : this.data.rmsValue,
         sidePresure: sidePressure !== undefined && sidePressure !== null ? String(sidePressure) : this.data.sidePresure,
         muscleStatus: telemetry.muscle_status || this.data.muscleStatus,
-        healthAlert: telemetry.health_alert || telemetry.diagnostics || '',
         lastCommandMessage: lastAck.message || this.data.lastCommandMessage,
 
         predictionResult,
@@ -1187,63 +1178,5 @@ Page({
     }
   },
 
-  generateReport() {
-    if (!this._boundDevice || !this._boundDevice.hardware_id) {
-      wx.showModal({
-        title: '请先绑定设备',
-        content: '肌肉健康报告只为已绑定设备的用户生成。',
-        showCancel: false,
-      });
-      return;
-    }
-
-    const samples = (this._emgSamples || []).slice(-1000);
-    if (samples.length < 32) {
-      wx.showModal({
-        title: '需要真实肌电数据',
-        content: '请先连接设备并采集至少一段肌电信号，再生成健康报告。',
-        showCancel: false,
-      });
-      return;
-    }
-
-    wx.showLoading({ title: '生成报告中...' });
-    request({
-      url: '/health/report/analyze',
-      method: 'POST',
-      data: {
-        samples,
-        sample_rate_hz: 500,
-        hardware_id: this._boundDevice.hardware_id,
-        side_pressure: Number(this.data.sidePresure) || null,
-        include_ai: true,
-        persist: true,
-      },
-    })
-      .then((res) => {
-        wx.hideLoading();
-        const metrics = res.metrics || {};
-        this.setData({
-          rmsValue: metrics.rms !== undefined ? String(metrics.rms) : this.data.rmsValue,
-          sidePresure: res.side_presure !== undefined ? String(res.side_presure) : this.data.sidePresure,
-          muscleStatus: res.muscle_status || metrics.muscle_status || this.data.muscleStatus,
-          healthScore: metrics.health_score !== undefined ? String(metrics.health_score) : this.data.healthScore,
-          healthLevel: res.health_level || metrics.health_level || this.data.healthLevel,
-          healthFatigueIndex: metrics.fatigue_index !== undefined ? String(metrics.fatigue_index) : this.data.healthFatigueIndex,
-          healthAdvice: res.ai_advice || res.diagnostics || '',
-          healthAlert: res.ai_advice || res.diagnostics || '',
-        });
-        wx.showToast({ title: '报告已保存', icon: 'success' });
-      })
-      .catch((err) => {
-        wx.hideLoading();
-        const message = err && (err.detail || err.message || err.msg);
-        wx.showToast({ title: typeof message === 'string' ? message.slice(0, 28) : '报告生成失败', icon: 'none' });
-      });
-  },
-
-  dismissAlert() {
-    this.setData({ healthAlert: '' });
-  },
 });
 

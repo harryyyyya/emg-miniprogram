@@ -1,0 +1,83 @@
+<view class="health-page">
+  <view class="report-hero">
+    <view class="hero-top">
+      <view>
+        <text class="hero-title">肌肉健康报告</text>
+        <text class="hero-subtitle">{{deviceName}} · {{healthSignalStatus}}</text>
+      </view>
+      <view class="status-pill {{deviceOnline ? 'online' : 'offline'}}">{{deviceOnline ? '在线' : '离线'}}</view>
+    </view>
+    <view class="score-row">
+      <view class="score-main">
+        <text class="score-value">{{healthScore}}</text>
+        <text class="score-unit">/ 100</text>
+      </view>
+      <view class="score-copy">
+        <text class="score-level">{{healthLevel}}</text>
+        <text class="score-status">肌肉状态：{{healthMuscleStatus}}</text>
+        <text class="score-time" wx:if="{{healthUpdatedAt}}">实时更新 {{healthUpdatedAt}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="signal-panel">
+    <view class="panel-head">
+      <view>
+        <text class="panel-title">实时肌电信号</text>
+        <text class="panel-caption">{{healthWindowSamples}} 点分析窗口 · 8 通道</text>
+      </view>
+      <text class="panel-caption">RMS {{healthLiveRms}}</text>
+    </view>
+    <canvas canvas-id="healthCanvas" class="health-canvas"></canvas>
+    <view class="live-grid">
+      <view class="live-item"><text>实时 RMS</text><text class="live-value">{{healthLiveRms}}</text></view>
+      <view class="live-item"><text>实时 MAV</text><text class="live-value">{{healthLiveMav}}</text></view>
+      <view class="live-item"><text>峰值</text><text class="live-value">{{healthLivePeak}}</text></view>
+      <view class="live-item"><text>信号质量</text><text class="live-value">{{healthQualityScore}}</text></view>
+    </view>
+  </view>
+
+  <view class="metrics-panel">
+    <view class="panel-head">
+      <view>
+        <text class="panel-title">分析指标</text>
+        <text class="panel-caption">参考 500Hz 采样率、200ms 滑动窗口</text>
+      </view>
+    </view>
+    <view class="metric-list">
+      <view class="metric-row"><text>疲劳指数</text><text class="metric-value">{{healthFatigueIndex}}</text></view>
+      <view class="metric-row"><text>静息基线 RMS</text><text class="metric-value">{{healthBaselineRms}}</text></view>
+      <view class="metric-row"><text>RMS 变异系数</text><text class="metric-value">{{healthRmsCv}}</text></view>
+      <view class="metric-row"><text>中位频率 MF</text><text class="metric-value">{{healthMf}} Hz</text></view>
+      <view class="metric-row"><text>平均频率 MNF</text><text class="metric-value">{{healthMnf}} Hz</text></view>
+      <view class="metric-row"><text>总功率</text><text class="metric-value">{{healthPower}}</text></view>
+      <view class="metric-row"><text>侧压力</text><text class="metric-value">{{healthSidePressure}}</text></view>
+    </view>
+  </view>
+
+  <view class="score-panel">
+    <view class="panel-head"><text class="panel-title">分项评分</text></view>
+    <view class="subscore-grid">
+      <view class="subscore"><text>静息紧张度</text><text>{{healthBaselineScore}}</text></view>
+      <view class="subscore"><text>收缩稳定性</text><text>{{healthStabilityScore}}</text></view>
+      <view class="subscore"><text>频率稳定性</text><text>{{healthFrequencyScore}}</text></view>
+      <view class="subscore"><text>信号质量</text><text>{{healthQualityScore}}</text></view>
+    </view>
+  </view>
+
+  <view class="advice-panel">
+    <view class="advice-head">
+      <text class="panel-title">{{healthAiSource || '分析建议'}}</text>
+      <text class="panel-caption" wx:if="{{healthReportAt}}">{{healthReportAt}}</text>
+    </view>
+    <text class="advice-text">{{healthAdvice}}</text>
+  </view>
+
+  <view class="actions-panel">
+    <button class="primary-btn" bindtap="requestHealthAi" loading="{{healthAnalyzing}}" disabled="{{healthAnalyzing || healthWindowSamples < 32}}">{{healthHasReport ? '重新分析并保存' : '生成并保存报告'}}</button>
+    <button class="secondary-btn" bindtap="goToBind">{{deviceOnline ? '重新绑定设备' : '连接或绑定设备'}}</button>
+    <button class="secondary-btn" bindtap="goToControl">前往假手控制</button>
+  </view>
+
+  <text class="disclaimer">本报告基于当前真实肌电信号，仅用于训练和康复参考，不替代医生诊断。如出现疼痛、麻木或不适持续加重，请停止训练并咨询专业医生。</text>
+</view>
