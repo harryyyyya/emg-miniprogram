@@ -1006,6 +1006,10 @@ def list_health_logs(
             "muscle_status_label": item.muscle_status or "正常",
             "muscle_status": item.muscle_status or "正常",
             "diagnostics": item.diagnostics or "",
+            "health_score": item.health_score or 0,
+            "health_level": item.health_level or "",
+            "ai_advice": item.ai_advice or "",
+            "analysis": _parse_json(item.analysis_json, {}),
             "created_at": _dt(item.recorded_at),
         }
         for item in records

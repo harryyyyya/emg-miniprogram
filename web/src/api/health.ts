@@ -9,6 +9,10 @@ export interface HealthLog {
   muscle_status_label: string
   muscle_status?: string
   diagnostics?: string
+  health_score?: number
+  health_level?: string
+  ai_advice?: string
+  analysis?: Record<string, unknown>
   created_at: string
 }
 
@@ -41,6 +45,11 @@ export interface ReportResponse {
   side_presure?: number
   muscle_status?: string
   data_source?: 'simulated' | string
+  health_score?: number
+  health_level?: string
+  ai_advice?: string
+  metrics?: Record<string, unknown>
+  ai_source?: string
   generated_at?: string
 }
 

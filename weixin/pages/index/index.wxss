@@ -81,6 +81,152 @@
   font-size: 48rpx;
 }
 
+.health-card {
+  margin: 0 30rpx 24rpx;
+  padding: 26rpx;
+  border-radius: 20rpx;
+  background: #ffffff;
+  box-shadow: 0 6rpx 20rpx rgba(17, 56, 110, 0.08);
+}
+
+.health-card-head,
+.health-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.health-card-title {
+  display: block;
+  color: #20304a;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.health-card-subtitle {
+  display: block;
+  margin-top: 6rpx;
+  color: #718096;
+  font-size: 21rpx;
+}
+
+.health-level {
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.health-level.normal {
+  color: #16834a;
+  background: rgba(31, 157, 85, 0.12);
+}
+
+.health-level.attention {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.14);
+}
+
+.health-canvas {
+  display: block;
+  width: 660rpx;
+  height: 300rpx;
+  margin: 20rpx auto 16rpx;
+  border-radius: 12rpx;
+}
+
+.health-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10rpx;
+}
+
+.health-metric {
+  padding: 14rpx 6rpx;
+  border-radius: 12rpx;
+  background: #f5f8fc;
+  text-align: center;
+}
+
+.health-metric-label,
+.health-metric-value {
+  display: block;
+}
+
+.health-metric-label {
+  color: #7a8799;
+  font-size: 19rpx;
+}
+
+.health-metric-value {
+  margin-top: 5rpx;
+  color: #22324a;
+  font-size: 27rpx;
+  font-weight: 700;
+}
+
+.health-advice {
+  margin-top: 16rpx;
+  padding: 16rpx 18rpx;
+  border-left: 6rpx solid #0b59d6;
+  background: #f7faff;
+}
+
+.health-advice-label,
+.health-advice-text,
+.health-disclaimer {
+  display: block;
+}
+
+.health-advice-label {
+  color: #0b59d6;
+  font-size: 21rpx;
+  font-weight: 700;
+}
+
+.health-advice-text {
+  margin-top: 7rpx;
+  color: #44546a;
+  font-size: 23rpx;
+  line-height: 1.55;
+}
+
+.health-actions {
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+.health-actions button {
+  flex: 1;
+  height: 68rpx;
+  margin: 0;
+  padding: 0 10rpx;
+  border-radius: 34rpx;
+  font-size: 23rpx;
+  line-height: 68rpx;
+}
+
+.health-action-secondary {
+  color: #0b59d6;
+  background: #edf4ff;
+}
+
+.health-action-primary {
+  color: #ffffff;
+  background: linear-gradient(135deg, #0b59d6, #1693ff);
+}
+
+.health-actions button::after {
+  border: none;
+}
+
+.health-disclaimer {
+  margin-top: 12rpx;
+  color: #9aa7b8;
+  font-size: 19rpx;
+  line-height: 1.45;
+}
+
 /* 功能金刚区 */
 .feature-grid {
   display: flex;

@@ -7,6 +7,7 @@ Run with:
 from __future__ import annotations
 
 import io
+import math
 import os
 import struct
 import uuid
@@ -584,6 +585,46 @@ class TestHealth:
         assert data["generated_at"]
         TestHealth.report = data
 
+    def test_realtime_emg_analysis_persists_real_report(self, auth_headers):
+        bound = client.post(
+            "/devices/bind",
+            json={
+                "hardware_id": "HEALTH-ANALYSIS-001",
+                "transport": "ble",
+                "device_name": "Realtime Health Device",
+            },
+            headers=auth_headers,
+        )
+        assert bound.status_code == 200
+        samples = [
+            [127 + int(30 * math.sin(index / 8 + channel / 3)) for channel in range(8)]
+            for index in range(500)
+        ]
+        response = client.post(
+            "/health/report/analyze",
+            json={
+                "samples": samples,
+                "sample_rate_hz": 500,
+                "hardware_id": "HEALTH-ANALYSIS-001",
+                "include_ai": False,
+                "persist": True,
+            },
+            headers=auth_headers,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["data_source"] == "realtime_emg"
+        assert data["ai_source"] == "local_fallback"
+        assert data["metrics"]["sample_count"] == 500
+        assert 0 <= data["health_score"] <= 100
+        assert data["report_id"]
+
+        records = client.get("/health/records", headers=auth_headers)
+        assert records.status_code == 200
+        latest = records.json()["records"][0]
+        assert latest["health_score"] == data["health_score"]
+        assert latest["analysis"]["sample_count"] == 500
+
     def test_admin_can_view_generated_health_report(self):
         admin_login = client.post(
             "/auth/login",
@@ -598,7 +639,10 @@ class TestHealth:
             headers=admin_headers,
         )
         assert response.status_code == 200
-        latest = response.json()[-1]
+        latest = next(
+            item for item in response.json()
+            if item["rms_value"] == TestHealth.report["rms_value"]
+        )
         assert latest["muscle_status"] == "正常"
         assert latest["rms_value"] == TestHealth.report["rms_value"]
         assert latest["side_pressure"] == TestHealth.report["side_pressure"]

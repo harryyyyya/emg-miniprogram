@@ -94,6 +94,10 @@ class HealthRecord(Base):
     side_presure = Column(Float, default=0.0)
     muscle_status = Column(String(32), default="正常")
     diagnostics = Column(Text, default="")
+    health_score = Column(Float, default=0.0)
+    health_level = Column(String(32), default="")
+    analysis_json = Column(Text, default="{}")
+    ai_advice = Column(Text, default="")
     recorded_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="health_data")
@@ -243,6 +247,7 @@ def init_db():
     Base.metadata.create_all(bind=engine)
     _ensure_user_columns()
     _ensure_device_columns()
+    _ensure_health_record_columns()
     _ensure_forum_comment_columns()
     _ensure_knowledge_article_columns()
 
@@ -289,6 +294,27 @@ def _ensure_device_columns():
         "last_command_ack_json": "ALTER TABLE devices ADD COLUMN last_command_ack_json TEXT DEFAULT ''",
         "last_seen_at": "ALTER TABLE devices ADD COLUMN last_seen_at DATETIME",
         "updated_at": "ALTER TABLE devices ADD COLUMN updated_at DATETIME",
+    }
+
+    with engine.begin() as conn:
+        for name, ddl in column_ddls.items():
+            if name not in existing:
+                conn.execute(text(ddl))
+
+
+def _ensure_health_record_columns():
+    inspector = inspect(engine)
+    if "health_records" not in inspector.get_table_names():
+        return
+
+    existing = {col["name"] for col in inspector.get_columns("health_records")}
+    column_ddls = {
+        "health_score": "ALTER TABLE health_records ADD COLUMN health_score FLOAT DEFAULT 0",
+        "health_level": "ALTER TABLE health_records ADD COLUMN health_level VARCHAR(32) DEFAULT ''",
+        # MySQL versions before 8.0.13 reject defaults on TEXT columns.
+        # The SQLAlchemy model supplies defaults for newly inserted records.
+        "analysis_json": "ALTER TABLE health_records ADD COLUMN analysis_json TEXT",
+        "ai_advice": "ALTER TABLE health_records ADD COLUMN ai_advice TEXT",
     }
 
     with engine.begin() as conn:

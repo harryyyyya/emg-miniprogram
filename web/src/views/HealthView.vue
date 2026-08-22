@@ -84,7 +84,7 @@
     <div class="glass-card" style="margin-top: 20px">
       <div class="diag-header">
         <h3>AI 诊断评估</h3>
-        <el-tag type="success" size="small">规则分析</el-tag>
+        <el-tag type="success" size="small">真实肌电 · AI 建议</el-tag>
       </div>
       <div class="diag-content">
         {{ diagnosticText }}
@@ -112,7 +112,7 @@ import { normalizeStrength } from '@/utils/math.js'
 
 echarts.use([LineChart, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent, CanvasRenderer])
 
-type HealthPoint = { time: string; rms: number; pressure: number; strength: number; status: string; diagnostics: string }
+type HealthPoint = { time: string; rms: number; pressure: number; strength: number; score: number; status: string; diagnostics: string }
 
 const healthChartRef = ref<HTMLElement>()
 let chart: echarts.ECharts | null = null
@@ -171,8 +171,9 @@ async function loadData() {
       rms: Number(log.rms_value || 0),
       pressure: Number(log.side_pressure ?? log.side_presure ?? 0),
       strength: normalizeStrength(Number(log.rms_value || 0)),
-      status: log.muscle_status || log.muscle_status_label || '正常',
-      diagnostics: log.diagnostics || '',
+      score: Number(log.health_score || 0),
+      status: log.health_level || log.muscle_status || log.muscle_status_label || '正常',
+      diagnostics: log.ai_advice || log.diagnostics || '',
     }))
     rawHealthData.value = mapped
     healthData.value = mapped.length > 5000 ? lttbDownsample(mapped, 5000) : mapped
@@ -206,7 +207,15 @@ function computeMetrics() {
   const latest = d[d.length - 1]
   muscleStatus.value = latest.status || '正常'
 
-  if (muscleStatus.value === '正常') {
+  if (latest.score > 0 && latest.score < 55) {
+    riskLevel.value = 'high'
+    riskText.value = '高风险'
+    diagnosticText.value = latest.diagnostics || `当前健康评分为 ${latest.score.toFixed(1)}，建议暂停高强度训练并咨询专业医生。`
+  } else if (latest.score > 0 && latest.score < 70) {
+    riskLevel.value = 'medium'
+    riskText.value = '中等风险'
+    diagnosticText.value = latest.diagnostics || `当前健康评分为 ${latest.score.toFixed(1)}，建议降低训练强度并持续观察。`
+  } else if (muscleStatus.value === '正常' || latest.score >= 70) {
     riskLevel.value = 'low'
     riskText.value = '低风险'
     diagnosticText.value = latest.diagnostics || `该用户 RMS 肌电均值为 ${rmsAvg.value.toFixed(1)}，侧边压力均值为 ${pressureAvg.value.toFixed(1)}，最新肌肉状态正常。`

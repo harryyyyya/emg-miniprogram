@@ -303,6 +303,12 @@
         <text class="health-label">肌肉状态</text>
         <text class="health-val {{muscleStatus !== '正常' ? 'text-danger' : ''}}">{{muscleStatus || '正常'}}</text>
       </view>
+      <view class="health-item">
+        <text class="health-label">健康评分</text>
+        <text class="health-val">{{healthScore}}</text>
+      </view>
     </view>
+    <text class="health-report-level">等级：{{healthLevel}} · 疲劳指数：{{healthFatigueIndex}}</text>
+    <text class="health-report-advice" wx:if="{{healthAdvice}}">{{healthAdvice}}</text>
   </view>
 </view>

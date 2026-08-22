@@ -63,6 +63,10 @@ Page({
     sidePresure: '',
     muscleStatus: '正常',
     healthAlert: '',
+    healthScore: '--',
+    healthLevel: '等待分析',
+    healthAdvice: '',
+    healthFatigueIndex: '--',
     lastCommandMessage: '',
 
     predictionResult: '',
@@ -1193,19 +1197,41 @@ Page({
       return;
     }
 
+    const samples = (this._emgSamples || []).slice(-1000);
+    if (samples.length < 32) {
+      wx.showModal({
+        title: '需要真实肌电数据',
+        content: '请先连接设备并采集至少一段肌电信号，再生成健康报告。',
+        showCancel: false,
+      });
+      return;
+    }
+
     wx.showLoading({ title: '生成报告中...' });
     request({
-      url: '/health/report/generate',
+      url: '/health/report/analyze',
       method: 'POST',
-      data: {},
+      data: {
+        samples,
+        sample_rate_hz: 500,
+        hardware_id: this._boundDevice.hardware_id,
+        side_pressure: Number(this.data.sidePresure) || null,
+        include_ai: true,
+        persist: true,
+      },
     })
       .then((res) => {
         wx.hideLoading();
+        const metrics = res.metrics || {};
         this.setData({
-          rmsValue: res.rms_value !== undefined ? String(res.rms_value) : this.data.rmsValue,
+          rmsValue: metrics.rms !== undefined ? String(metrics.rms) : this.data.rmsValue,
           sidePresure: res.side_presure !== undefined ? String(res.side_presure) : this.data.sidePresure,
-          muscleStatus: res.muscle_status || this.data.muscleStatus,
-          healthAlert: res.diagnostics || '',
+          muscleStatus: res.muscle_status || metrics.muscle_status || this.data.muscleStatus,
+          healthScore: metrics.health_score !== undefined ? String(metrics.health_score) : this.data.healthScore,
+          healthLevel: res.health_level || metrics.health_level || this.data.healthLevel,
+          healthFatigueIndex: metrics.fatigue_index !== undefined ? String(metrics.fatigue_index) : this.data.healthFatigueIndex,
+          healthAdvice: res.ai_advice || res.diagnostics || '',
+          healthAlert: res.ai_advice || res.diagnostics || '',
         });
         wx.showToast({ title: '报告已保存', icon: 'success' });
       })

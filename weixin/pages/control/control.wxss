@@ -897,3 +897,19 @@
 .text-danger {
   color: #d83a3a;
 }
+
+.health-report-level,
+.health-report-advice {
+  display: block;
+  margin-top: 16rpx;
+  color: #64748b;
+  font-size: 22rpx;
+  line-height: 1.55;
+}
+
+.health-report-advice {
+  padding: 16rpx 18rpx;
+  border-left: 6rpx solid #0b59d6;
+  background: #f7faff;
+  color: #44546a;
+}

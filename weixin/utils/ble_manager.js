@@ -51,6 +51,7 @@ let _notifyTimer = null;
 let _mockTimer = null;
 let _onDataCallback = null;    // 外部回调：接收解析后的 EMG 样本
 let _onStatusCallback = null;  // 连接状态回调
+const _dataListeners = new Set();
 let _useMock = false;
 
 // ========== 公共 API ==========
@@ -177,13 +178,21 @@ function _extractFrames(data) {
     for (let j = i + 6; j < data.length; j++) {
       if (data[j] === protocol.TAIL) { tailIdx = j; break; }
     }
-    if (tailIdx === -1) break; // 不完整帧，等待下次
+    if (tailIdx === -1) {
+      // ringBufferRead 已经推进了 readPos；把未完成帧退回去，
+      // 否则 BLE 通知拆包时这一帧会被永久丢弃。
+      readPos -= data.length - i;
+      break;
+    }
 
     const frameSlice = data.slice(i, tailIdx + 1);
     const result = protocol.unpackFrame(frameSlice.buffer);
-    if (result.valid && _onDataCallback) {
+    if (result.valid) {
       const samples = protocol.parseEMGPayload(result.payload);
-      _onDataCallback(samples);
+      if (_onDataCallback) _onDataCallback(samples);
+      _dataListeners.forEach((listener) => {
+        try { listener(samples); } catch (e) { console.warn('[BLE] data listener failed', e); }
+      });
     }
     i = tailIdx + 1;
   }
@@ -263,6 +272,9 @@ function startMock() {
       samples.push(row);
     }
     if (_onDataCallback) _onDataCallback(samples);
+    _dataListeners.forEach((listener) => {
+      try { listener(samples); } catch (e) { console.warn('[BLE] data listener failed', e); }
+    });
   }, 200);
 }
 
@@ -273,6 +285,8 @@ function stopMock() {
 
 // ========== 回调注册 ==========
 function onData(cb) { _onDataCallback = cb; }
+function addDataListener(cb) { if (typeof cb === 'function') _dataListeners.add(cb); }
+function removeDataListener(cb) { _dataListeners.delete(cb); }
 function onStatus(cb) { _onStatusCallback = cb; }
 function _fireStatus(status) {
   if (_onStatusCallback) _onStatusCallback(status);
@@ -287,6 +301,8 @@ module.exports = {
   startMock,
   stopMock,
   onData,
+  addDataListener,
+  removeDataListener,
   onStatus,
   isConnected,
   getDeviceId,
