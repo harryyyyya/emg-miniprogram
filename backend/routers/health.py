@@ -1,6 +1,7 @@
 """Health records and real-time sEMG analysis endpoints."""
 import json
 import math
+import os
 import random
 from typing import Any
 
@@ -215,6 +216,8 @@ def _target_device(db: Session, user: User, hardware_id: str) -> Device | None:
 
 async def _ai_advice(metrics: dict[str, Any], user: User, device: Device | None, db: Session) -> tuple[str, str]:
     rule_advice = _rule_advice(metrics)
+    if not os.getenv("DEEPSEEK_API_KEY"):
+        return rule_advice, "local_fallback"
     try:
         from routers.ai import ChatIn, _call_deepseek
 
@@ -227,8 +230,10 @@ async def _ai_advice(metrics: dict[str, Any], user: User, device: Device | None,
         if reply:
             return reply.strip(), "deepseek"
     except Exception:
-        pass
-    return rule_advice, "local_fallback"
+        # Keep the report usable when the key, network, quota, or upstream
+        # response is unavailable, but expose the real source to the client.
+        return f"{rule_advice}（DeepSeek 暂时不可用，当前显示本地规则建议。）", "deepseek_unavailable"
+    return rule_advice, "deepseek_unavailable"
 
 
 @router.post("/report/analyze")
@@ -261,6 +266,7 @@ async def analyze_report(
             health_level=metrics["health_level"],
             analysis_json=json.dumps(metrics, ensure_ascii=False),
             ai_advice=ai_advice,
+            ai_source=ai_source,
         )
         db.add(record)
         db.commit()
@@ -365,6 +371,7 @@ def get_records(
                 "health_score":  r.health_score or 0,
                 "health_level":  r.health_level or "",
                 "ai_advice":     r.ai_advice or "",
+                "ai_source":     r.ai_source or "",
                 "analysis":      _parse_analysis(r.analysis_json),
                 "recorded_at":   r.recorded_at.isoformat(),
             }

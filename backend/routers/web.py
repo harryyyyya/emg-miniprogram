@@ -988,14 +988,14 @@ def list_health_logs(
     if (current_user.role or "user") != "admin":
         user_id = current_user.id
 
-    hours = 24 if range == "24h" else 24 * 7
-    start = datetime.utcnow() - timedelta(hours=hours)
-    records = (
-        db.query(HealthRecord)
-        .filter(HealthRecord.user_id == user_id, HealthRecord.recorded_at >= start)
-        .order_by(HealthRecord.recorded_at.asc())
-        .all()
-    )
+    query = db.query(HealthRecord).filter(HealthRecord.user_id == user_id)
+    if range == "24h":
+        query = query.filter(HealthRecord.recorded_at >= datetime.utcnow() - timedelta(hours=24))
+    elif range == "7d":
+        query = query.filter(HealthRecord.recorded_at >= datetime.utcnow() - timedelta(days=7))
+    elif range == "30d":
+        query = query.filter(HealthRecord.recorded_at >= datetime.utcnow() - timedelta(days=30))
+    records = query.order_by(HealthRecord.recorded_at.asc(), HealthRecord.id.asc()).all()
     return [
         {
             "id": item.id,
@@ -1009,6 +1009,7 @@ def list_health_logs(
             "health_score": item.health_score or 0,
             "health_level": item.health_level or "",
             "ai_advice": item.ai_advice or "",
+            "ai_source": item.ai_source or "",
             "analysis": _parse_json(item.analysis_json, {}),
             "created_at": _dt(item.recorded_at),
         }

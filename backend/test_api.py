@@ -623,6 +623,7 @@ class TestHealth:
         assert records.status_code == 200
         latest = records.json()["records"][0]
         assert latest["health_score"] == data["health_score"]
+        assert latest["ai_source"] == data["ai_source"]
         assert latest["analysis"]["sample_count"] == 500
 
     def test_admin_can_view_generated_health_report(self):

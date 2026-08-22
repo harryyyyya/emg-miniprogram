@@ -98,6 +98,7 @@ class HealthRecord(Base):
     health_level = Column(String(32), default="")
     analysis_json = Column(Text, default="{}")
     ai_advice = Column(Text, default="")
+    ai_source = Column(String(32), default="")
     recorded_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="health_data")
@@ -315,6 +316,7 @@ def _ensure_health_record_columns():
         # The SQLAlchemy model supplies defaults for newly inserted records.
         "analysis_json": "ALTER TABLE health_records ADD COLUMN analysis_json TEXT",
         "ai_advice": "ALTER TABLE health_records ADD COLUMN ai_advice TEXT",
+        "ai_source": "ALTER TABLE health_records ADD COLUMN ai_source VARCHAR(32) DEFAULT ''",
     }
 
     with engine.begin() as conn:

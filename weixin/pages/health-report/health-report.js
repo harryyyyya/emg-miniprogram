@@ -27,7 +27,7 @@ Page({
     healthStabilityScore: '--',
     healthFrequencyScore: '--',
     healthAdvice: '绑定设备后，这里会根据真实肌电信号生成报告。',
-    healthAiSource: '',
+    healthAiSource: '等待 DeepSeek 分析',
     healthUpdatedAt: '',
     healthReportAt: '',
     healthAnalyzing: false,
@@ -39,6 +39,7 @@ Page({
   _healthLastPreviewMarker: '',
   _healthLastAnalysisAt: 0,
   _healthAnalysisInFlight: false,
+  _healthAiAutoRequested: false,
   _healthDataListener: null,
   _healthDevice: null,
   _sidePressure: null,
@@ -108,6 +109,7 @@ Page({
     this._healthWindow = [];
     this._healthLastPreviewMarker = '';
     this._healthLastAnalysisAt = 0;
+    this._healthAiAutoRequested = false;
     this._sidePressure = null;
     const device = this._healthDevice;
     this.setData({
@@ -122,7 +124,7 @@ Page({
       healthFatigueIndex: '--',
       healthQualityScore: '--',
       healthAdvice: device ? '正在等待真实肌电数据...' : '请先绑定设备，才能进行实时肌电分析。',
-      healthAiSource: '',
+      healthAiSource: '等待 DeepSeek 分析',
       healthUpdatedAt: '',
       healthHasReport: false,
     });
@@ -215,7 +217,9 @@ Page({
 
     const now = Date.now();
     if (this._healthWindow.length >= 100 && now - this._healthLastAnalysisAt >= 3000 && !this._healthAnalysisInFlight) {
-      this.requestHealthAnalysis(false, false);
+      const requestAi = !this._healthAiAutoRequested;
+      if (requestAi) this._healthAiAutoRequested = true;
+      this.requestHealthAnalysis(requestAi, requestAi);
     }
   },
 
@@ -238,6 +242,13 @@ Page({
 
   applyReport(res, fromHistory = false) {
     const metrics = res.metrics || res.analysis || {};
+    const aiSource = res.ai_source === 'deepseek'
+      ? 'DeepSeek 建议'
+      : (res.ai_source === 'deepseek_unavailable'
+        ? 'DeepSeek 暂不可用 · 本地规则建议'
+        : (res.ai_source === 'local_fallback'
+          ? '本地规则建议'
+          : (res.ai_advice ? '已保存建议（来源未记录）' : this.data.healthAiSource)));
     this.setData({
       healthLiveRms: metrics.rms !== undefined ? String(metrics.rms) : (res.rms_value !== undefined ? String(res.rms_value) : this.data.healthLiveRms),
       healthLiveMav: metrics.mav !== undefined ? String(metrics.mav) : this.data.healthLiveMav,
@@ -258,7 +269,7 @@ Page({
       healthStabilityScore: metrics.stability_score !== undefined ? String(metrics.stability_score) : this.data.healthStabilityScore,
       healthFrequencyScore: metrics.frequency_score !== undefined ? String(metrics.frequency_score) : this.data.healthFrequencyScore,
       healthAdvice: res.ai_advice || res.diagnostics || this.data.healthAdvice,
-      healthAiSource: res.ai_source === 'deepseek' ? 'DeepSeek 建议' : (res.ai_advice ? '本地规则建议' : this.data.healthAiSource),
+      healthAiSource: aiSource,
       healthReportAt: res.generated_at || (fromHistory ? res.recorded_at || '' : this.data.healthReportAt),
       healthHasReport: true,
     });
@@ -313,15 +324,26 @@ Page({
 
   drawHealthChart(samples) {
     const ctx = wx.createCanvasContext('healthCanvas', this);
-    const width = 345;
-    const height = 160;
+    const screenWidth = (wx.getSystemInfoSync && wx.getSystemInfoSync().windowWidth) || 375;
+    const scale = screenWidth / 750;
+    const width = Math.max(240, Math.floor((750 - 60 - 56) * scale));
+    const height = Math.max(100, Math.floor(230 * scale));
     const series = (samples || []).slice(-180).map((row) => (Number(row[0]) || 0) - 127);
     ctx.setFillStyle('#071b2b');
     ctx.fillRect(0, 0, width, height);
+    ctx.setStrokeStyle('rgba(148, 163, 184, 0.16)');
+    ctx.setLineWidth(1);
+    for (let grid = 1; grid < 4; grid += 1) {
+      const y = (height / 4) * grid;
+      ctx.beginPath();
+      ctx.moveTo(10, y);
+      ctx.lineTo(width - 10, y);
+      ctx.stroke();
+    }
     if (!series.length) {
       ctx.setFillStyle('rgba(255,255,255,0.62)');
       ctx.setFontSize(13);
-      ctx.fillText('等待实时肌电信号...', 108, 84);
+      ctx.fillText('等待实时肌电信号...', Math.max(18, width / 2 - 58), height / 2 + 4);
       ctx.draw();
       return;
     }
@@ -330,8 +352,8 @@ Page({
     const range = Math.max(1, max - min);
     ctx.beginPath();
     series.forEach((value, index) => {
-      const x = 12 + (index / Math.max(1, series.length - 1)) * 321;
-      const y = 12 + ((max - value) / range) * 126;
+      const x = 12 + (index / Math.max(1, series.length - 1)) * (width - 24);
+      const y = 12 + ((max - value) / range) * (height - 24);
       if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     });
     ctx.setStrokeStyle('#24f2a6');

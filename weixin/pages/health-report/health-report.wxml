@@ -67,14 +67,14 @@
 
   <view class="advice-panel">
     <view class="advice-head">
-      <text class="panel-title">{{healthAiSource || '分析建议'}}</text>
+      <text class="panel-title">{{healthAiSource}}</text>
       <text class="panel-caption" wx:if="{{healthReportAt}}">{{healthReportAt}}</text>
     </view>
     <text class="advice-text">{{healthAdvice}}</text>
   </view>
 
   <view class="actions-panel">
-    <button class="primary-btn" bindtap="requestHealthAi" loading="{{healthAnalyzing}}" disabled="{{healthAnalyzing || healthWindowSamples < 32}}">{{healthHasReport ? '重新分析并保存' : '生成并保存报告'}}</button>
+    <button class="primary-btn" bindtap="requestHealthAi" loading="{{healthAnalyzing}}" disabled="{{healthAnalyzing || healthWindowSamples < 32}}">{{healthHasReport ? '调用 DeepSeek 重新分析' : '调用 DeepSeek 生成报告'}}</button>
     <button class="secondary-btn" bindtap="goToBind">{{deviceOnline ? '重新绑定设备' : '连接或绑定设备'}}</button>
     <button class="secondary-btn" bindtap="goToControl">前往假手控制</button>
   </view>

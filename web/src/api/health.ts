@@ -12,6 +12,7 @@ export interface HealthLog {
   health_score?: number
   health_level?: string
   ai_advice?: string
+  ai_source?: string
   analysis?: Record<string, unknown>
   created_at: string
 }
@@ -79,7 +80,7 @@ export function deleteHealthUser(userId: number) {
   return request.delete<any, { message: string }>(`/users/${userId}`)
 }
 
-export function fetchHealthLogs(userId: number, params?: { range?: '24h' | '7d' }) {
+export function fetchHealthLogs(userId: number, params?: { range?: '24h' | '7d' | '30d' | 'all' }) {
   return request.get<any, HealthLog[]>(`/health/logs/${userId}`, { params })
 }
 

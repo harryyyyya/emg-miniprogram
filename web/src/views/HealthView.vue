@@ -24,6 +24,8 @@
         <el-radio-group v-model="timeRange" size="default">
           <el-radio-button value="24h">24小时</el-radio-button>
           <el-radio-button value="7d">近7天</el-radio-button>
+          <el-radio-button value="30d">近30天</el-radio-button>
+          <el-radio-button value="all">全部</el-radio-button>
         </el-radio-group>
       </div>
     </div>
@@ -90,6 +92,47 @@
         {{ diagnosticText }}
       </div>
     </div>
+
+    <div class="glass-card report-table-card">
+      <div class="diag-header">
+        <div>
+          <h3>健康报告明细</h3>
+          <p class="table-caption">当前用户的每一份健康报告、评分和 AI 建议都来自后端数据库。</p>
+        </div>
+        <el-tag type="info" size="small">{{ rawHealthData.length }} 份报告</el-tag>
+      </div>
+      <el-table
+        :data="rawHealthData"
+        stripe
+        border
+        height="360"
+        empty-text="该用户暂无健康报告"
+      >
+        <el-table-column prop="time" label="时间" width="160" />
+        <el-table-column prop="score" label="健康评分" width="110">
+          <template #default="scope">
+            <el-tag :type="scoreTagType(scope.row.score)" size="small">
+              {{ scope.row.score > 0 ? scope.row.score.toFixed(1) : '--' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="等级/状态" width="120" />
+        <el-table-column label="建议来源" width="170">
+          <template #default="scope">
+            <el-tag :type="scope.row.aiSource === 'deepseek' ? 'success' : 'info'" size="small">
+              {{ sourceLabel(scope.row.aiSource) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="rms" label="RMS" width="100" />
+        <el-table-column prop="fatigue" label="疲劳指数" width="110" />
+        <el-table-column label="AI 建议" min-width="320">
+          <template #default="scope">
+            <span class="report-advice">{{ scope.row.aiAdvice || '暂无 AI 建议' }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
   </div>
 </template>
 
@@ -112,14 +155,26 @@ import { normalizeStrength } from '@/utils/math.js'
 
 echarts.use([LineChart, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent, CanvasRenderer])
 
-type HealthPoint = { time: string; rms: number; pressure: number; strength: number; score: number; status: string; diagnostics: string }
+type HealthPoint = {
+  id: number
+  time: string
+  rms: number
+  pressure: number
+  strength: number
+  score: number
+  status: string
+  fatigue: number
+  aiAdvice: string
+  aiSource: string
+  diagnostics: string
+}
 
 const healthChartRef = ref<HTMLElement>()
 let chart: echarts.ECharts | null = null
 
 const users = ref<HealthUser[]>([])
 const selectedUser = ref<number | null>(null)
-const timeRange = ref<'24h' | '7d'>('24h')
+const timeRange = ref<'24h' | '7d' | '30d' | 'all'>('24h')
 const loading = ref(false)
 const loadingUsers = ref(false)
 
@@ -142,7 +197,7 @@ function userLabel(user: HealthUser) {
 async function loadUsers() {
   loadingUsers.value = true
   try {
-    users.value = (await fetchHealthUsers()).filter((user) => user.device_count > 0)
+    users.value = await fetchHealthUsers()
     if (!selectedUser.value && users.value.length) {
       selectedUser.value = users.value[0].id
     }
@@ -167,12 +222,16 @@ async function loadData() {
   try {
     const logs: HealthLog[] = await fetchHealthLogs(selectedUser.value, { range: timeRange.value })
     const mapped = logs.map((log) => ({
+      id: log.id,
       time: (log.created_at || '').slice(5, 16).replace('T', ' '),
       rms: Number(log.rms_value || 0),
       pressure: Number(log.side_pressure ?? log.side_presure ?? 0),
       strength: normalizeStrength(Number(log.rms_value || 0)),
       score: Number(log.health_score || 0),
       status: log.health_level || log.muscle_status || log.muscle_status_label || '正常',
+      fatigue: Number(log.analysis?.fatigue_index || 0),
+      aiAdvice: log.ai_advice || '',
+      aiSource: log.ai_source || '',
       diagnostics: log.ai_advice || log.diagnostics || '',
     }))
     rawHealthData.value = mapped
@@ -232,6 +291,20 @@ function computeMetrics() {
     riskText.value = '低风险'
     diagnosticText.value = `该用户 RMS 肌电均值为 ${rmsAvg.value.toFixed(1)}，归一化强度均值为 ${strengthAvg.toFixed(1)}。侧边压力均值 ${pressureAvg.value.toFixed(1)} 表现稳定，当前肌肉状态较好，建议维持训练方案。`
   }
+}
+
+function scoreTagType(score: number) {
+  if (score <= 0) return 'info'
+  if (score < 55) return 'danger'
+  if (score < 70) return 'warning'
+  return 'success'
+}
+
+function sourceLabel(source: string) {
+  if (source === 'deepseek') return 'DeepSeek'
+  if (source === 'deepseek_unavailable') return 'DeepSeek 不可用'
+  if (source === 'local_fallback') return '本地规则'
+  return '未请求 AI'
 }
 
 function renderChart() {
@@ -405,6 +478,9 @@ onBeforeUnmount(() => {
 }
 .diag-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .diag-content { color: var(--color-text-muted); line-height: 1.8; font-size: 14px; padding: 16px; background: rgba(15,23,42,0.5); border-radius: 10px; border: 1px solid rgba(99,102,241,0.1); }
+.report-table-card { margin-top: 20px; }
+.table-caption { margin: 6px 0 0; color: var(--color-text-muted); font-size: 13px; }
+.report-advice { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.55; color: var(--color-text-muted); white-space: normal; }
 
 @media (max-width: 900px) {
   .risk-row { grid-template-columns: 1fr; }
