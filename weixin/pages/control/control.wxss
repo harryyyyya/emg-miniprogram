@@ -301,6 +301,40 @@
   line-height: 1.6;
 }
 
+.collection-name-editor {
+  margin: 0 0 20rpx;
+  padding: 18rpx 20rpx;
+  border: 2rpx solid #dbe5f2;
+  border-radius: 16rpx;
+  background: #fbfdff;
+}
+
+.collection-name-label {
+  display: block;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #20304a;
+}
+
+.collection-name-input {
+  height: 72rpx;
+  margin-top: 10rpx;
+  padding: 0 18rpx;
+  border: 2rpx solid #c8d5e6;
+  border-radius: 12rpx;
+  background: #ffffff;
+  color: #20304a;
+  font-size: 26rpx;
+}
+
+.collection-name-hint {
+  display: block;
+  margin-top: 8rpx;
+  color: #718096;
+  font-size: 20rpx;
+  line-height: 1.5;
+}
+
 .module-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

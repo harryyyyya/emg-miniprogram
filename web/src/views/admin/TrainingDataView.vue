@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="page-header">
-      <div><h2 class="page-title gradient-text">采集数据</h2><p>查看小程序用户上传的肌电数据，并下载原始 DAT 文件用于后续训练。</p></div>
+      <div><h2 class="page-title gradient-text">采集数据</h2><p>查看小程序用户上传的肌电数据，并下载带动作标签的标准 CSV 文件用于后续训练。</p></div>
       <el-button :loading="loading" @click="loadData"><el-icon><Refresh /></el-icon>刷新</el-button>
     </div>
     <div class="filters">
@@ -18,7 +18,7 @@
         <el-table-column prop="status" label="状态" width="110"><template #default="{ row }"><el-tag :type="statusTagType(row)">{{ statusLabel(row) }}</el-tag></template></el-table-column>
         <el-table-column prop="created_at" label="采集时间" min-width="170"><template #default="{ row }">{{ formatTime(row.created_at) }}</template></el-table-column>
         <el-table-column prop="session_id" label="会话 ID" min-width="190" show-overflow-tooltip />
-        <el-table-column label="操作" width="190" fixed="right"><template #default="{ row }"><el-button type="primary" size="small" :disabled="row.downloadable === false || !row.raw_data_path" :loading="downloading === row.session_id" @click="download(row)"><el-icon><Download /></el-icon>下载</el-button><el-button type="danger" size="small" :loading="deleting === row.session_id" @click="remove(row)"><el-icon><Delete /></el-icon>删除</el-button></template></el-table-column>
+        <el-table-column label="操作" width="190" fixed="right"><template #default="{ row }"><el-button type="primary" size="small" :disabled="row.downloadable === false" :loading="downloading === row.session_id" @click="download(row)"><el-icon><Download /></el-icon>下载 CSV</el-button><el-button type="danger" size="small" :loading="deleting === row.session_id" @click="remove(row)"><el-icon><Delete /></el-icon>删除</el-button></template></el-table-column>
       </el-table>
       <el-empty v-if="!loading && !filteredRows.length" description="暂无采集数据" />
     </div>
@@ -62,7 +62,7 @@ async function download(row: TrainingSession) {
     const link = document.createElement('a')
     const userLabel = (row.user_username || row.user_name || `user-${row.user_id}`).replace(/[^\w\u4e00-\u9fa5.-]+/g, '_')
     const gesture = (row.gesture_name || 'unlabeled').replace(/[^\w\u4e00-\u9fa5.-]+/g, '_')
-    link.href = url; link.download = `user-${row.user_id}_${userLabel}_${gesture}_${row.session_id}.dat`; link.click()
+    link.href = url; link.download = `user-${row.user_id}_${userLabel}_${gesture}_${row.session_id}.csv`; link.click()
     URL.revokeObjectURL(url)
     ElMessage.success('下载已开始')
   } finally { downloading.value = '' }

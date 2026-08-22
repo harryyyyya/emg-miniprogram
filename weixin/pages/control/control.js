@@ -1,4 +1,4 @@
-﻿const ble = require('../../utils/ble_manager');
+const ble = require('../../utils/ble_manager');
 const { request, uploadChunk } = require('../../utils/request');
 const esp32Link = require('../../utils/esp32_link');
 
@@ -99,6 +99,7 @@ Page({
 
     customGestures: [],
     selectedGestureIndex: -1,
+    collectionActionName: '目标动作',
     storedSessions: [],
     storedSessionsLoading: false,
     storedSessionsError: '',
@@ -130,7 +131,11 @@ Page({
 
     const savedGestures = wx.getStorageSync('customGestures');
     if (savedGestures && savedGestures.length) {
-      this.setData({ customGestures: savedGestures, selectedGestureIndex: 0 });
+      this.setData({
+        customGestures: savedGestures,
+        selectedGestureIndex: 0,
+        collectionActionName: savedGestures[0].name,
+      });
     }
 
     this.loadBoundDevice();
@@ -576,7 +581,15 @@ Page({
   },
 
   switchMode(e) {
-    this.setData({ mode: e.currentTarget.dataset.mode });
+    const mode = e.currentTarget.dataset.mode;
+    const selected = mode === 'personal' && this.data.selectedGestureIndex >= 0
+      ? this.data.customGestures[this.data.selectedGestureIndex].name
+      : '目标动作';
+    this.setData({ mode, collectionActionName: selected });
+  },
+
+  updateCollectionActionName(e) {
+    this.setData({ collectionActionName: String(e.detail.value || '').slice(0, 32) });
   },
 
   addGesture() {
@@ -593,6 +606,7 @@ Page({
         this.setData({
           customGestures: list,
           selectedGestureIndex: list.length - 1,
+          collectionActionName: name,
         });
         wx.setStorageSync('customGestures', list);
       },
@@ -600,7 +614,11 @@ Page({
   },
 
   selectGesture(e) {
-    this.setData({ selectedGestureIndex: e.currentTarget.dataset.index });
+    const index = Number(e.currentTarget.dataset.index);
+    this.setData({
+      selectedGestureIndex: index,
+      collectionActionName: this.data.customGestures[index].name,
+    });
   },
 
   deleteGesture(e) {
@@ -614,6 +632,7 @@ Page({
         this.setData({
           customGestures: list,
           selectedGestureIndex: list.length > 0 ? Math.min(index, list.length - 1) : -1,
+          collectionActionName: list.length > 0 ? list[Math.min(index, list.length - 1)].name : '目标动作',
         });
         wx.setStorageSync('customGestures', list);
       },
@@ -840,9 +859,7 @@ Page({
   },
 
   buildGestureSequence() {
-    const actionName = this.data.mode === 'personal' && this.data.selectedGestureIndex >= 0
-      ? this.data.customGestures[this.data.selectedGestureIndex].name
-      : '目标动作';
+    const actionName = String(this.data.collectionActionName || '').trim() || '目标动作';
 
     if (this.data.mode === 'personal' && this.data.selectedGestureIndex >= 0) {
       const gesture = this.data.customGestures[this.data.selectedGestureIndex];
@@ -891,6 +908,9 @@ Page({
     this._collectBuffer = [];
     this._lastBufferedPreviewAt = '';
     this._activeGestures = this.buildGestureSequence();
+    this._recordingGestureName = this._activeGestures[1] && this._activeGestures[1].name
+      ? this._activeGestures[1].name
+      : '';
     this._collectStartedAt = Date.now();
 
     this.setData({
@@ -916,9 +936,7 @@ Page({
         await this.sendWifiCommand('start_collect', {
           mode: this.data.mode,
           session_id: this._sessionId,
-          gesture_name: this.data.selectedGestureIndex >= 0
-            ? this.data.customGestures[this.data.selectedGestureIndex].name
-            : '',
+          gesture_name: this._recordingGestureName,
           gestures: this._activeGestures.map((gesture) => ({
             name: gesture.name,
             duration: gesture.duration,
@@ -934,9 +952,7 @@ Page({
           action: 'start_collect',
           mode: this.data.mode,
           session_id: this._sessionId,
-          gesture_name: this.data.selectedGestureIndex >= 0
-            ? this.data.customGestures[this.data.selectedGestureIndex].name
-            : '',
+          gesture_name: this._recordingGestureName,
           gestures: this._activeGestures.map((gesture) => ({
             name: gesture.name,
             duration: gesture.duration,
@@ -1150,7 +1166,7 @@ Page({
         data: {
           session_id: this._sessionId,
           total_chunks: totalChunks,
-          gesture_name: this.data.gestureName,
+          gesture_name: this._recordingGestureName || this.data.gestureName,
           transport: force ? 'wifi_fallback' : this.data.deviceTransport,
           hardware_id: (this._boundDevice && this._boundDevice.hardware_id) || '',
         },

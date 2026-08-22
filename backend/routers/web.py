@@ -6,6 +6,8 @@ frontend, so the mini program, ESP32 bridge, and web dashboard share one DB.
 """
 from __future__ import annotations
 
+import csv
+import io
 import json
 import re
 import struct
@@ -15,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -41,6 +43,38 @@ router = APIRouter(tags=["web"])
 DEVICE_OFFLINE_SECONDS = 15
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 UPLOAD_ROOT = BACKEND_ROOT / "uploads"
+CSV_EMG_COLUMNS = [f"E{index}" for index in range(1, 9)]
+CSV_IMU_COLUMNS = ["AX", "AY", "AZ", "GX", "GY", "GZ", "P", "R", "Y"]
+CSV_DOWNLOAD_COLUMNS = [
+    "SampleIndex",
+    "PacketIndex",
+    "PacketTimestamp",
+    *CSV_EMG_COLUMNS,
+    *CSV_IMU_COLUMNS,
+    "Label",
+    "Session",
+    "ActionBlock",
+    "Repetition",
+    "Phase",
+    "LabelName",
+    "GestureName",
+    "UserId",
+    "UserName",
+    "HardwareId",
+    "Transport",
+    "SampleRateHz",
+    "IMUAvailable",
+]
+ACTION_LABEL_ALIASES = {
+    1: ("张开手掌", "张开", "open", "open_hand"),
+    2: ("自然抓握", "抓握", "自然握", "natural_grip"),
+    3: ("用力抓握/握拳", "用力抓握", "握拳", "fist", "strong_grip"),
+    4: ("三指捏", "三指", "three_finger_pinch"),
+    5: ("指尖捏", "指尖", "pinch", "tip_pinch"),
+    6: ("食指伸展", "食指", "index_extend", "index_finger"),
+    7: ("钩状抓握", "钩状", "钩握", "hook_grip"),
+    8: ("竖拇指", "拇指", "thumbs_up", "thumb_up"),
+}
 
 
 def _require_admin(user: User) -> None:
@@ -761,6 +795,76 @@ def _rebuild_training_file(
     return output_path.resolve()
 
 
+def _read_binary_emg_samples(path: Path) -> list[list[int]]:
+    raw = path.read_bytes()
+    row_size = len(CSV_EMG_COLUMNS) * 2
+    if len(raw) % row_size:
+        raise ValueError("DAT 文件长度不是 8 通道 int16 的整数倍")
+    return [list(row) for row in struct.iter_unpack("<8h", raw)]
+
+
+def _action_label_id(gesture_name: str) -> int:
+    normalized = (gesture_name or "").strip().lower()
+    for label_id, aliases in ACTION_LABEL_ALIASES.items():
+        if any(alias.lower() == normalized or alias.lower() in normalized for alias in aliases):
+            return label_id
+    # A single custom action is still trainable as class 1; LabelName keeps its exact name.
+    return 1
+
+
+def _build_emg_csv(
+    *,
+    session: EmgCollectionSession | TrainingSession,
+    samples: list[list[int]],
+    user: User | None,
+) -> str:
+    sample_rate = int(getattr(session, "sample_rate_hz", 0) or 500)
+    sample_rate = max(sample_rate, 1)
+    gesture_name = (session.gesture_name or "未命名动作").strip() or "未命名动作"
+    action_label = _action_label_id(gesture_name)
+    cycle_samples = max(sample_rate * 6, 1)
+    action_samples = max(sample_rate * 3, 1)
+    user_name = (user.username or user.name) if user else f"用户#{session.user_id}"
+    hardware_id = getattr(session, "hardware_id", "") or ""
+    transport = getattr(session, "transport", "") or ""
+
+    output = io.StringIO(newline="")
+    writer = csv.writer(output, lineterminator="\n")
+    writer.writerow(CSV_DOWNLOAD_COLUMNS)
+    for sample_index, raw_row in enumerate(samples):
+        values = [int(value) for value in raw_row[: len(CSV_EMG_COLUMNS)]]
+        if len(values) != len(CSV_EMG_COLUMNS):
+            continue
+        cycle_offset = sample_index % cycle_samples
+        is_action = cycle_offset >= action_samples
+        label = action_label if is_action else 0
+        phase = "action" if is_action else "rest"
+        action_block = sample_index // cycle_samples + 1
+        packet_index = sample_index // 10
+        packet_timestamp = int(round(packet_index * 1000 * 10 / sample_rate))
+        writer.writerow([
+            sample_index,
+            packet_index,
+            packet_timestamp,
+            *values,
+            *([0] * len(CSV_IMU_COLUMNS)),
+            label,
+            session.session_id,
+            action_block,
+            action_block,
+            phase,
+            gesture_name if is_action else "静息",
+            gesture_name,
+            session.user_id,
+            user_name,
+            hardware_id,
+            transport,
+            sample_rate,
+            0,
+        ])
+    return output.getvalue()
+
+
 @router.get("/training/sessions")
 def list_training_sessions(
     db: Session = Depends(get_db),
@@ -789,6 +893,7 @@ def list_training_sessions(
 @router.get("/admin/training/sessions/{session_id}/download")
 def download_training_session(
     session_id: str,
+    format: str = "csv",
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -811,8 +916,32 @@ def download_training_session(
     gesture = session.gesture_name or "unlabeled"
     safe_label = re.sub(r"[^\w.-]+", "_", owner_label, flags=re.UNICODE).strip("_") or "user"
     safe_gesture = re.sub(r"[^\w.-]+", "_", gesture, flags=re.UNICODE).strip("_") or "unlabeled"
-    filename = f"user-{session.user_id}_{safe_label}_{safe_gesture}_{session_id}.dat"
-    return FileResponse(path, media_type="application/octet-stream", filename=filename)
+    if format.lower() == "dat":
+        filename = f"user-{session.user_id}_{safe_label}_{safe_gesture}_{session_id}.dat"
+        return FileResponse(path, media_type="application/octet-stream", filename=filename)
+
+    batches = (
+        db.query(EmgCollectionBatch)
+        .filter(EmgCollectionBatch.session_id == session_id)
+        .order_by(EmgCollectionBatch.sequence_no.asc(), EmgCollectionBatch.id.asc())
+        .all()
+    )
+    samples: list[list[int]] = []
+    for batch in batches:
+        raw_samples = _parse_json(batch.samples_json, [])
+        if isinstance(raw_samples, list):
+            samples.extend(row for row in raw_samples if isinstance(row, list))
+    if not samples:
+        try:
+            samples = _read_binary_emg_samples(path)
+        except (OSError, ValueError, struct.error) as exc:
+            raise HTTPException(status_code=422, detail=f"无法解析肌电数据文件：{exc}") from exc
+
+    csv_text = _build_emg_csv(session=session, samples=samples, user=owner)
+    filename = f"user-{session.user_id}_{safe_label}_{safe_gesture}_{session_id}.csv"
+    from urllib.parse import quote
+    headers = {"Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename)}"}
+    return Response(content="\ufeff" + csv_text, media_type="text/csv; charset=utf-8", headers=headers)
 
 
 @router.delete("/admin/training/sessions/{session_id}")

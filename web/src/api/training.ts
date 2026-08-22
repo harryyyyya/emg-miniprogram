@@ -17,8 +17,8 @@ export interface TrainingSession {
   rms_value?: number
 }
 
-export async function downloadTrainingSession(sessionId: string) {
-  return await request.get(`/admin/training/sessions/${encodeURIComponent(sessionId)}/download`, {
+export async function downloadTrainingSession(sessionId: string, format: 'csv' | 'dat' = 'csv') {
+  return await request.get(`/admin/training/sessions/${encodeURIComponent(sessionId)}/download?format=${format}`, {
     responseType: 'blob',
   }) as unknown as Blob
 }

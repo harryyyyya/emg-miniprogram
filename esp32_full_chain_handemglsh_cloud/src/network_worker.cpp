@@ -8,7 +8,7 @@
 
 #include "full_chain_config.h"
 #include "runtime_snapshot.h"
-#include "../generated/lda_model.h"
+#include "../generated/mlp_model.h"
 
 struct PendingCommand {
     String command_id;
@@ -45,10 +45,16 @@ static CollectState g_collect;
 static uint8_t g_upload_batch[RUNTIME_EMG_UPLOAD_BATCH_SAMPLES][RUNTIME_SNAPSHOT_CHANNELS];
 
 static String build_base_url(void) {
-    if (BACKEND_PORT == 443) {
-        return String("https://") + BACKEND_HOST;
+#if BACKEND_USE_HTTPS
+    const char *scheme = "https://";
+#else
+    const char *scheme = "http://";
+#endif
+    if ((BACKEND_USE_HTTPS && BACKEND_PORT == 443) ||
+        (!BACKEND_USE_HTTPS && BACKEND_PORT == 80)) {
+        return String(scheme) + BACKEND_HOST;
     }
-    return String("https://") + BACKEND_HOST + ":" + String(BACKEND_PORT);
+    return String(scheme) + BACKEND_HOST + ":" + String(BACKEND_PORT);
 }
 
 static String build_url(const String &path) {
@@ -64,8 +70,12 @@ static String build_url(const String &path) {
 static bool post_json(const String &url, const String &body, String &response_body, int &status_code) {
     HTTPClient http;
     http.setTimeout(FULL_CHAIN_HTTP_TIMEOUT_MS);
+#if BACKEND_USE_HTTPS
     WiFiClientSecure client;
     client.setInsecure();
+#else
+    WiFiClient client;
+#endif
     const bool begin_ok = http.begin(client, url);
     if (!begin_ok) {
         status_code = -1;
@@ -74,6 +84,7 @@ static bool post_json(const String &url, const String &body, String &response_bo
         return false;
     }
     http.addHeader("Content-Type", "application/json");
+    http.addHeader("Accept", "application/json");
     status_code = http.POST(body);
     response_body = http.getString();
     http.end();

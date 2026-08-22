@@ -226,6 +226,12 @@
       <text class="section-title">{{mode === 'personal' ? '个性化数据采集' : '设备控制'}}</text>
     </view>
 
+    <view class="collection-name-editor">
+      <text class="collection-name-label">本次采集动作名称</text>
+      <input class="collection-name-input" value="{{collectionActionName}}" maxlength="32" bindinput="updateCollectionActionName" placeholder="例如：握拳、张开手掌" />
+      <text class="collection-name-hint">名称会保存到后台，并写入下载 CSV 的 GestureName 和 LabelName 列。</text>
+    </view>
+
     <view class="animation-area">
       <view class="gesture-display">
         <text class="gesture-emoji">{{gestureEmoji}}</text>

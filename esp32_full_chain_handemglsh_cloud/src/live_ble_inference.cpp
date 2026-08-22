@@ -16,20 +16,20 @@
 #include "stage6_uart_link.h"
 extern "C" {
 #include "emg_features.h"
-#include "lda_inference.h"
+#include "mlp_inference.h"
 #include "emg_controller.h"
 }
 #include "stage6_1c_integration_config.h"
-#include "../generated/lda_model.h"
+#include "../generated/mlp_model.h"
 
 /* STAGE6_1C_CONTRACT_ASSERTS_BEGIN */
 static_assert(STAGE6_1C_WINDOW_SAMPLES == STAGE5_RING_WINDOW_SAMPLES, "window/ring mismatch");
-static_assert(STAGE6_1C_WINDOW_SAMPLES == EMG_STAGE6_1C_SAMPLE_COUNT, "window/model mismatch");
+static_assert(STAGE6_1C_WINDOW_SAMPLES == LSH_MLP_WINDOW_SAMPLES, "window/model mismatch");
 static_assert(STAGE6_1C_CHANNEL_COUNT == STAGE5_RING_CHANNELS, "channel/ring mismatch");
 static_assert(STAGE6_1C_CHANNEL_COUNT == STAGE5_CHANNELS, "channel/parser mismatch");
-static_assert(STAGE6_1C_CHANNEL_COUNT == EMG_STAGE6_1C_CHANNEL_COUNT, "channel/model mismatch");
-static_assert(STAGE6_1C_FEATURE_COUNT == EMG_STAGE6_1C_NUM_FEATURES, "feature/model mismatch");
-static_assert(STAGE6_1C_CLASS_COUNT == EMG_STAGE6_1C_NUM_CLASSES, "class/model mismatch");
+static_assert(STAGE6_1C_CHANNEL_COUNT == LSH_MLP_CHANNEL_COUNT, "channel/model mismatch");
+static_assert(STAGE6_1C_FEATURE_COUNT == LSH_MLP_INPUT_COUNT, "feature/model mismatch");
+static_assert(STAGE6_1C_CLASS_COUNT == LSH_MLP_CLASS_COUNT, "class/model mismatch");
 static_assert(STAGE6_1C_STEP_SAMPLES == STAGE4_STEP_SAMPLES, "step/config mismatch");
 /* STAGE6_1C_CONTRACT_ASSERTS_END */
 
@@ -101,6 +101,8 @@ static uint8_t g_scan_running = 0u;
 static float g_window[STAGE4_WINDOW_SAMPLES * STAGE4_CHANNEL_COUNT];
 static float g_features[STAGE4_FEATURE_COUNT];
 static float g_standardized[STAGE4_FEATURE_COUNT];
+static float g_hidden1[LSH_MLP_HIDDEN1_COUNT];
+static float g_hidden2[LSH_MLP_HIDDEN2_COUNT];
 static float g_scores[STAGE4_CLASS_COUNT];
 static uint32_t g_timing_scratch[STAGE6_TIMING_CAP];
 static uint32_t g_last_uart_tx_ms = 0u;
@@ -357,17 +359,17 @@ static void stage6_run_inference(uint32_t sample_timestamp_ms, uint32_t frame_st
 
     stage5_sample_ring_buffer_copy_window(&g_live.ring_buffer, g_window);
     model_start_us = micros();
-    predict_status = emg_lda_predict_stage2_window(
-        &EMG_STAGE2_LDA_MODEL,
+    predict_status = emg_mlp_predict_stage2_window(
+        &LSH_MLP_MODEL,
         g_window,
         g_features,
         g_standardized,
+        g_hidden1,
+        g_hidden2,
         g_scores,
-        &predicted_label
+        &predicted_label,
+        &margin
     );
-    if (predict_status == 0) {
-        predict_status = emg_lda_argmax_margin(g_scores, STAGE4_CLASS_COUNT, &predicted_label, &margin);
-    }
     model_us = micros() - model_start_us;
     end_to_end_us = micros() - frame_start_us;
     stage6_timing_record(&g_live.model_timing, model_us);

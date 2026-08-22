@@ -17,7 +17,7 @@
 #define STAGE4_REST_LABEL STAGE6_1C_REST_LABEL
 
 /* Inherited unchanged; Stage 6.1C training did not select controller parameters. */
-#define STAGE4_MARGIN_THRESHOLD 3.0f
+#define STAGE4_MARGIN_THRESHOLD 0.0f
 #define STAGE4_VOTE_HORIZON_MS 300u
 #define STAGE4_VOTE_REQUIRED_FRACTION 0.70f
 #define STAGE4_LOW_CONFIDENCE_HOLD_MS 200u

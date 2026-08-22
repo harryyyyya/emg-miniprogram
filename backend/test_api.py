@@ -465,16 +465,28 @@ class TestEsp32CollectionChain:
         assert row["status"] == "completed"
 
         download = client.get(
-            f"/admin/training/sessions/{session_id}/download",
+            f"/admin/training/sessions/{session_id}/download?format=dat",
             headers=admin_headers,
         )
         assert download.status_code == 200
         assert download.content == b"".join(struct.pack("<8h", *sample) for sample in samples)
         assert f"user-{owner_id}" in download.headers["content-disposition"]
 
+        csv_download = client.get(
+            f"/admin/training/sessions/{session_id}/download",
+            headers=admin_headers,
+        )
+        assert csv_download.status_code == 200
+        csv_text = csv_download.content.decode("utf-8-sig")
+        assert csv_text.splitlines()[0].startswith(
+            "SampleIndex,PacketIndex,PacketTimestamp,E1,E2,E3,E4,E5,E6,E7,E8"
+        )
+        assert ",LabelName," in csv_text.splitlines()[0]
+        assert ",fist," in csv_text
+
         Path(saved["file_path"]).unlink()
         rebuilt_download = client.get(
-            f"/admin/training/sessions/{session_id}/download",
+            f"/admin/training/sessions/{session_id}/download?format=dat",
             headers=admin_headers,
         )
         assert rebuilt_download.status_code == 200
@@ -487,7 +499,7 @@ class TestEsp32CollectionChain:
         assert deleted.status_code == 200
         assert client.get(f"/devices/emg/sessions/{session_id}", headers=auth_headers).status_code == 404
         assert client.get(
-            f"/admin/training/sessions/{session_id}/download",
+            f"/admin/training/sessions/{session_id}/download?format=dat",
             headers=admin_headers,
         ).status_code == 404
 

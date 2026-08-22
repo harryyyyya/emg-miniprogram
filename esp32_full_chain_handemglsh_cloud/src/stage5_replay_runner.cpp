@@ -6,11 +6,11 @@
 #include "sample_ring_buffer.h"
 extern "C" {
 #include "emg_features.h"
-#include "lda_inference.h"
+#include "mlp_inference.h"
 #include "emg_controller.h"
 }
 #include "stage6_1c_integration_config.h"
-#include "../generated/lda_model.h"
+#include "../generated/mlp_model.h"
 
 #define STAGE5_SAMPLE_INTERVAL_MS 2u
 #define STAGE5_PACKET_INTERVAL_MS 20u
@@ -46,6 +46,8 @@ static Stage5Session g_session;
 static float g_window[STAGE4_WINDOW_SAMPLES * STAGE4_CHANNEL_COUNT];
 static float g_features[STAGE4_FEATURE_COUNT];
 static float g_standardized[STAGE4_FEATURE_COUNT];
+static float g_hidden1[LSH_MLP_HIDDEN1_COUNT];
+static float g_hidden2[LSH_MLP_HIDDEN2_COUNT];
 static float g_scores[STAGE4_CLASS_COUNT];
 static uint32_t g_timing_scratch[STAGE5_TIMING_CAP];
 
@@ -226,17 +228,17 @@ static void stage5_run_inference(uint32_t sample_timestamp_ms) {
 
     stage5_sample_ring_buffer_copy_window(&g_session.ring_buffer, g_window);
     start_us = micros();
-    predict_status = emg_lda_predict_stage2_window(
-        &EMG_STAGE2_LDA_MODEL,
+    predict_status = emg_mlp_predict_stage2_window(
+        &LSH_MLP_MODEL,
         g_window,
         g_features,
         g_standardized,
+        g_hidden1,
+        g_hidden2,
         g_scores,
-        &predicted_label
+        &predicted_label,
+        &margin
     );
-    if (predict_status == 0) {
-        predict_status = emg_lda_argmax_margin(g_scores, STAGE4_CLASS_COUNT, &predicted_label, &margin);
-    }
     inference_us = micros() - start_us;
     stage5_record_timing(inference_us);
     g_session.inference_count += 1u;
